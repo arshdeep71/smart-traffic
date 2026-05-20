@@ -1,53 +1,64 @@
 FROM php:8.2-apache
 
-# Install system dependencies (including libzstd-dev required by MongoDB PECL extension)
+# Install system dependencies (libzstd-dev required by MongoDB PECL extension)
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
     libzip-dev \
+    libzstd-dev \
+    zlib1g-dev \
+    libssl-dev \
+    pkg-config \
     unzip \
     git \
     curl \
-    libssl-dev \
-    pkg-config \
-    libzstd-dev \
-    zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install standard PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install gd zip bcmath
 
-# Install MongoDB driver (CRITICAL for SmartTraffic Atlas connection)
+# Install MongoDB driver
 RUN pecl install mongodb && docker-php-ext-enable mongodb
 
-# Enable Apache ModRewrite
+# Enable Apache mod_rewrite
 RUN a2enmod rewrite
 
-# Change Apache document root to Laravel public directory
-ENV APACHE_DOCUMENT_ROOT /var/www/html/public
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+# Set Apache document root to Laravel public/
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
+    /etc/apache2/sites-available/*.conf \
+    /etc/apache2/apache2.conf \
+    /etc/apache2/conf-available/*.conf
 
-# Install Composer
+# Allow .htaccess overrides (required for Laravel routing)
+RUN echo '<Directory /var/www/html/public>\n\
+    Options Indexes FollowSymLinks\n\
+    AllowOverride All\n\
+    Require all granted\n\
+</Directory>' >> /etc/apache2/apache2.conf
+
+# Install Composer binary
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set working directory
 WORKDIR /var/www/html
 
-# Copy project files
+# ── Layer cache optimization: install dependencies BEFORE copying all code ──
+# Copy only composer files first so this layer is cached on re-deploys
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interaction --prefer-dist
+
+# Copy rest of the application
 COPY . .
 
-# Install Composer dependencies
-RUN composer install --no-dev --optimize-autoloader
+# Run post-install scripts after full code is available
+RUN composer dump-autoload --optimize
 
-# Set file permissions for Laravel
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
-    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+# Set correct permissions for Laravel storage and cache
+RUN chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
 
-# Expose port
 EXPOSE 80
 
-# Start Apache
 CMD ["apache2-foreground"]
