@@ -19,8 +19,13 @@ RUN apt-get update && apt-get install -y \
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install gd zip bcmath
 
-# Install MongoDB driver
-RUN pecl install mongodb && docker-php-ext-enable mongodb
+# Install MongoDB PECL extension and explicitly enable it for BOTH CLI and Apache
+RUN pecl install mongodb \
+    && docker-php-ext-enable mongodb \
+    && echo "extension=mongodb.so" > /usr/local/etc/php/conf.d/docker-php-ext-mongodb.ini
+
+# Verify MongoDB is visible to PHP CLI (will fail build if not found)
+RUN php -m | grep -i mongodb
 
 # Enable Apache mod_rewrite
 RUN a2enmod rewrite
@@ -41,10 +46,10 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# Copy ALL project files first, then run composer
+# Copy ALL project files
 COPY . .
 
-# Install Composer dependencies
+# Install Composer dependencies (mongodb extension is now confirmed active)
 RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
 
 # Set correct permissions for Laravel storage and cache
