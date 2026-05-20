@@ -33,27 +33,19 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
     /etc/apache2/conf-available/*.conf
 
 # Allow .htaccess overrides (required for Laravel routing)
-RUN echo '<Directory /var/www/html/public>\n\
-    Options Indexes FollowSymLinks\n\
-    AllowOverride All\n\
-    Require all granted\n\
-</Directory>' >> /etc/apache2/apache2.conf
+RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' \
+    /etc/apache2/apache2.conf
 
 # Install Composer binary
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# ── Layer cache optimization: install dependencies BEFORE copying all code ──
-# Copy only composer files first so this layer is cached on re-deploys
-COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interaction --prefer-dist
-
-# Copy rest of the application
+# Copy ALL project files first, then run composer
 COPY . .
 
-# Run post-install scripts after full code is available
-RUN composer dump-autoload --optimize
+# Install Composer dependencies
+RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
 
 # Set correct permissions for Laravel storage and cache
 RUN chown -R www-data:www-data storage bootstrap/cache \
