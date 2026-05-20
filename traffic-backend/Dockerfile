@@ -50,7 +50,7 @@ WORKDIR /var/www/html
 COPY . .
 
 # Install Composer dependencies (mongodb extension is now confirmed active)
-RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --ignore-platform-req=ext-mongodb
 
 # Set correct permissions for Laravel storage and cache
 RUN chown -R www-data:www-data storage bootstrap/cache \
