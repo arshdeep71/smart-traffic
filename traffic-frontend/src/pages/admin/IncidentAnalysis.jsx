@@ -98,7 +98,7 @@ const IncidentAnalysis = () => {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
                {incident.images?.map((img, i) => {
                   const isVideo = img.endsWith('.mp4') || img.endsWith('.webm') || img.endsWith('.mov');
-                  const url = `http://localhost:8000/storage/${img}`;
+                  const url = `${(import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api').replace('/api', '')}/storage/${img}`;
                   return (
                     <div key={i} style={{ borderRadius: '8px', overflow: 'hidden', border: '1px solid #f3f4f6', height: '140px', background: '#f9fafb' }}>
                        {isVideo ? (

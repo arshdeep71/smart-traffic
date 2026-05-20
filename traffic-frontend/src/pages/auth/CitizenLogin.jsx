@@ -92,7 +92,7 @@ const CitizenLogin = () => {
       const { error: err } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: window.location.origin + '/citizen-login'
+          redirectTo: (import.meta.env.VITE_APP_URL || window.location.origin) + '/citizen-login'
         }
       });
       if (err) throw err;
@@ -120,7 +120,7 @@ const CitizenLogin = () => {
       const { error: err } = await supabase.auth.signInWithOtp({
         email: email.trim(),
         options: {
-          emailRedirectTo: window.location.origin + '/citizen-login'
+          emailRedirectTo: (import.meta.env.VITE_APP_URL || window.location.origin) + '/citizen-login'
         }
       });
 
