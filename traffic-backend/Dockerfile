@@ -1,6 +1,6 @@
 FROM php:8.2-apache
 
-# Install system dependencies
+# Install system dependencies (including libzstd-dev required by MongoDB PECL extension)
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
@@ -11,6 +11,8 @@ RUN apt-get update && apt-get install -y \
     curl \
     libssl-dev \
     pkg-config \
+    libzstd-dev \
+    zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install standard PHP extensions
