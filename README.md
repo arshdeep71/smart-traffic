@@ -67,7 +67,7 @@ APP_DEBUG=false
 APP_URL=https://your-backend.onrender.com
 
 # Exclusive MongoDB Atlas Cloud Connection
-MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.dl6d2dz.mongodb.net/smart_traffic_db?appName=Cluster0
+MONGODB_URI=mongodb+srv://<username>:<password>@cluster.mongodb.net/smart_traffic_db?appName=Cluster0
 MONGODB_DATABASE=smart_traffic_db
 
 # Resend SMTP Configuration
