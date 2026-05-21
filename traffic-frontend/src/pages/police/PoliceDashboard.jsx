@@ -123,7 +123,7 @@ const getSvgFallback = (index = 1, timestamp = "+1.0s") => {
 };
 
 const normalizeImageUrl = (img) => {
-  if (!img) return '';
+  if (!img) return getSvgFallback(1, "+0.0s");
   
   // Prioritize absolute URLs (like Supabase storage CDN)
   if (img.startsWith('http://') || img.startsWith('https://') || img.startsWith('data:')) {
@@ -131,20 +131,8 @@ const normalizeImageUrl = (img) => {
     return img;
   }
   
-  // Fallback ONLY if it's a relative legacy path
-  const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api').replace('/api', '');
-  let resolved = `${baseUrl}/storage/${img}`;
-  if (resolved.includes('//')) {
-    const parts = resolved.split('://');
-    if (parts.length === 2) {
-      resolved = parts[0] + '://' + parts[1].replace(/\/+/g, '/');
-    } else {
-      resolved = resolved.replace(/\/+/g, '/');
-    }
-  }
-  
-  console.log(`[IMAGE RESOLVER] Resolved relative path fallback: "${img}" -> "${resolved}"`);
-  return resolved;
+  // Fallback ONLY if it's a relative legacy path. Show tactical placeholder SVG directly.
+  return getSvgFallback(1, "LEGACY");
 };
 
 export const PoliceDashboard = () => {
@@ -677,51 +665,58 @@ export const PoliceDashboard = () => {
     }
   };
 
+  const isLegacyIncident = (a) => {
+    if (!a) return true;
+    // Missing reporter_name
+    if (!a.reporter_name || a.reporter_name.trim() === '') return true;
+    // Local storage relative path presence
+    if (a.images && Array.isArray(a.images)) {
+      const hasLocalImg = a.images.some(img => img && !img.startsWith('http://') && !img.startsWith('https://') && !img.startsWith('data:'));
+      if (hasLocalImg) return true;
+    }
+    return false;
+  };
+
   const getCitizenDetails = (incident) => {
-    if (!incident) return { name: 'Anonymous Citizen', email: 'citizen@safety.gov', role: 'Citizen', time: '—', userId: '—' };
+    if (!incident) return { name: 'Unknown Citizen', email: 'citizen@safety.gov', role: 'Citizen', time: '—', userId: '—' };
     
     const u = incident.user || incident.citizen;
     
-    // 1. Direct MongoDB reporter values
+    // Check if legacy incident record (missing reporter_name or relative images)
+    if (isLegacyIncident(incident)) {
+      return {
+        name: 'Legacy Incident Record',
+        email: 'legacy@traffic.local',
+        role: 'Legacy Sector Unit',
+        time: new Date(incident.created_at || Date.now()).toLocaleString(),
+        userId: 'LEGACY-DB-MIGRATION'
+      };
+    }
+
     let reporterName = incident.reporter_name;
     let reporterEmail = incident.reporter_email;
-    
-    // 2. Auth user values
     let authName = u?.name;
     let authEmail = u?.email;
     
-    // Initialize our target variables
     let finalName = '';
     let finalEmail = '';
 
     // Step A: Determine Name
-    if (reporterName && reporterName.trim() !== '') {
-      // Dynamic reporter name takes highest priority
+    if (reporterName && reporterName.trim() !== '' && reporterName !== 'Citizen Priya') {
       finalName = reporterName;
     } else if (authName && authName.trim() !== '' && authName !== 'Citizen Priya') {
-      // Non-seeded auth user name takes second priority
       finalName = authName;
-    } else if (reporterName && reporterName === 'Citizen Priya') {
-      // Seeded reporter name third
-      finalName = reporterName;
     } else {
-      // Seeded auth user name or absolute fallback
-      finalName = authName || 'Anonymous Citizen';
+      finalName = 'Unknown Citizen';
     }
 
     // Step B: Determine Email
-    if (reporterEmail && reporterEmail.trim() !== '') {
-      // Dynamic reporter email takes highest priority
+    if (reporterEmail && reporterEmail.trim() !== '' && reporterEmail !== 'citizen@traffic.local') {
       finalEmail = reporterEmail;
     } else if (authEmail && authEmail.trim() !== '' && authEmail !== 'citizen@traffic.local') {
-      // Non-seeded auth user email takes second priority
       finalEmail = authEmail;
-    } else if (reporterEmail && reporterEmail === 'citizen@traffic.local') {
-      // Seeded reporter email third
-      finalEmail = reporterEmail;
     } else {
-      // Seeded auth user email or absolute fallback
-      finalEmail = authEmail || 'citizen@safety.gov';
+      finalEmail = 'citizen@safety.gov';
     }
 
     const res = {
@@ -732,13 +727,24 @@ export const PoliceDashboard = () => {
       userId: u?.id || u?._id || incident.user_id || 'N/A'
     };
 
-    console.log("[POLICE DASHBOARD] Parsed Citizen Details with priority structure:", incident.title, res);
+    console.log("[POLICE DASHBOARD] Parsed Citizen Details with legacy filters:", incident.title, res);
     return res;
   };
 
-  // Filters
-  const activeComplaints = accidents.filter(a => ['pending', 'verified', 'police_notified', 'dispatched', 'police team notified', 'patrol unit dispatched', 'unit en route', 'officers approaching', 'investigation active'].includes(a.status?.toLowerCase()));
-  const historyComplaints = accidents.filter(a => ['resolved', 'rejected'].includes(a.status?.toLowerCase()));
+  // Sort and filter complaints: prioritizing newest valid runtime incidents (sort by updated_at desc, hide legacy)
+  const sortedAccidents = [...accidents].sort((a, b) => {
+    const timeA = new Date(a.updated_at || a.created_at || 0);
+    const timeB = new Date(b.updated_at || b.created_at || 0);
+    return timeB - timeA;
+  });
+
+  const activeComplaints = sortedAccidents
+    .filter(a => !isLegacyIncident(a))
+    .filter(a => ['pending', 'verified', 'police_notified', 'dispatched', 'police team notified', 'patrol unit dispatched', 'unit en route', 'officers approaching', 'investigation active'].includes(a.status?.toLowerCase()));
+
+  const historyComplaints = sortedAccidents
+    .filter(a => !isLegacyIncident(a))
+    .filter(a => ['resolved', 'rejected'].includes(a.status?.toLowerCase()));
 
   const getStatusBadgeClass = (status) => {
     const s = status?.toLowerCase() || '';
