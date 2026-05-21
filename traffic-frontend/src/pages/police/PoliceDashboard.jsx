@@ -12,6 +12,40 @@ import {
   Film, FileText, CheckCircle2, ChevronRight, ZoomIn
 } from 'lucide-react';
 
+const getSvgFallback = (index = 1, timestamp = "+1.0s") => {
+  return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='640' height='360' viewBox='0 0 640 360'>
+    <rect width='640' height='360' fill='%23050b14'/>
+    <defs>
+      <linearGradient id='g' x1='0%' y1='0%' x2='100%' y2='100%'>
+        <stop offset='0%' stop-color='%231e293b'/>
+        <stop offset='100%' stop-color='%230f172a'/>
+      </linearGradient>
+    </defs>
+    <rect x='20' y='20' width='600' height='320' rx='10' fill='url(%23g)' stroke='%233b82f6' stroke-width='1' stroke-opacity='0.2'/>
+    
+    <path d='M290,140 h60 a10,10 0 0 1 10,10 v60 a10,10 0 0 1 -10,10 h-60 a10,10 0 0 1 -10,-10 v-60 a10,10 0 0 1 10,-10 z' fill='%231e3a8a' fill-opacity='0.3' stroke='%233b82f6' stroke-width='2'/>
+    <circle cx='320' cy='180' r='18' fill='none' stroke='%2310b981' stroke-width='3' stroke-dasharray='4 2'/>
+    <circle cx='320' cy='180' r='8' fill='%2310b981'/>
+    <path d='M310,132 l10,-12 h20 l10,12' fill='none' stroke='%233b82f6' stroke-width='2'/>
+    
+    <line x1='40' y1='180' x2='600' y2='180' stroke='%233b82f6' stroke-width='0.5' stroke-opacity='0.1'/>
+    <line x1='320' y1='40' x2='320' y2='320' stroke='%233b82f6' stroke-width='0.5' stroke-opacity='0.1'/>
+    
+    <path d='M40,60 L40,40 L60,40' fill='none' stroke='%23ef4444' stroke-width='2'/>
+    <path d='M600,60 L600,40 L580,40' fill='none' stroke='%23ef4444' stroke-width='2'/>
+    <path d='M40,300 L40,320 L60,320' fill='none' stroke='%23ef4444' stroke-width='2'/>
+    <path d='M600,300 L600,320 L580,320' fill='none' stroke='%23ef4444' stroke-width='2'/>
+    
+    <text x='50' y='70' fill='%23ef4444' font-family='monospace' font-size='12' font-weight='bold'>● REC</text>
+    <text x='100' y='70' fill='%23ffffff' font-family='monospace' font-size='12'>CAM-SECURE-0${index}</text>
+    
+    <text x='50' y='300' fill='%233b82f6' font-family='monospace' font-size='11' font-weight='bold'>📡 RADAR LINK ACTIVE</text>
+    <text x='50' y='315' fill='%2310b981' font-family='monospace' font-size='11' font-weight='bold'>🛰️ GPS: 31.252242 N, 75.703130 E</text>
+    
+    <text x='470' y='308' fill='%239ca3af' font-family='monospace' font-size='12' font-weight='bold'>TIME: ${timestamp}</text>
+  </svg>`;
+};
+
 export const PoliceDashboard = () => {
   const [searchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'complaints';
@@ -611,7 +645,11 @@ export const PoliceDashboard = () => {
                         return (
                           <div 
                             key={i} 
-                            onClick={() => setPreviewPhoto({ url, index: i + 1, timestamp: mockTime })}
+                            onClick={(e) => {
+                              const imgEl = e.currentTarget.querySelector('img');
+                              const finalSrc = imgEl ? imgEl.src : url;
+                              setPreviewPhoto({ url: finalSrc, index: i + 1, timestamp: mockTime });
+                            }}
                             style={{ 
                               position: 'relative', 
                               height: '75px', 
@@ -623,7 +661,14 @@ export const PoliceDashboard = () => {
                             }}
                             className="card-hover-police"
                           >
-                            <img src={url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.src = 'https://via.placeholder.com/150?text=Frame'; }} />
+                            <img 
+                              src={url} 
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                              onError={(e) => { 
+                                e.target.src = getSvgFallback(i + 1, mockTime); 
+                              }} 
+                              alt="Evidence Snapshot"
+                            />
                             <span style={{ position: 'absolute', bottom: 3, right: 3, fontSize: '0.55rem', background: 'rgba(9,13,22,0.85)', color: '#10b981', padding: '1px 4px', borderRadius: '2px', fontFamily: 'monospace', fontWeight: 800 }}>
                               {mockTime}
                             </span>
@@ -727,7 +772,15 @@ export const PoliceDashboard = () => {
 
             {/* High-res Image box with zoomed inspection styling */}
             <div style={{ width: '100%', height: '420px', borderRadius: '8px', overflow: 'hidden', background: '#000', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-              <img src={previewPhoto.url} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', transition: 'transform 0.3s' }} className="zoomable-image" alt="Evidence Preview" />
+              <img 
+                src={previewPhoto.url} 
+                onError={(e) => { 
+                  e.target.src = getSvgFallback(previewPhoto.index || 1, previewPhoto.timestamp || '+1.0s'); 
+                }}
+                style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', transition: 'transform 0.3s' }} 
+                className="zoomable-image" 
+                alt="Evidence Preview" 
+              />
             </div>
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', color: '#9ca3af', background: 'rgba(255,255,255,0.02)', padding: '0.75rem 1rem', borderRadius: '6px' }}>
