@@ -10,6 +10,7 @@ import { createLocationPin } from '../../components/LiveTracking/mapIcons';
 import { SilentSOS, AudioEvidence } from './EmergencyPanel';
 import { MedicalPanel, InjurySelector } from './MedicalPanel';
 import LiveTrackingView from '../../components/LiveTracking/LiveTrackingView';
+import { resolveStartingLocation, LPU_FALLBACK } from '../../services/location';
 
 
 const EvidencePackage = ({ video, photos, lat, lng }) => {
@@ -153,10 +154,13 @@ const CitizenDashboard = () => {
   const savedLat = localStorage.getItem('citizen_lat');
   const savedLng = localStorage.getItem('citizen_lng');
   const savedAcc = localStorage.getItem('citizen_accuracy');
-  const initialLocation = savedLat && savedLng ? { lat: parseFloat(savedLat), lng: parseFloat(savedLng), accuracy: parseFloat(savedAcc || '10') } : null;
+  const initialLocation = savedLat && savedLng 
+    ? { lat: parseFloat(savedLat), lng: parseFloat(savedLng), accuracy: parseFloat(savedAcc || '10') } 
+    : { lat: LPU_FALLBACK.lat, lng: LPU_FALLBACK.lng, accuracy: LPU_FALLBACK.accuracy };
 
   const [formData, setFormData] = useState({ title: '', description: '', category: 'Vehicle Collision', severity: 'medium', location: initialLocation });
-  const [locationPermissionState, setLocationPermissionState] = useState(initialLocation ? 'granted' : 'prompt');
+  const [locationPermissionState, setLocationPermissionState] = useState('granted'); // Initialized as granted to prevent blocking during fallback resolution
+  const [usingDemoFallback, setUsingDemoFallback] = useState(!savedLat || !savedLng);
   
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -181,8 +185,8 @@ const CitizenDashboard = () => {
 
   const requestLocation = (force = false) => {
     if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser.");
-      setLocationPermissionState('denied');
+      console.warn("Geolocation is not supported by your browser.");
+      handleLocationFailure();
       return;
     }
     
@@ -196,17 +200,38 @@ const CitizenDashboard = () => {
         localStorage.setItem('citizen_lng', pos.coords.longitude.toString());
         localStorage.setItem('citizen_accuracy', pos.coords.accuracy.toString());
         setLocationPermissionState('granted');
+        setUsingDemoFallback(false);
       },
-      (err) => {
+      async (err) => {
         console.warn(`[GPS] Geolocation permission request failed: Code ${err.code} - ${err.message}`);
-        if (!localStorage.getItem('citizen_lat')) {
-          setLocationPermissionState('denied');
-        } else {
-          setLocationPermissionState('granted');
-        }
+        await handleLocationFailure();
       },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
+  };
+
+  const handleLocationFailure = async () => {
+    // Priority B: Last successful cached coordinates
+    const cLat = localStorage.getItem('citizen_lat');
+    const cLng = localStorage.getItem('citizen_lng');
+    const cAcc = localStorage.getItem('citizen_accuracy');
+    
+    if (cLat && cLng) {
+      console.log("[GPS] Falling back to cached localStorage coordinates.");
+      const loc = { lat: parseFloat(cLat), lng: parseFloat(cLng), accuracy: parseFloat(cAcc || '15') };
+      setFormData(prev => ({ ...prev, location: loc }));
+      setLocationPermissionState('granted');
+      setUsingDemoFallback(false);
+      return;
+    }
+
+    // Priority C & D: IP Location & Final LPU Fallback
+    console.log("[GPS] No cached coordinates. Resolving starting location via IP/LPU fallback...");
+    const res = await resolveStartingLocation('citizen');
+    const loc = { lat: res.lat, lng: res.lng, accuracy: res.accuracy };
+    setFormData(prev => ({ ...prev, location: loc }));
+    setUsingDemoFallback(res.isFallback);
+    setLocationPermissionState('granted');
   };
 
   // Keep location ref for socket handler to bypass dependency rebuilds
@@ -223,6 +248,7 @@ const CitizenDashboard = () => {
       requestLocation();
     } else {
       setLocationPermissionState('granted');
+      setUsingDemoFallback(false);
     }
 
     window.addEventListener('online', () => setIsOffline(false));
@@ -237,7 +263,7 @@ const CitizenDashboard = () => {
 
   // Hook 2: High-accuracy Background GPS Watcher
   useEffect(() => {
-    if (locationPermissionState !== 'granted') return;
+    if (locationPermissionState !== 'granted' || usingDemoFallback) return;
     
     let watchId;
     if (navigator.geolocation) {
@@ -249,6 +275,7 @@ const CitizenDashboard = () => {
           localStorage.setItem('citizen_lat', pos.coords.latitude.toString());
           localStorage.setItem('citizen_lng', pos.coords.longitude.toString());
           localStorage.setItem('citizen_accuracy', pos.coords.accuracy.toString());
+          setUsingDemoFallback(false);
         },
         (err) => {
           console.warn("[GPS] Active watchPosition warning:", err.message);
@@ -259,7 +286,7 @@ const CitizenDashboard = () => {
     return () => {
       if (watchId) navigator.geolocation.clearWatch(watchId);
     };
-  }, [locationPermissionState]);
+  }, [locationPermissionState, usingDemoFallback]);
 
   // Hook 3: Socket Event Handlers (Using locationRef to stay completely decoupled from GPS jitter)
   useEffect(() => {
@@ -691,7 +718,7 @@ const CitizenDashboard = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
         <div>
           <h2 style={{ margin: 0, fontSize: '1.2rem' }}>Citizen Safety Portal</h2>
-          <div style={{ color: '#6b7280', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <div style={{ color: '#6b7280', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
             <MapPin size={11} style={{ verticalAlign: 'middle' }} /> 
             {formData.location.lat.toFixed(4)}, {formData.location.lng.toFixed(4)} (±{formData.location.accuracy.toFixed(0)}m)
             <button 
@@ -702,6 +729,11 @@ const CitizenDashboard = () => {
             >
               🔄 Refresh GPS
             </button>
+            {usingDemoFallback && (
+              <span className="pulse-alert" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.68rem', fontWeight: 800, border: '1px solid rgba(245, 158, 11, 0.3)', display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}>
+                ⚠️ Using approximate/demo fallback location (LPU Block 38)
+              </span>
+            )}
           </div>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>

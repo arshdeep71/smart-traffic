@@ -350,7 +350,7 @@ export function MapRefSetter({ setMap }) {
 }
 
 // ─── Reusable Premium Map Wrapper ────────────────────────────────────────────
-export function PremiumMap({ center = [28.6139, 77.209], zoom = 14, children, className = "ltv-map", style }) {
+export function PremiumMap({ center = [31.2522427094373, 75.70313062579577], zoom = 14, children, className = "ltv-map", style }) {
   return (
     <MapContainer
       center={center}
@@ -585,8 +585,8 @@ export default function LiveTrackingView({ incident, ambulance, socket, citizenL
     };
   }, [socket, calcBearing]);
 
-  const savedLat = localStorage.getItem('citizen_lat') || localStorage.getItem('driver_lat') || '30.9010';
-  const savedLng = localStorage.getItem('citizen_lng') || localStorage.getItem('driver_lng') || '75.8573';
+  const savedLat = localStorage.getItem('citizen_lat') || localStorage.getItem('driver_lat') || '31.2522427094373';
+  const savedLng = localStorage.getItem('citizen_lng') || localStorage.getItem('driver_lng') || '75.70313062579577';
   const center = ambulancePos || destinationPos || [parseFloat(savedLat), parseFloat(savedLng)];
 
   return (
@@ -648,7 +648,7 @@ export default function LiveTrackingView({ incident, ambulance, socket, citizenL
             } else if (destinationPos) {
               mapInstance.flyTo(destinationPos, 16, { duration: 1.5 });
             } else {
-              mapInstance.flyTo([28.6139, 77.209], 14, { duration: 1.5 });
+              mapInstance.flyTo([31.2522427094373, 75.70313062579577], 14, { duration: 1.5 });
             }
           }}
         >

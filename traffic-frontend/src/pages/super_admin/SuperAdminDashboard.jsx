@@ -83,8 +83,8 @@ const SuperAdminDashboard = () => {
       const activeAcc = accidents.find(a => a.location?.coordinates);
       if (activeAcc) return [activeAcc.location.coordinates[1], activeAcc.location.coordinates[0]];
     }
-    const savedLat = localStorage.getItem('citizen_lat') || localStorage.getItem('driver_lat') || '30.9010';
-    const savedLng = localStorage.getItem('citizen_lng') || localStorage.getItem('driver_lng') || '75.8573';
+    const savedLat = localStorage.getItem('citizen_lat') || localStorage.getItem('driver_lat') || '31.2522427094373';
+    const savedLng = localStorage.getItem('citizen_lng') || localStorage.getItem('driver_lng') || '75.70313062579577';
     return [parseFloat(savedLat), parseFloat(savedLng)];
   };
 
