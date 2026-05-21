@@ -640,7 +640,7 @@ export const PoliceDashboard = () => {
                       </div>
                     ) : (
                       (selectedIncident.images || []).filter(img => !img.endsWith('.mp4') && !img.endsWith('.mov') && !img.endsWith('.webm')).map((img, i) => {
-                        const url = img.startsWith('data:') ? img : `${(import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api').replace('/api', '')}/storage/${img}`;
+                        const url = (img.startsWith('data:') || img.startsWith('http://') || img.startsWith('https://')) ? img : `${(import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api').replace('/api', '')}/storage/${img}`;
                         const mockTime = `+${(i + 1).toFixed(1)}s`;
                         return (
                           <div 

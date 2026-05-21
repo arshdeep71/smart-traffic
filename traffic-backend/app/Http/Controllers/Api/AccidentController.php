@@ -55,12 +55,46 @@ class AccidentController extends Controller
             'trust_score'      => 'nullable|numeric|between:0,100',
         ]);
 
-        // Handle image uploads
+        // Handle image uploads (Supabase Storage with automatic Local Storage fallback)
         $imagePaths = [];
         if ($request->hasFile('images')) {
+            $supabaseUrl = env('SUPABASE_URL');
+            $supabaseKey = env('SUPABASE_KEY');
+            $bucketName = env('SUPABASE_BUCKET', 'evidence');
+
             foreach ($request->file('images') as $image) {
-                $path = $image->store('accidents/images', 'public');
-                $imagePaths[] = $path;
+                if ($supabaseUrl && $supabaseKey) {
+                    try {
+                        $filename = 'accidents/images/' . uniqid() . '.' . $image->getClientOriginalExtension();
+                        
+                        // Upload directly to Supabase Storage API using Laravel's Http facade
+                        $response = \Illuminate\Support\Facades\Http::withHeaders([
+                            'Authorization' => 'Bearer ' . $supabaseKey,
+                            'apikey'        => $supabaseKey,
+                        ])->attach(
+                            'file', 
+                            file_get_contents($image->getRealPath()), 
+                            $image->getClientOriginalName()
+                        )->post($supabaseUrl . '/storage/v1/object/' . $bucketName . '/' . $filename);
+
+                        if ($response->successful()) {
+                            // Format public URL
+                            $imagePaths[] = $supabaseUrl . '/storage/v1/object/public/' . $bucketName . '/' . $filename;
+                        } else {
+                            // Fallback to local
+                            $path = $image->store('accidents/images', 'public');
+                            $imagePaths[] = $path;
+                        }
+                    } catch (\Exception $e) {
+                        // Fallback on exception
+                        $path = $image->store('accidents/images', 'public');
+                        $imagePaths[] = $path;
+                    }
+                } else {
+                    // Fallback to local storage if credentials are not configured
+                    $path = $image->store('accidents/images', 'public');
+                    $imagePaths[] = $path;
+                }
             }
         }
 

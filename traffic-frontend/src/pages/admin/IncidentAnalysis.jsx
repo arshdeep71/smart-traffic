@@ -187,7 +187,7 @@ const IncidentAnalysis = () => {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem' }}>
                  {incident.images.map((img, i) => {
                     const isVideo = img.endsWith('.mp4') || img.endsWith('.webm') || img.endsWith('.mov');
-                    const url = `${(import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api').replace('/api', '')}/storage/${img}`;
+                    const url = (img.startsWith('data:') || img.startsWith('http://') || img.startsWith('https://')) ? img : `${(import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api').replace('/api', '')}/storage/${img}`;
                     const mockTimestamp = `+${(i + 1).toFixed(1)}s`;
                     return (
                       <div 
