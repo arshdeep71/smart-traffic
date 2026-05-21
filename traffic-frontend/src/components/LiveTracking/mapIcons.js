@@ -45,6 +45,50 @@ export function createAmbulanceIcon(bearing = 0) {
   });
 }
 
+// ─── Police moving icon ────────────────────────────────────────────────────────
+export function createPoliceIcon(bearing = 0) {
+  return L.divIcon({
+    className: "ltv-custom-div-icon",
+    iconSize: [50, 50],
+    iconAnchor: [25, 25],
+    html: `
+      <div style="
+        position: relative;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      ">
+        <!-- pulse ring -->
+        <div style="
+          position: absolute;
+          inset: 0;
+          border-radius: 50%;
+          border: 2px solid rgba(59,130,246,0.35);
+          animation: ltv-ring-expand 2s ease-out infinite;
+        "></div>
+        <!-- body -->
+        <div style="
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background: #3b82f6;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 18px;
+          box-shadow: 0 3px 14px rgba(59,130,246,0.5);
+          transform: rotate(${bearing}deg);
+          position: relative;
+          z-index: 1;
+          transition: transform 1.2s ease;
+        ">🚓</div>
+      </div>
+    `,
+  });
+}
+
 // ─── Emergency location pin ───────────────────────────────────────────────────
 export function createLocationPin(label = "Emergency Location") {
   return L.divIcon({

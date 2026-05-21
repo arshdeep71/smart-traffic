@@ -12,7 +12,7 @@ import "./LiveTrackingView.css";
 import ETACard from "./ETACard";
 import DriverSheet from "./DriverSheet";
 import StatusBanner from "./StatusBanner";
-import { createAmbulanceIcon, createLocationPin, createCitizenIcon, createHospitalIcon } from "./mapIcons";
+import { createAmbulanceIcon, createLocationPin, createCitizenIcon, createHospitalIcon, createPoliceIcon } from "./mapIcons";
 import { Loader2, CheckCircle2, Navigation } from "lucide-react";
 import "leaflet-routing-machine";
 
@@ -311,20 +311,20 @@ export function MapFitter({ ambulancePos, incidentPos, hasRoute }) {
 }
 
 // ─── Ambulance marker controller ─────────────────────────────────────────────
-export function AmbulanceMarker({ position, bearing }) {
+export function AmbulanceMarker({ position, bearing, isPolice }) {
   const markerRef = useRef(null);
   const [targetPos, setTargetPos] = useState(position);
-  const icon = useRef(createAmbulanceIcon(bearing));
+  const icon = useRef(isPolice ? createPoliceIcon(bearing) : createAmbulanceIcon(bearing));
 
   useEffect(() => { setTargetPos(position); }, [position]);
   useSmoothMarker(markerRef, targetPos);
 
   useEffect(() => {
     if (markerRef.current) {
-      icon.current = createAmbulanceIcon(bearing);
+      icon.current = isPolice ? createPoliceIcon(bearing) : createAmbulanceIcon(bearing);
       markerRef.current.setIcon(icon.current);
     }
-  }, [bearing]);
+  }, [bearing, isPolice]);
 
   if (!position) return null;
   return <Marker ref={markerRef} position={position} icon={icon.current} />;
@@ -630,7 +630,11 @@ export default function LiveTrackingView({ incident, ambulance, socket, citizenL
         )}
 
         {/* Ambulance marker */}
-        <AmbulanceMarker position={ambulancePos} bearing={bearing} />
+        <AmbulanceMarker 
+          position={ambulancePos} 
+          bearing={bearing} 
+          isPolice={status?.toLowerCase().includes('police') || status?.toLowerCase().includes('patrol') || status?.toLowerCase().includes('officer')} 
+        />
 
         <MapFitter
           ambulancePos={ambulancePos}

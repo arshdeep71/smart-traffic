@@ -447,9 +447,55 @@ const CitizenDashboard = () => {
       const ctx = canvas.getContext('2d');
       const bi = setInterval(() => {
         if (burst.length < 8 && videoRef.current) {
-          canvas.width = videoRef.current.videoWidth || 640;
-          canvas.height = videoRef.current.videoHeight || 480;
-          ctx.drawImage(videoRef.current, 0, 0);
+          const w = videoRef.current.videoWidth || 640;
+          const h = videoRef.current.videoHeight || 480;
+          canvas.width = w;
+          canvas.height = h;
+
+          // Draw actual webcam image frame
+          ctx.drawImage(videoRef.current, 0, 0, w, h);
+
+          // Overlay sleek dimming filter to boost HUD readability
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+          ctx.fillRect(0, 0, w, h);
+
+          // HUD Corner Viewfinder brackets
+          ctx.strokeStyle = '#ef4444';
+          ctx.lineWidth = 3;
+          const l = 20;
+          // Top-Left
+          ctx.beginPath(); ctx.moveTo(l, 15); ctx.lineTo(15, 15); ctx.lineTo(15, l); ctx.stroke();
+          // Top-Right
+          ctx.beginPath(); ctx.moveTo(w - l, 15); ctx.lineTo(w - 15, 15); ctx.lineTo(w - 15, l); ctx.stroke();
+          // Bottom-Left
+          ctx.beginPath(); ctx.moveTo(l, h - 15); ctx.lineTo(15, h - 15); ctx.lineTo(15, h - l); ctx.stroke();
+          // Bottom-Right
+          ctx.beginPath(); ctx.moveTo(w - l, h - 15); ctx.lineTo(w - 15, h - 15); ctx.lineTo(w - 15, h - l); ctx.stroke();
+
+          // Pulsing red recording dot
+          ctx.fillStyle = '#ef4444';
+          ctx.beginPath();
+          ctx.arc(35, 35, 6, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 12px monospace';
+          ctx.fillText(`REC 00:0${burst.length + 1}`, 50, 39);
+
+          // Smart Telemetry Info Box
+          ctx.fillStyle = 'rgba(9, 13, 22, 0.85)';
+          ctx.fillRect(15, h - 65, 290, 50);
+          ctx.strokeStyle = 'rgba(59, 130, 246, 0.4)';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(15, h - 65, 290, 50);
+
+          ctx.fillStyle = '#3b82f6';
+          ctx.fillText('📡 LINK: SECURE CITY RADAR', 25, h - 48);
+          ctx.fillStyle = '#10b981';
+          ctx.fillText('🛰️ GPS: 31.252242 N, 75.703130 E', 25, h - 33);
+          ctx.fillStyle = '#9ca3af';
+          ctx.fillText(`⏳ FRAME TIME: +${(burst.length + 1).toFixed(1)}s (LPU B38)`, 25, h - 18);
+
           const tStamp = `+${(burst.length + 1).toFixed(1)}s`;
           burst.push({
             dataUrl: canvas.toDataURL('image/jpeg'),
