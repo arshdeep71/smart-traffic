@@ -157,6 +157,11 @@ class AccidentController extends Controller
             'success' => true,
             'message' => 'Accident reported successfully.',
             'data'    => $accident,
+            'reporter_name'           => $accident->reporter_name,
+            'reporter_email'          => $accident->reporter_email,
+            'images'                  => $accident->images,
+            'upload_source'           => 'Supabase CDN Only (Strict)',
+            'supabase_upload_success' => true,
         ], 201);
     }
 

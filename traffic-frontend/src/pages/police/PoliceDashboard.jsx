@@ -233,6 +233,15 @@ export const PoliceDashboard = () => {
   // Sync timeline and police location when selecting an incident
   useEffect(() => {
     if (selectedIncident) {
+      console.log("=========================================");
+      console.log("🚨 [POLICE DASHBOARD RAW ACCIDENT OBJECT SELECTED EFFECT] 🚨");
+      console.log("  ID:             ", selectedIncident.id || selectedIncident._id);
+      console.log("  reporter_name:  ", selectedIncident.reporter_name);
+      console.log("  reporter_email: ", selectedIncident.reporter_email);
+      console.log("  images:         ", selectedIncident.images);
+      console.log("  RAW OBJECT:     ", selectedIncident);
+      console.log("=========================================");
+
       const statusLower = selectedIncident.status?.toLowerCase() || '';
       
       // Auto-enable live tracking UI if case is already accepted/active
@@ -1102,8 +1111,17 @@ export const PoliceDashboard = () => {
                 
                 return (
                   <div 
-                    key={acc.id || acc._id}
-                    onClick={() => setSelectedIncident(acc)}
+                    onClick={() => {
+                      console.log("=========================================");
+                      console.log("🚨 [POLICE DASHBOARD RAW ACCIDENT CARD CLICKED] 🚨");
+                      console.log("  ID:             ", acc.id || acc._id);
+                      console.log("  reporter_name:  ", acc.reporter_name);
+                      console.log("  reporter_email: ", acc.reporter_email);
+                      console.log("  images:         ", acc.images);
+                      console.log("  RAW OBJECT:     ", acc);
+                      console.log("=========================================");
+                      setSelectedIncident(acc);
+                    }}
                     className="card-hover-police"
                     style={{ 
                       padding: '1rem', 

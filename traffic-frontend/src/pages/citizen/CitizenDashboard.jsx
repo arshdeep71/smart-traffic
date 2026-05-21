@@ -683,6 +683,14 @@ const CitizenDashboard = () => {
         console.log(`  ${pair[0]}: ${pair[1] instanceof File ? `File (${pair[1].name}, ${pair[1].size} bytes)` : pair[1]}`);
       }
 
+      console.log("=================================================");
+      console.log("🚨 [FRONTEND PAYLOAD INSPECTION - CITIZEN REPORT] 🚨");
+      console.log("  REPORTER_NAME  ->", data.get('reporter_name'));
+      console.log("  REPORTER_EMAIL ->", data.get('reporter_email'));
+      console.log("  LATITUDE       ->", data.get('latitude'));
+      console.log("  LONGITUDE      ->", data.get('longitude'));
+      console.log("=================================================");
+
       const res = await api.post('/accidents', data, { headers: { 'Content-Type': 'multipart/form-data' } });
       const accidentData = res.data.data;
       setSubmittedAccident(accidentData);
