@@ -182,6 +182,7 @@ const CitizenDashboard = () => {
   const [assignedAmbulance, setAssignedAmbulance] = useState(null);
   const [ambLocation, setAmbLocation] = useState(null);
   const [routeInfo, setRouteInfo] = useState({ distance: '—', time: '—' });
+  const [resolutionCountdown, setResolutionCountdown] = useState(null);
 
   const videoRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -333,11 +334,12 @@ const CitizenDashboard = () => {
     const handleStatusUpdated = (data) => {
       const { status } = data;
 
-      if (status === 'completed' || status === 'reached_hospital') {
+      if (status === 'completed' || status === 'resolved' || status?.toLowerCase() === 'resolved') {
         setIsSOS(false);
         setEmergencyMode(false);
+        setResolutionCountdown(3);
         if ('speechSynthesis' in window) {
-          const utterance = new SpeechSynthesisUtterance("SOS mode automatically deactivated. You have safely arrived at the destination hospital.");
+          const utterance = new SpeechSynthesisUtterance("Emergency incident successfully resolved. Closing tracking session.");
           window.speechSynthesis.speak(utterance);
         }
       }
@@ -366,15 +368,15 @@ const CitizenDashboard = () => {
           updated.rejection_reason = data.reason || 'No reason specified.';
         }
 
-        if (status === 'completed') {
+        if (status === 'completed' || status === 'resolved' || status?.toLowerCase() === 'resolved') {
           setAccidents(accs => {
             const idx = accs.findIndex(a => (a._id || a.id) === (prev._id || prev.id));
             if (idx > -1) {
               const newAccs = [...accs];
-              newAccs[idx] = { ...newAccs[idx], status: 'completed' };
+              newAccs[idx] = { ...newAccs[idx], status: 'resolved' };
               return newAccs;
             } else {
-              return [{ ...prev, status: 'completed' }, ...accs];
+              return [{ ...prev, status: 'resolved' }, ...accs];
             }
           });
         }
@@ -413,6 +415,22 @@ const CitizenDashboard = () => {
       }
     }
   }, [activeIncident, socket?.connected]);
+
+  // RESOLUTION COUNTDOWN AUTOMATED EXIT PIPELINE
+  useEffect(() => {
+    if (resolutionCountdown === null) return;
+    if (resolutionCountdown <= 0) {
+      setActiveIncident(null);
+      setAssignedAmbulance(null);
+      setResolutionCountdown(null);
+      setTab('home');
+      return;
+    }
+    const timer = setTimeout(() => {
+      setResolutionCountdown(prev => prev - 1);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [resolutionCountdown]);
 
   const fetchNearby = async () => {
     try {
@@ -1044,8 +1062,214 @@ const CitizenDashboard = () => {
     );
   }
 
+  const isWaiting = activeIncident && ['pending', 'report received', 'sos received'].includes(activeIncident.status?.toLowerCase());
+
   return (
     <div className={`fade-in ${emergencyMode ? 'emergency-mode-active' : ''}`} style={{ padding: '0 1rem' }}>
+      {/* ── HIGHLY POLISHED REAL-TIME WAITING STATE SCREEN ── */}
+      {isWaiting && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: '#030712',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 99999,
+          color: '#fff',
+          fontFamily: 'monospace',
+          padding: '2rem',
+        }}>
+          {/* Neon scan lines background */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(rgba(18, 24, 38, 0.8) 50%, rgba(3, 7, 18, 0.9) 50%)',
+            backgroundSize: '100% 4px',
+            zIndex: 1,
+            pointerEvents: 'none'
+          }} />
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            style={{
+              maxWidth: '520px',
+              width: '100%',
+              background: 'linear-gradient(135deg, #090d16, #030712)',
+              border: '1px solid rgba(59, 130, 246, 0.3)',
+              boxShadow: '0 0 40px rgba(59, 130, 246, 0.15)',
+              borderRadius: '24px',
+              padding: '2.5rem 2rem',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              textAlign: 'center',
+              gap: '2rem',
+              zIndex: 2,
+              position: 'relative'
+            }}
+          >
+            {/* Pulsing Tactical Radar Scanner */}
+            <div className="radar-scanner" style={{ width: '100px', height: '100px', borderRadius: '50%', border: '2px solid rgba(59, 130, 246, 0.3)', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ position: 'absolute', inset: 0, border: '2px solid #3b82f6', borderRadius: '50%', animation: 'pulse-blue 2s infinite' }} />
+              <div style={{
+                width: '12px',
+                height: '12px',
+                background: '#3b82f6',
+                borderRadius: '50%',
+                boxShadow: '0 0 20px #3b82f6',
+                animation: 'pulse-glow 1.5s infinite'
+              }} />
+              <Shield size={36} style={{ color: '#3b82f6', opacity: 0.8, position: 'absolute' }} />
+            </div>
+
+            <div>
+              <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 900, color: '#fff', letterSpacing: '-0.5px', textTransform: 'uppercase', lineHeight: 1.4 }}>
+                Your emergency report has been received.
+              </h2>
+              <p style={{ margin: '0.75rem 0 0 0', fontSize: '0.9rem', color: '#94a3b8', lineHeight: 1.5, fontFamily: 'system-ui' }}>
+                Please wait while nearby police units are being assigned.
+              </p>
+            </div>
+
+            {/* Futuristic Sector Telemetry */}
+            <div style={{
+              width: '100%',
+              background: '#040810',
+              border: '1px solid rgba(255, 255, 255, 0.05)',
+              borderRadius: '12px',
+              padding: '1rem 1.25rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.5rem',
+              fontSize: '0.72rem',
+              color: '#3b82f6',
+              textAlign: 'left'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>[SECTOR CODE]</span>
+                <span style={{ color: '#fff' }}>LPU_BLOCK_38</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>[SIGNAL LATENCY]</span>
+                <span style={{ color: '#10b981' }}>2ms (STABLE)</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>[COORDINATES]</span>
+                <span style={{ color: '#fff', fontFamily: 'monospace' }}>31.252243 N, 75.703131 E</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span>[SECURE LINK]</span>
+                <span style={{ color: '#f59e0b' }} className="animate-pulse">AWAITING DISPATCH SIGNATURE...</span>
+              </div>
+            </div>
+
+            {/* Glowing Telemetry Progress Bar */}
+            <div style={{ width: '100%', height: '4px', background: '#1e293b', borderRadius: '2px', overflow: 'hidden', position: 'relative' }}>
+              <motion.div
+                initial={{ left: '-30%' }}
+                animate={{ left: '100%' }}
+                transition={{ repeat: Infinity, duration: 1.8, ease: 'linear' }}
+                style={{ width: '30%', height: '100%', background: 'linear-gradient(90deg, transparent, #3b82f6, transparent)', position: 'absolute' }}
+              />
+            </div>
+
+            <button
+              onClick={() => {
+                setActiveIncident(null);
+                setTab('history');
+              }}
+              style={{
+                width: '100%',
+                padding: '0.8rem',
+                background: 'transparent',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                color: '#64748b',
+                borderRadius: '10px',
+                cursor: 'pointer',
+                fontWeight: 800,
+                fontSize: '0.8rem',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => { e.target.style.borderColor = 'rgba(239, 68, 68, 0.3)'; e.target.style.color = '#ef4444'; }}
+              onMouseLeave={(e) => { e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'; e.target.style.color = '#64748b'; }}
+            >
+              Cancel Watch & Return
+            </button>
+          </motion.div>
+        </div>
+      )}
+
+      {/* ── HIGHLY POLISHED REAL-TIME RESOLUTION COUNTDOWN OVERLAY ── */}
+      {resolutionCountdown !== null && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(9, 13, 22, 0.95)',
+          backdropFilter: 'blur(10px)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 100000,
+          color: '#fff',
+          textAlign: 'center',
+          fontFamily: 'system-ui, -apple-system, sans-serif'
+        }}>
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            style={{
+              padding: '3rem',
+              borderRadius: '24px',
+              background: 'linear-gradient(135deg, #1e293b, #0f172a)',
+              border: '1px solid rgba(16, 185, 129, 0.3)',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '1.5rem'
+            }}
+          >
+            <div style={{
+              width: '80px',
+              height: '80px',
+              borderRadius: '50%',
+              background: 'rgba(16, 185, 129, 0.12)',
+              border: '2px solid #10b981',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '32px',
+              boxShadow: '0 0 30px rgba(16, 185, 129, 0.4)',
+            }}>
+              ✓
+            </div>
+            <div>
+              <h2 style={{ margin: 0, fontSize: '1.8rem', fontWeight: 900, color: '#10b981' }}>
+                Incident Successfully Resolved
+              </h2>
+              <p style={{ margin: '0.5rem 0 0 0', fontSize: '1rem', color: '#94a3b8' }}>
+                The emergency patrol session has been completed safely.
+              </p>
+            </div>
+
+            <div style={{ fontSize: '1.2rem', color: '#cbd5e1', fontWeight: 700, marginTop: '1rem' }}>
+              Closing session in:{' '}
+              <span style={{ fontSize: '2.5rem', color: '#3b82f6', fontWeight: 900, display: 'inline-block', minWidth: '40px' }} className="animate-pulse">
+                {resolutionCountdown}
+              </span>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
       {emergencyMode && (
         <div className="em-banner" style={{ marginBottom: '1rem', borderRadius: 12 }}>
           🚨 EMERGENCY MODE ACTIVE &nbsp;|&nbsp; Brightness Max &nbsp;|&nbsp; GPS Locked
@@ -1081,9 +1305,9 @@ const CitizenDashboard = () => {
       <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: '1.5rem', minHeight: 0, alignItems: 'start' }}>
 
         {/* ZOMATO/UBER STYLE FULLSCREEN HERO LIVE TRACKING */}
-        {activeIncident ? (
+        {activeIncident && !isWaiting ? (
           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 }}>
-            <button onClick={() => { setActiveIncident(null); setTab('history'); }} style={{ position: 'absolute', top: 20, right: 20, zIndex: 10001, background: '#f1f5f9', border: 'none', padding: '0.6rem 1rem', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', color: '#64748b', fontSize: '0.85rem', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>Close Map</button>
+            <button onClick={() => { setActiveIncident(null); setTab('history'); }} style={{ position: 'absolute', top: 20, right: 20, zIndex: 10001, background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', padding: '0.6rem 1rem', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', color: '#fff', fontSize: '0.85rem', boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }}>Close Map</button>
             <LiveTrackingView
               incident={activeIncident}
               ambulance={assignedAmbulance}

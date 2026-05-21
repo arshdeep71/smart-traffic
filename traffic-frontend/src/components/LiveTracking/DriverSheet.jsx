@@ -11,15 +11,9 @@ function getInitials(name = "") {
 }
 
 export default function DriverSheet({ ambulance, incident }) {
-  const isPolice = incident?.status?.toLowerCase().includes('police') || 
-                   incident?.status?.toLowerCase().includes('officer') || 
-                   ambulance?.vehicleNumber?.toLowerCase().includes('police') || 
-                   ambulance?.plateNumber?.toLowerCase().includes('police') ||
-                   ambulance?.driverName?.toLowerCase().includes('officer');
-
-  const driverName   = ambulance?.driverName    || ambulance?.driver?.name    || (isPolice ? "Officer Patrol Unit" : "Assigned Driver");
-  const hospitalName = ambulance?.hospitalName  || ambulance?.hospital?.name  || (isPolice ? "LPU Traffic Command Center" : "City Hospital");
-  const plateNumber  = ambulance?.ambulanceNumber || ambulance?.vehicleNumber || ambulance?.plateNumber || (isPolice ? "POLICE-911" : "AMB-0000");
+  const driverName   = ambulance?.driverName    || ambulance?.driver?.name    || "Officer Patrol Unit";
+  const stationName  = "LPU Traffic Command Center";
+  const plateNumber  = ambulance?.ambulanceNumber || ambulance?.vehicleNumber || ambulance?.plateNumber || "POLICE-911";
   const phone        = ambulance?.driverPhone   || ambulance?.driver?.phone   || null;
 
   const handleCall = () => {
@@ -33,16 +27,16 @@ export default function DriverSheet({ ambulance, incident }) {
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 300, damping: 30, delay: 0.35 }}
     >
-      <div className="ltv-sheet">
-        <div className="ltv-sheet-handle" />
+      <div className="ltv-sheet" style={{ background: 'linear-gradient(135deg, #090d16, #030712)', borderTop: '3px solid #3b82f6' }}>
+        <div className="ltv-sheet-handle" style={{ background: '#1e293b' }} />
 
-        {/* Ambulance/Police info */}
+        {/* Police info */}
         <div className="ltv-sheet-header">
           <div className="ltv-ambulance-badge">
-            <div className="ltv-ambulance-icon-wrap">{isPolice ? "🚔" : "🚑"}</div>
+            <div className="ltv-ambulance-icon-wrap" style={{ background: 'rgba(59, 130, 246, 0.15)', border: '1px solid rgba(59, 130, 246, 0.3)' }}>🚔</div>
             <div className="ltv-ambulance-meta">
-              <span className="ltv-ambulance-num">{plateNumber}</span>
-              <span className="ltv-hospital-name">{hospitalName}</span>
+              <span className="ltv-ambulance-num" style={{ color: '#fff' }}>{plateNumber}</span>
+              <span className="ltv-hospital-name" style={{ color: '#94a3b8' }}>{stationName}</span>
             </div>
           </div>
 
@@ -51,25 +45,25 @@ export default function DriverSheet({ ambulance, incident }) {
             onClick={handleCall}
             title={phone ? `Call ${driverName}` : "No number available"}
             disabled={!phone}
-            style={{ opacity: phone ? 1 : 0.4, cursor: phone ? "pointer" : "default" }}
-            aria-label="Call driver"
+            style={{ opacity: phone ? 1 : 0.4, cursor: phone ? "pointer" : "default", background: 'rgba(59,130,246,0.1)', color: '#3b82f6' }}
+            aria-label="Call officer"
           >
             📞
           </button>
         </div>
 
-        <div className="ltv-divider" />
+        <div className="ltv-divider" style={{ borderColor: 'rgba(255,255,255,0.08)' }} />
 
-        {/* Driver/Officer row */}
+        {/* Responder row */}
         <div className="ltv-driver-row">
-          <div className="ltv-avatar">{getInitials(driverName)}</div>
+          <div className="ltv-avatar" style={{ background: '#3b82f6', color: '#fff' }}>{getInitials(driverName)}</div>
           <div className="ltv-driver-info">
-            <div className="ltv-driver-name">{driverName}</div>
-            <div className="ltv-driver-role">{isPolice ? "Police Patrol Officer" : "Emergency Medical Technician"}</div>
+            <div className="ltv-driver-name" style={{ color: '#fff' }}>{driverName}</div>
+            <div className="ltv-driver-role" style={{ color: '#94a3b8' }}>Police Patrol Officer</div>
           </div>
           <div className="ltv-rating">
-            <span className="ltv-star">★</span>
-            {isPolice ? "5.0" : "4.9"}
+            <span className="ltv-star" style={{ color: '#f59e0b' }}>★</span>
+            <span style={{ color: '#fff' }}>5.0</span>
           </div>
         </div>
       </div>

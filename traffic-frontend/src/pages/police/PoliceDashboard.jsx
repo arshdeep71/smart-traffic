@@ -95,6 +95,7 @@ export const PoliceDashboard = () => {
   const [isTrackingActive, setIsTrackingActive] = useState(false);
   const [policeGpsWatcher, setPoliceGpsWatcher] = useState(null);
   const [policeHeading, setPoliceHeading] = useState(0);
+  const [isPoliceFullscreen, setIsPoliceFullscreen] = useState(false);
 
   // Socket Connection
   const socketRef = useRef(null);
@@ -190,6 +191,7 @@ export const PoliceDashboard = () => {
             lng: 75.6980
           });
         }
+        setIsPoliceFullscreen(true);
         alert('Emergency accepted! Fullscreen tactical command map activated.');
       }
     } catch (e) {
@@ -202,6 +204,7 @@ export const PoliceDashboard = () => {
   const startPoliceNavigation = () => {
     if (!selectedIncident) return;
     const incidentId = selectedIncident.id || selectedIncident._id;
+    setIsPoliceFullscreen(true);
 
     // 1. Update backend status to 'Officer En Route'
     api.post(`/accidents/${incidentId}/update-police-status`, { status: 'Officer En Route' })
@@ -402,6 +405,7 @@ export const PoliceDashboard = () => {
         setAccidents(prev => prev.map(a => (a.id === updatedIncident.id || a._id === updatedIncident._id) ? { ...a, ...updatedIncident } : a));
         setSelectedIncident(null);
         setIsTrackingActive(false);
+        setIsPoliceFullscreen(false);
         
         // Broadcast socket status
         if (socketRef.current) {
@@ -636,7 +640,216 @@ export const PoliceDashboard = () => {
 
   return (
     <div className="command-center-root fade-in">
-      
+      {/* ── HIGHLY POLISHED FULLSCREEN TACTICAL MAP MODE ── */}
+      {isPoliceFullscreen && selectedIncident ? (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: '#030712',
+          zIndex: 99999,
+          display: 'flex',
+          flexDirection: 'column',
+          fontFamily: 'system-ui, -apple-system, sans-serif'
+        }}>
+          {/* Top header HUD */}
+          <div style={{
+            background: 'linear-gradient(180deg, rgba(3,7,18,0.95) 0%, rgba(3,7,18,0.7) 100%)',
+            borderBottom: '1px solid rgba(59, 130, 246, 0.3)',
+            padding: '1rem 1.5rem',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            zIndex: 1000,
+            backdropFilter: 'blur(10px)'
+          }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#ef4444', fontWeight: 800, fontSize: '0.72rem', letterSpacing: '0.1em' }} className="pulse-alert">
+                🚨 FULLSCREEN TACTICAL COMMAND ROUTING ACTIVE
+              </div>
+              <h2 style={{ margin: '0.1rem 0 0 0', color: '#fff', fontSize: '1.25rem', fontWeight: 900, letterSpacing: '-0.5px' }}>
+                🚔 Responding to Case: {selectedIncident.title}
+              </h2>
+            </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '0.58rem', fontWeight: 800, color: '#6b7280', letterSpacing: '0.05em' }}>CURRENT STATE</div>
+                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#3b82f6', textTransform: 'uppercase' }}>
+                  {selectedIncident.status}
+                </div>
+              </div>
+              <button 
+                onClick={() => setIsPoliceFullscreen(false)}
+                style={{
+                  background: 'rgba(255,255,255,0.05)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '8px',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  padding: '0.5rem 1rem',
+                  fontSize: '0.8rem',
+                  fontWeight: 700,
+                  transition: 'all 0.2s'
+                }}
+                onMouseEnter={(e) => e.target.style.background = 'rgba(255,255,255,0.1)'}
+                onMouseLeave={(e) => e.target.style.background = 'rgba(255,255,255,0.05)'}
+              >
+                🗕 Minimize View
+              </button>
+            </div>
+          </div>
+
+          {/* Center Area: Fullscreen Map */}
+          <div style={{ flex: 1, position: 'relative' }}>
+            <LiveTrackingView
+              incident={selectedIncident}
+              ambulance={{
+                driverName: user?.name || "Officer Patrol Unit",
+                driverPhone: "+91 99999-99999",
+                vehicleNumber: "PB-08-POLICE",
+                plateNumber: "POLICE-911",
+                lat: policeCoords?.[0] || 31.2592,
+                lng: policeCoords?.[1] || 75.6980
+              }}
+              socket={socketRef.current}
+            />
+
+            {/* Tactical overlay floating sidebar */}
+            <div style={{
+              position: 'absolute',
+              top: '20px',
+              left: '20px',
+              width: '360px',
+              background: 'linear-gradient(135deg, rgba(9, 13, 22, 0.95), rgba(3, 7, 18, 0.98))',
+              border: '1px solid rgba(59, 130, 246, 0.25)',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+              borderRadius: '16px',
+              padding: '1.5rem',
+              color: '#fff',
+              zIndex: 999,
+              backdropFilter: 'blur(12px)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1.25rem'
+            }}>
+              <div>
+                <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#3b82f6', letterSpacing: '0.05em', textTransform: 'uppercase' }}>INCIDENT CLASSIFICATION</span>
+                <h3 style={{ margin: '0.1rem 0 0 0', fontSize: '1.05rem', fontWeight: 800 }}>{selectedIncident.title}</h3>
+                <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.78rem', color: '#94a3b8', lineHeight: 1.4 }}>{selectedIncident.description}</p>
+              </div>
+
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '0.85rem' }}>
+                <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#3b82f6', letterSpacing: '0.05em', textTransform: 'uppercase' }}>REPORTER INFORMATION</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginTop: '0.4rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem' }}>
+                    <span style={{ color: '#6b7280' }}>Reporter:</span>
+                    <span style={{ fontWeight: 700 }}>{selectedIncident.reporter_name || 'Citizen User'}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem' }}>
+                    <span style={{ color: '#6b7280' }}>Contact Email:</span>
+                    <span style={{ fontFamily: 'monospace' }}>{selectedIncident.reporter_email || 'citizen@traffic.local'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Step-by-Step Tactical Controller Panel */}
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#3b82f6', letterSpacing: '0.05em', textTransform: 'uppercase' }}>NAVIGATION CONTROLS</span>
+                
+                {selectedIncident.status?.toLowerCase().includes('en route') && (
+                  <button 
+                    onClick={handleReachedScene}
+                    disabled={updatingStatus}
+                    style={{
+                      width: '100%',
+                      background: 'linear-gradient(135deg, #10b981, #059669)',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '0.75rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      fontSize: '0.8rem',
+                      boxShadow: '0 4px 12px rgba(16,185,129,0.3)',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    🏁 Mark Unit Reached Scene
+                  </button>
+                )}
+
+                {(selectedIncident.status?.toLowerCase().includes('reached') || selectedIncident.status?.toLowerCase().includes('scene')) && (
+                  <button 
+                    onClick={handleInvestigationStarted}
+                    disabled={updatingStatus}
+                    style={{
+                      width: '100%',
+                      background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '0.75rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      fontSize: '0.8rem',
+                      boxShadow: '0 4px 12px rgba(59,130,246,0.3)',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    🔍 Start Active Scene Investigation
+                  </button>
+                )}
+
+                {['officer reached scene', 'investigation active'].includes(selectedIncident.status?.toLowerCase()) && (
+                  <button 
+                    onClick={handleCloseIncident}
+                    disabled={updatingStatus}
+                    style={{
+                      width: '100%',
+                      background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '0.75rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      fontSize: '0.8rem',
+                      boxShadow: '0 4px 12px rgba(239,68,68,0.3)',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    🔒 Close & Resolve Incident
+                  </button>
+                )}
+
+                {/* If accepted but not en route yet */}
+                {selectedIncident.status?.toLowerCase().includes('assigned') && (
+                  <button 
+                    onClick={startPoliceNavigation}
+                    disabled={updatingStatus}
+                    style={{
+                      width: '100%',
+                      background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '0.75rem',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      fontSize: '0.8rem',
+                      boxShadow: '0 4px 12px rgba(59,130,246,0.3)',
+                      transition: 'all 0.2s'
+                    }}
+                  >
+                    🚀 Start Active Navigation Routing
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       {/* COMMAND CENTER HEADER & TELEMETRY */}
       <div className="diagnostic-header">
         <div>
