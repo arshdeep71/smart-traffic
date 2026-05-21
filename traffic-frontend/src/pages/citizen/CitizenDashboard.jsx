@@ -1941,11 +1941,15 @@ const CitizenDashboard = () => {
                     <AmbulanceMarker position={ambLocation} bearing={0} />
                   )}
 
-                  {accidents.map((acc, i) => acc.location?.coordinates && (
-                    <Marker key={i} position={[acc.location.coordinates[1], acc.location.coordinates[0]]} icon={createLocationPin()}>
-                      <Popup className="uber-popup"><div style={{ padding: '0.5rem' }}>{acc.title}</div></Popup>
-                    </Marker>
-                  ))}
+                  {accidents.map((acc, i) => {
+                    if (!acc.location?.coordinates || acc.location.coordinates.length < 2) return null;
+                    const [lng, lat] = acc.location.coordinates;
+                    return (
+                      <Marker key={i} position={[lat, lng]} icon={createLocationPin()}>
+                        <Popup className="uber-popup"><div style={{ padding: '0.5rem' }}>{acc.title}</div></Popup>
+                      </Marker>
+                    );
+                  })}
                 </PremiumMap>
               </div>
 

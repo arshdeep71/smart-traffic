@@ -95,11 +95,18 @@ class LiveTrackingErrorBoundary extends React.Component {
 // ─── Routing Machine Component ──────────────────────────────────────────────
 export function RoutingMachine({ start, end, onRouteCalculated }) {
   const map = useMap();
-  const startStr = start ? `${start[0]},${start[1]}` : "";
-  const endStr = end ? `${end[0]},${end[1]}` : "";
+  
+  // Standardize start/end to lat,lng strings
+  const startLat = start?.lat ?? (Array.isArray(start) ? start[0] : 31.2592);
+  const startLng = start?.lng ?? (Array.isArray(start) ? start[1] : 75.6980);
+  const endLat = end?.lat ?? (Array.isArray(end) ? end[0] : 31.252243);
+  const endLng = end?.lng ?? (Array.isArray(end) ? end[1] : 75.703131);
+
+  const startStr = `${startLat},${startLng}`;
+  const endStr = `${endLat},${endLng}`;
 
   useEffect(() => {
-    if (!start || !end || !map) return;
+    if (!map) return;
     if (!L.Routing || !L.Routing.control) {
       console.warn("[Leaflet Routing Machine] L.Routing is not available yet.");
       return;
@@ -107,7 +114,7 @@ export function RoutingMachine({ start, end, onRouteCalculated }) {
     let routingControl;
     try {
       routingControl = L.Routing.control({
-        waypoints: [ L.latLng(start[0], start[1]), L.latLng(end[0], end[1]) ],
+        waypoints: [ L.latLng(startLat, startLng), L.latLng(endLat, endLng) ],
         lineOptions: { styles: [{ color: '#3b82f6', weight: 6, opacity: 0.85, lineCap: "round", lineJoin: "round" }] },
         createMarker: () => null, show: false, addWaypoints: false, routeWhileDragging: false, fitSelectedRoutes: false,
       }).addTo(map);
@@ -146,7 +153,12 @@ export function MapFitter({ ambulancePos, incidentPos }) {
     if (fitted.current) return;
     
     try {
-      const bounds = L.latLngBounds([ambulancePos, incidentPos]);
+      const ambLat = ambulancePos?.lat ?? (Array.isArray(ambulancePos) ? ambulancePos[0] : 31.2592);
+      const ambLng = ambulancePos?.lng ?? (Array.isArray(ambulancePos) ? ambulancePos[1] : 75.6980);
+      const incLat = incidentPos?.lat ?? (Array.isArray(incidentPos) ? incidentPos[0] : 31.252243);
+      const incLng = incidentPos?.lng ?? (Array.isArray(incidentPos) ? incidentPos[1] : 75.703131);
+
+      const bounds = L.latLngBounds([ [ambLat, ambLng], [incLat, incLng] ]);
       map.fitBounds(bounds, { padding: [80, 80], maxZoom: 17, animate: true, duration: 1.2 });
       fitted.current = true;
     } catch (err) {
@@ -178,7 +190,8 @@ export function AmbulanceMarker({ position, bearing }) {
   }, [bearing]);
 
   if (!position) return null;
-  return <Marker ref={markerRef} position={position} icon={icon.current} />;
+  const markerCoords = Array.isArray(position) ? position : [position.lat, position.lng];
+  return <Marker ref={markerRef} position={markerCoords} icon={icon.current} />;
 }
 
 // ─── Map auto-resize invalidator ──────────────────────────────────────────────
@@ -239,9 +252,18 @@ export function useSmoothMarker(markerRef, position) {
 
   useEffect(() => {
     if (!position || !markerRef.current) return;
-    if (endPos.current && (endPos.current[0] === position[0] && endPos.current[1] === position[1])) {
+    
+    // Safely parse position whether it is array or object
+    const targetLat = Array.isArray(position) ? position[0] : position.lat;
+    const targetLng = Array.isArray(position) ? position[1] : position.lng;
+    
+    if (endPos.current && (
+      (Array.isArray(endPos.current) && endPos.current[0] === targetLat && endPos.current[1] === targetLng) ||
+      (!Array.isArray(endPos.current) && endPos.current.lat === targetLat && endPos.current.lng === targetLng)
+    )) {
       return;
     }
+    
     const currentMarker = markerRef.current;
     const currentLatLng = currentMarker.getLatLng();
     startPos.current = [currentLatLng.lat, currentLatLng.lng];
@@ -257,8 +279,8 @@ export function useSmoothMarker(markerRef, position) {
         ? 2 * progress * progress 
         : 1 - Math.pow(-2 * progress + 2, 2) / 2;
 
-      const lat = startPos.current[0] + (endPos.current[0] - startPos.current[0]) * ease;
-      const lng = startPos.current[1] + (endPos.current[1] - startPos.current[1]) * ease;
+      const lat = startPos.current[0] + (targetLat - startPos.current[0]) * ease;
+      const lng = startPos.current[1] + (targetLng - startPos.current[1]) * ease;
 
       currentMarker.setLatLng([lat, lng]);
 
@@ -274,7 +296,9 @@ export function useSmoothMarker(markerRef, position) {
 
 // ─── Main component ───────────────────────────────────────────
 const isValidCoords = (coords) => {
-  return Array.isArray(coords) && coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1]);
+  if (!coords) return false;
+  if (Array.isArray(coords)) return coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1]);
+  return !isNaN(coords.lat) && !isNaN(coords.lng);
 };
 
 export function LiveTrackingViewRaw({ incident, ambulance, socket, onClose }) {
@@ -288,15 +312,19 @@ export function LiveTrackingViewRaw({ incident, ambulance, socket, onClose }) {
   const isCompleted = ['completed', 'resolved'].includes(status?.toLowerCase());
   const isArrivalMode = distance !== null && parseFloat(distance) <= 0.08 && !isCompleted;
 
-  const incidentPos = [31.252243, 75.703131]; // Fixed LPU coordinates
+  const incidentPos = { lat: 31.252243, lng: 75.703131 }; // Fixed LPU coordinates
 
   // ── compute bearing between two GPS points ──
   const calcBearing = useCallback((from, to) => {
-    if (!isValidCoords(from) || !isValidCoords(to)) return 0;
+    const fromLat = from?.lat ?? (Array.isArray(from) ? from[0] : 31.2592);
+    const fromLng = from?.lng ?? (Array.isArray(from) ? from[1] : 75.6980);
+    const toLat = to?.lat ?? (Array.isArray(to) ? to[0] : 31.252243);
+    const toLng = to?.lng ?? (Array.isArray(to) ? to[1] : 75.703131);
+
     const toRad = (d) => (d * Math.PI) / 180;
-    const dLng = toRad(to[1] - from[1]);
-    const lat1 = toRad(from[0]);
-    const lat2 = toRad(to[0]);
+    const dLng = toRad(toLng - fromLng);
+    const lat1 = toRad(fromLat);
+    const lat2 = toRad(toLat);
     const y = Math.sin(dLng) * Math.cos(lat2);
     const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
     return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
@@ -318,9 +346,9 @@ export function LiveTrackingViewRaw({ incident, ambulance, socket, onClose }) {
 
   // Set initial coordinates for active police dispatch
   useEffect(() => {
-    if (!isValidCoords(ambulancePos)) {
-      console.log("[GIS POSITION FALLBACK] Setting police unit fallback coords: [31.2592, 75.6980]");
-      setAmbulancePos([31.2592, 75.6980]);
+    if (!ambulancePos) {
+      console.log("[GIS POSITION FALLBACK] Setting police unit fallback coords: { lat: 31.2592, lng: 75.6980 }");
+      setAmbulancePos({ lat: 31.2592, lng: 75.6980 });
     }
   }, [ambulancePos]);
 
@@ -331,10 +359,10 @@ export function LiveTrackingViewRaw({ incident, ambulance, socket, onClose }) {
       const lng = ambulance.lng || ambulance.currentLocation?.lng;
       if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
         console.log("[GIS POSITION SYNC] Coordinates successfully synced from props:", { lat, lng });
-        setAmbulancePos([lat, lng]);
+        setAmbulancePos({ lat, lng });
       } else {
         console.log("[GIS POSITION SYNC] Coordinates missing or invalid in props, falling back to LPU coords.");
-        setAmbulancePos([31.2592, 75.6980]);
+        setAmbulancePos({ lat: 31.2592, lng: 75.6980 });
       }
     }
   }, [ambulance]);
@@ -352,10 +380,10 @@ export function LiveTrackingViewRaw({ incident, ambulance, socket, onClose }) {
 
     const onLocation = (data) => {
       console.log("[GIS REALTIME RECEIVED] Realtime GPS signal received over socket:", data);
-      const newPos = [data.lat, data.lng];
-      if (isValidCoords(newPos)) {
+      const newPos = { lat: data.lat, lng: data.lng };
+      if (newPos.lat && newPos.lng) {
         setAmbulancePos((prev) => {
-          if (isValidCoords(prev)) setBearing(calcBearing(prev, newPos));
+          if (prev) setBearing(calcBearing(prev, newPos));
           return newPos;
         });
       }
@@ -376,7 +404,7 @@ export function LiveTrackingViewRaw({ incident, ambulance, socket, onClose }) {
     };
   }, [socket, calcBearing]);
 
-  const center = isValidCoords(ambulancePos) ? ambulancePos : incidentPos;
+  const center = ambulancePos ? [ambulancePos.lat, ambulancePos.lng] : [incidentPos.lat, incidentPos.lng];
 
   return (
     <div className="ltv-root" style={{ background: '#030712' }}>
@@ -384,7 +412,7 @@ export function LiveTrackingViewRaw({ incident, ambulance, socket, onClose }) {
         <MapRefSetter setMap={setMapInstance} />
         
         {/* Dynamic Route line */}
-        {isValidCoords(ambulancePos) && (
+        {ambulancePos && (
           <RoutingMachine 
              start={ambulancePos} 
              end={incidentPos} 
@@ -398,7 +426,7 @@ export function LiveTrackingViewRaw({ incident, ambulance, socket, onClose }) {
         {/* Proximity arrival glow ring */}
         {isArrivalMode && (
           <Circle
-            center={incidentPos}
+            center={[incidentPos.lat, incidentPos.lng]}
             radius={80}
             pathOptions={{
               fillColor: '#3b82f6',
@@ -412,17 +440,17 @@ export function LiveTrackingViewRaw({ incident, ambulance, socket, onClose }) {
         )}
 
         {/* Accident Incident pin */}
-        <Marker position={incidentPos} icon={createCitizenIcon()} />
+        <Marker position={[incidentPos.lat, incidentPos.lng]} icon={createCitizenIcon()} />
 
         {/* Responding Police patrol vehicle marker */}
-        {isValidCoords(ambulancePos) && (
+        {ambulancePos && (
           <AmbulanceMarker 
             position={ambulancePos} 
             bearing={bearing} 
           />
         )}
 
-        {isValidCoords(ambulancePos) && (
+        {ambulancePos && (
           <MapFitter
             ambulancePos={ambulancePos}
             incidentPos={incidentPos}
@@ -436,15 +464,15 @@ export function LiveTrackingViewRaw({ incident, ambulance, socket, onClose }) {
           className="ltv-recenter-btn" 
           title="Recenter Map"
           onClick={() => {
-            if (isValidCoords(ambulancePos)) {
+            if (ambulancePos) {
               try {
-                const bounds = L.latLngBounds([ambulancePos, incidentPos]);
+                const bounds = L.latLngBounds([ [ambulancePos.lat, ambulancePos.lng], [incidentPos.lat, incidentPos.lng] ]);
                 mapInstance.flyToBounds(bounds, { padding: [80, 80], maxZoom: 17, duration: 1.5 });
               } catch (_) {
-                mapInstance.flyTo(incidentPos, 16, { duration: 1.5 });
+                mapInstance.flyTo([incidentPos.lat, incidentPos.lng], 16, { duration: 1.5 });
               }
             } else {
-              mapInstance.flyTo(incidentPos, 16, { duration: 1.5 });
+              mapInstance.flyTo([incidentPos.lat, incidentPos.lng], 16, { duration: 1.5 });
             }
           }}
           style={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)' }}

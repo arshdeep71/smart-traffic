@@ -135,6 +135,14 @@ const normalizeImageUrl = (img) => {
   return getSvgFallback(1, "LEGACY");
 };
 
+const parseMongoLocation = (location) => {
+  if (!location || !Array.isArray(location.coordinates) || location.coordinates.length < 2) {
+    return { lat: 31.252243, lng: 75.703131 };
+  }
+  const [lng, lat] = location.coordinates;
+  return { lat, lng };
+};
+
 export const PoliceDashboard = () => {
   const { user } = useContext(AuthContext);
   const [searchParams] = useSearchParams();
@@ -307,7 +315,7 @@ export const PoliceDashboard = () => {
     setIsPoliceFullscreen(true);
 
     // 1. Force state coordinates to start exactly at patrol station
-    setPoliceCoords([31.2592, 75.6980]);
+    setPoliceCoords({ lat: 31.2592, lng: 75.6980 });
 
     // 2. Update backend status to 'Officer En Route'
     api.post(`/accidents/${incidentId}/update-police-status`, { status: 'Officer En Route' })
@@ -361,7 +369,7 @@ export const PoliceDashboard = () => {
       const curLng = startLng + (destLng - startLng) * pct;
       
       console.log(`[POLICE SIMULATOR STEP ${step}] Moving coords to: [${curLat}, ${curLng}], Status: ${statuses[Math.min(step, statuses.length - 1)]}`);
-      setPoliceCoords([curLat, curLng]);
+      setPoliceCoords({ lat: curLat, lng: curLng });
       
       const curStatus = statuses[Math.min(step, statuses.length - 1)];
 
@@ -856,22 +864,19 @@ export const PoliceDashboard = () => {
                 }
 
                 // Phase 2: Hard Render guards
-                const mapCenter = [
-                  selectedIncident?.location?.coordinates?.[1] || 31.252243,
-                  selectedIncident?.location?.coordinates?.[0] || 75.703131
-                ];
+                const citizenCoordinates = parseMongoLocation(selectedIncident?.location);
+                const policeCoordinates = {
+                  lat: policeCoords?.lat || 31.2592,
+                  lng: policeCoords?.lng || 75.6980
+                };
 
-                const citizenCoords = [
-                  selectedIncident?.location?.coordinates?.[1] || 31.252243,
-                  selectedIncident?.location?.coordinates?.[0] || 75.703131
-                ];
+                // Mandatory debug validation log statement
+                console.log("DEBUG VALIDATION:", {
+                  policeCoordinates,
+                  citizenCoordinates
+                });
 
-                const finalPoliceCoords = [
-                  policeCoords?.[0] || 31.2592,
-                  policeCoords?.[1] || 75.6980
-                ];
-
-                if (!selectedIncident || !mapCenter || !citizenCoords || !finalPoliceCoords) {
+                if (!selectedIncident || !citizenCoordinates || !policeCoordinates) {
                   return (
                     <div style={{
                       position: 'absolute',
@@ -901,8 +906,8 @@ export const PoliceDashboard = () => {
                       driverPhone: "+91 99999-99999",
                       vehicleNumber: "PB-08-POLICE",
                       plateNumber: "POLICE-911",
-                      lat: finalPoliceCoords[0],
-                      lng: finalPoliceCoords[1]
+                      lat: policeCoordinates.lat,
+                      lng: policeCoordinates.lng
                     }}
                     socket={socketRef.current}
                   />
@@ -1465,36 +1470,40 @@ export const PoliceDashboard = () => {
                     <MapPin size={16} style={{ color: '#3b82f6' }} /> Live Response Grid Map (LPU Block 38)
                   </div>
                   <div style={{ width: '100%', height: 'calc(100% - 25px)', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <PremiumMap center={[selectedIncident.location?.coordinates?.[1] || 31.2522427094373, selectedIncident.location?.coordinates?.[0] || 75.70313062579577]} zoom={15}>
-                      {/* Incident / Citizen Marker */}
-                      <Marker 
-                        position={[selectedIncident.location?.coordinates?.[1] || 31.2522427094373, selectedIncident.location?.coordinates?.[0] || 75.70313062579577]} 
-                        icon={createLocationPin(selectedIncident.title)}
-                      >
-                        <Popup className="uber-popup">
-                          <div style={{padding:'0.2rem'}}>
-                            <strong>{selectedIncident.title}</strong><br/>
-                            Reporter: {getCitizenDetails(selectedIncident).name}
-                          </div>
-                        </Popup>
-                      </Marker>
+                    {(() => {
+                      const incidentLocation = parseMongoLocation(selectedIncident.location);
+                      const finalPoliceLoc = policeCoords ? [policeCoords.lat, policeCoords.lng] : null;
+                      return (
+                        <PremiumMap center={[incidentLocation.lat, incidentLocation.lng]} zoom={15}>
+                          {/* Incident / Citizen Marker */}
+                          <Marker 
+                            position={[incidentLocation.lat, incidentLocation.lng]} 
+                            icon={createLocationPin(selectedIncident.title)}
+                          >
+                            <Popup className="uber-popup">
+                              <div style={{padding:'0.2rem'}}>
+                                <strong>{selectedIncident.title}</strong><br/>
+                                Reporter: {getCitizenDetails(selectedIncident).name}
+                              </div>
+                            </Popup>
+                          </Marker>
 
-                      {/* Moving Police Unit interpolation */}
-                      {policeCoords && (
-                        <Marker position={policeCoords} icon={createPoliceIcon()}>
-                          <Popup className="uber-popup"><div style={{padding:'0.2rem'}}>Patrol Patrol Unit 08</div></Popup>
-                        </Marker>
-                      )}
+                          {/* Moving Police Unit interpolation */}
+                          {finalPoliceLoc && (
+                            <Marker position={finalPoliceLoc} icon={createPoliceIcon()}>
+                              <Popup className="uber-popup"><div style={{padding:'0.2rem'}}>Patrol Patrol Unit 08</div></Popup>
+                            </Marker>
+                          )}
 
-                      {/* Historical Resolved Case marker at target location */}
-                      {selectedIncident.status?.toLowerCase() === 'resolved' && (
-                        <Marker position={[selectedIncident.location?.coordinates?.[1], selectedIncident.location?.coordinates?.[0]]} icon={createPoliceIcon()}>
-                          <Popup className="uber-popup"><div style={{padding:'0.2rem'}}>Patrol Unit (Investigation Closed)</div></Popup>
-                        </Marker>
-                      )}
-
-
-                    </PremiumMap>
+                          {/* Historical Resolved Case marker at target location */}
+                          {selectedIncident.status?.toLowerCase() === 'resolved' && (
+                            <Marker position={[incidentLocation.lat, incidentLocation.lng]} icon={createPoliceIcon()}>
+                              <Popup className="uber-popup"><div style={{padding:'0.2rem'}}>Patrol Unit (Investigation Closed)</div></Popup>
+                            </Marker>
+                          )}
+                        </PremiumMap>
+                      );
+                    })()}
                   </div>
                 </div>
 
