@@ -313,24 +313,34 @@ export const PoliceDashboard = () => {
     if (!incident) return { name: 'Anonymous Citizen', email: 'citizen@safety.gov', role: 'Citizen', time: '—', userId: '—' };
     
     const u = incident.user || incident.citizen;
-    let res = {};
-    if (u) {
-      res = {
-        name: incident.reporter_name || u.name || 'Anonymous Citizen',
-        email: incident.reporter_email || u.email || 'N/A',
-        role: u.role || 'Citizen',
-        time: new Date(incident.created_at || Date.now()).toLocaleString(),
-        userId: u.id || u._id || incident.user_id || 'N/A'
-      };
-    } else {
-      res = {
-        name: incident.reporter_name || 'Anonymous Citizen',
-        email: incident.reporter_email || 'citizen@safety.gov',
-        role: 'Citizen',
-        time: new Date(incident.created_at || Date.now()).toLocaleString(),
-        userId: incident.user_id || 'N/A'
-      };
+    
+    // 1. Prioritize direct reporter fields from MongoDB first!
+    let name = incident.reporter_name;
+    let email = incident.reporter_email;
+    
+    // 2. Bypasses seed defaults ('Citizen Priya' / 'citizen@traffic.local') if other info is available
+    if (!name || name === 'Citizen Priya') {
+      if (u && u.name && u.name !== 'Citizen Priya') {
+        name = u.name;
+      }
     }
+    if (!email || email === 'citizen@traffic.local') {
+      if (u && u.email && u.email !== 'citizen@traffic.local') {
+        email = u.email;
+      }
+    }
+    
+    // 3. Absolute fallbacks
+    if (!name) name = u?.name || 'Anonymous Citizen';
+    if (!email) email = u?.email || 'citizen@safety.gov';
+    
+    const res = {
+      name,
+      email,
+      role: u?.role || 'Citizen',
+      time: new Date(incident.created_at || Date.now()).toLocaleString(),
+      userId: u?.id || u?._id || incident.user_id || 'N/A'
+    };
 
     console.log("[POLICE DASHBOARD] Parsed Citizen Details for incident:", incident.title, res);
     return res;

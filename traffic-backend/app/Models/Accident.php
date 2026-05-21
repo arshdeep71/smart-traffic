@@ -36,6 +36,8 @@ class Accident extends Model
         'handover_coords',
         'pickup_address',
         'handover_address',
+        'reporter_name',
+        'reporter_email',
     ];
 
     protected $casts = [

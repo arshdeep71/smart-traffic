@@ -134,6 +134,10 @@ class AccidentController extends Controller
             }
         }
 
+        $repName = $request->input('reporter_name');
+        $repEmail = $request->input('reporter_email');
+        \Illuminate\Support\Facades\Log::info("[BACKEND CITIZEN IDENTITY] Received on Request: Name={$repName}, Email={$repEmail}");
+
         $accident = Accident::create([
             'user_id'          => auth()->id(),
             'title'            => $validated['title'],
@@ -148,9 +152,14 @@ class AccidentController extends Controller
             'witness_count'    => $validated['witness_count'] ?? 0,
             'vehicle_involved' => $validated['vehicle_involved'] ?? null,
             'trust_score'      => $validated['trust_score'] ?? 0,
-            'reporter_name'    => $request->input('reporter_name'),
-            'reporter_email'   => $request->input('reporter_email'),
         ]);
+
+        // Explicitly set and save again to force MongoDB persistence
+        $accident->reporter_name = $repName;
+        $accident->reporter_email = $repEmail;
+        $accident->save();
+
+        \Illuminate\Support\Facades\Log::info("[BACKEND CITIZEN IDENTITY] Final saved in MongoDB: Name={$accident->reporter_name}, Email={$accident->reporter_email}");
 
         AuditLog::record('accident_reported', 'accident', $accident->id);
 

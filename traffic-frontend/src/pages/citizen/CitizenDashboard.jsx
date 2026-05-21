@@ -611,14 +611,25 @@ const CitizenDashboard = () => {
       ['title', 'description', 'category', 'severity'].forEach(k => data.append(k, formData[k]));
       data.append('latitude', formData.location.lat); data.append('longitude', formData.location.lng);
       if (user) {
-        data.append('reporter_name', user.name || '');
-        data.append('reporter_email', user.email || '');
+        const nameVal = user.name || user.fullName || 'Citizen User';
+        const emailVal = user.email || '';
+        console.log("[OUTGOING PAYLOAD REPORT] Dynamic Reporter Details:", { nameVal, emailVal, userContext: user });
+        data.append('reporter_name', nameVal);
+        data.append('reporter_email', emailVal);
+      } else {
+        console.warn("[OUTGOING PAYLOAD REPORT] Warning: No user session found in context!");
       }
       if (videoUrl) { const b = await (await fetch(videoUrl)).blob(); data.append('images[]', b, `ev_${Date.now()}.mp4`); }
       for (let i = 0; i < burstPhotos.length; i++) { 
         const b = await (await fetch(burstPhotos[i].dataUrl)).blob(); 
         data.append('images[]', b, `burst_${i}.jpg`); 
       }
+      
+      console.log("[OUTGOING PAYLOAD FULL KEY-VALUE ENTRIES]:");
+      for (let pair of data.entries()) {
+        console.log(`  ${pair[0]}: ${pair[1] instanceof File ? `File (${pair[1].name}, ${pair[1].size} bytes)` : pair[1]}`);
+      }
+
       const res = await api.post('/accidents', data, { headers: { 'Content-Type': 'multipart/form-data' } });
       const accidentData = res.data.data;
       setSubmittedAccident(accidentData);
