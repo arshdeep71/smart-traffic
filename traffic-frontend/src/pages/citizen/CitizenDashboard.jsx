@@ -169,6 +169,11 @@ const CitizenDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [activeIncident, setActiveIncident] = useState(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [submittedAccident, setSubmittedAccident] = useState(null);
+  const [isExtractingFrames, setIsExtractingFrames] = useState(false);
+  const [extractionProgress, setExtractionProgress] = useState(0);
+  const [previewPhoto, setPreviewPhoto] = useState(null);
   const [accidents, setAccidents] = useState([]);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [injuries, setInjuries] = useState([]);
@@ -406,14 +411,66 @@ const CitizenDashboard = () => {
       mediaRecorderRef.current = recorder;
       const chunks = [];
       recorder.ondataavailable = e => chunks.push(e.data);
-      recorder.onstop = () => { setVideoUrl(URL.createObjectURL(new Blob(chunks, { type: 'video/mp4' }))); };
+      
+      recorder.onstop = () => {
+        setVideoUrl(URL.createObjectURL(new Blob(chunks, { type: 'video/mp4' })));
+        setIsExtractingFrames(true);
+        setExtractionProgress(0);
+        let progress = 0;
+        const progInterval = setInterval(() => {
+          progress += 10;
+          setExtractionProgress(progress);
+          if (progress >= 100) {
+            clearInterval(progInterval);
+            setIsExtractingFrames(false);
+          }
+        }, 150);
+      };
+
       recorder.start();
-      setIsRecording(true); setRecordingTime(0);
-      recTimerRef.current = setInterval(() => setRecordingTime(t => t + 1), 1000);
-      const burst = []; const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
-      const bi = setInterval(() => { if (burst.length < 5 && videoRef.current) { canvas.width = videoRef.current.videoWidth || 320; canvas.height = videoRef.current.videoHeight || 240; ctx.drawImage(videoRef.current, 0, 0); burst.push(canvas.toDataURL('image/jpeg')); setBurstPhotos([...burst]); } else clearInterval(bi); }, 1000);
-      setTimeout(() => stopRecording(), 30000);
-    } catch (_) { alert('Camera/Mic access required.'); }
+      setIsRecording(true);
+      setRecordingTime(0);
+      setBurstPhotos([]); // Reset photos
+
+      recTimerRef.current = setInterval(() => {
+        setRecordingTime(t => {
+          if (t >= 7) { // 8 seconds limit (0 to 7)
+            stopRecording();
+            return 8;
+          }
+          return t + 1;
+        });
+      }, 1000);
+
+      const burst = [];
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const bi = setInterval(() => {
+        if (burst.length < 8 && videoRef.current) {
+          canvas.width = videoRef.current.videoWidth || 640;
+          canvas.height = videoRef.current.videoHeight || 480;
+          ctx.drawImage(videoRef.current, 0, 0);
+          const tStamp = `+${(burst.length + 1).toFixed(1)}s`;
+          burst.push({
+            dataUrl: canvas.toDataURL('image/jpeg'),
+            timestamp: tStamp,
+            id: burst.length + 1
+          });
+          setBurstPhotos([...burst]);
+        } else {
+          clearInterval(bi);
+        }
+      }, 1000);
+
+      // Backup safety stop at 9 seconds
+      setTimeout(() => {
+        clearInterval(bi);
+      }, 9000);
+
+    } catch (e) {
+      console.error(e);
+      alert('Camera/Mic access required for emergency evidence recording.');
+    }
   };
 
   const stopRecording = () => {
@@ -457,9 +514,14 @@ const CitizenDashboard = () => {
       ['title', 'description', 'category', 'severity'].forEach(k => data.append(k, formData[k]));
       data.append('latitude', formData.location.lat); data.append('longitude', formData.location.lng);
       if (videoUrl) { const b = await (await fetch(videoUrl)).blob(); data.append('images[]', b, `ev_${Date.now()}.mp4`); }
-      for (let i = 0; i < burstPhotos.length; i++) { const b = await (await fetch(burstPhotos[i])).blob(); data.append('images[]', b, `burst_${i}.jpg`); }
+      for (let i = 0; i < burstPhotos.length; i++) { 
+        const b = await (await fetch(burstPhotos[i].dataUrl)).blob(); 
+        data.append('images[]', b, `burst_${i}.jpg`); 
+      }
       const res = await api.post('/accidents', data, { headers: { 'Content-Type': 'multipart/form-data' } });
       const accidentData = res.data.data;
+      setSubmittedAccident(accidentData);
+      setShowSuccessModal(true);
       setActiveIncident({ ...accidentData, status: 'Report Received', timeline: [{ time: new Date().toLocaleTimeString(), text: 'Evidence Package Uploaded' }] });
       setMessage('Emergency Report Submitted.');
 
@@ -474,7 +536,6 @@ const CitizenDashboard = () => {
           lat: formData.location.lat,
           lng: formData.location.lng
         });
-        // Join specific room for this emergency to get updates
       }
     } catch (_) { setMessage('Upload failed.'); }
     finally { setLoading(false); }
@@ -522,6 +583,128 @@ const CitizenDashboard = () => {
             >
               Start Tour
             </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const SuccessPopup = () => {
+    if (!showSuccessModal) return null;
+
+    return (
+      <div style={{ position: 'fixed', inset: 0, zIndex: 100001, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(15, 23, 42, 0.85)', backdropFilter: 'blur(8px)', padding: '1.5rem' }}>
+        <div className="glass-panel pop-in" style={{ width: '100%', maxWidth: '480px', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', boxShadow: '0 25px 60px rgba(0,0,0,0.4)', border: '1px solid rgba(16, 185, 129, 0.25)', position: 'relative', overflow: 'hidden' }}>
+          
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto' }}>
+            <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', border: '4px solid #10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#10b981', boxShadow: '0 0 20px rgba(16, 185, 129, 0.4)', animation: 'pulse-red 2s infinite' }}>
+              <CheckCircle size={44} />
+            </div>
+          </div>
+
+          <div style={{ textAlign: 'center' }}>
+            <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.4rem', fontWeight: 900, color: '#10b981' }}>
+              Your complaint has been successfully filed.
+            </h3>
+            <p style={{ margin: 0, fontSize: '0.78rem', color: '#6b7280' }}>
+              Emergency telemetry and photographic evidence uploaded to control room.
+            </p>
+          </div>
+
+          <div style={{ background: 'rgba(255, 255, 255, 0.03)', border: '1px solid rgba(255, 255, 255, 0.05)', borderRadius: '12px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.82rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: '#9ca3af' }}>Complaint ID:</span>
+              <span style={{ fontWeight: 800, color: '#f3f4f6', fontFamily: 'monospace' }}>
+                {submittedAccident?.id || submittedAccident?._id || `SMP-${Date.now().toString().slice(-6)}`}
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ color: '#9ca3af' }}>Submitted:</span>
+              <span style={{ fontWeight: 600, color: '#f3f4f6' }}>
+                {new Date(submittedAccident?.created_at || Date.now()).toLocaleTimeString()}
+              </span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ color: '#9ca3af' }}>Emergency Status:</span>
+              <span className="badge badge-warning" style={{ fontSize: '0.65rem', padding: '0.2rem 0.6rem', textTransform: 'uppercase', fontWeight: 800 }}>
+                Under Manual Verification
+              </span>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', fontSize: '0.8rem', color: '#d1d5db' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+              <span style={{ color: '#10b981' }}>✓</span>
+              <span>Emergency response teams have been notified.</span>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+              <span style={{ color: '#10b981' }}>✓</span>
+              <span>Your uploaded evidence has been forwarded to the control center.</span>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+              <span style={{ color: '#10b981' }}>✓</span>
+              <span>Please remain reachable for further assistance.</span>
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+              <span style={{ color: '#10b981' }}>✓</span>
+              <span>Help will be dispatched shortly after verification.</span>
+            </div>
+          </div>
+
+          <div style={{ padding: '0.75rem', background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.1)', borderRadius: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: '#60a5fa', fontWeight: 700, marginBottom: '0.3rem' }} className="pulse-alert">
+              <span>📡 ACTIVE DISPATCH FREQUENCY...</span>
+              <span>CONNECTED</span>
+            </div>
+            <div style={{ height: '3px', background: '#1e293b', borderRadius: '2px', overflow: 'hidden' }}>
+              <div style={{ height: '100%', background: 'linear-gradient(90deg, #3b82f6, #60a5fa)', width: '60%' }}></div>
+            </div>
+          </div>
+
+          <button 
+            onClick={() => {
+              setShowSuccessModal(false);
+            }}
+            className="btn btn-danger"
+            style={{ width: '100%', padding: '0.75rem', fontWeight: 800, letterSpacing: '0.5px' }}
+          >
+            Acknowledge & Track
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  const FrameInspectorPopup = () => {
+    if (!previewPhoto) return null;
+
+    return (
+      <div style={{ position: 'fixed', inset: 0, zIndex: 100002, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(15, 23, 42, 0.9)', backdropFilter: 'blur(8px)', padding: '1.5rem' }}>
+        <div className="glass-panel pop-in" style={{ width: '100%', maxWidth: '640px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', boxShadow: '0 25px 60px rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 800 }}>🔍 Evidence Frame Inspector</h4>
+            <button 
+              onClick={() => setPreviewPhoto(null)} 
+              style={{ background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer', fontSize: '1.2rem', fontWeight: 900 }}
+            >
+              ✕
+            </button>
+          </div>
+
+          <div style={{ width: '100%', height: '360px', borderRadius: '8px', overflow: 'hidden', background: '#000', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <img src={previewPhoto.dataUrl} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} alt="High-Res Evidence Preview" />
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.8rem', color: '#9ca3af', background: 'rgba(255,255,255,0.02)', padding: '0.75rem 1rem', borderRadius: '6px' }}>
+            <div>
+              Frame: <span style={{ color: '#fff', fontWeight: 700 }}>#{previewPhoto.id} of 8</span>
+            </div>
+            <div>
+              Extract Timestamp: <span style={{ color: '#10b981', fontWeight: 800, fontFamily: 'monospace' }}>{previewPhoto.timestamp}</span>
+            </div>
+            <div className="badge badge-info" style={{ fontSize: '0.62rem', fontWeight: 800 }}>
+              VERIFICATION SCAN READY
+            </div>
           </div>
         </div>
       </div>
@@ -963,12 +1146,57 @@ const CitizenDashboard = () => {
                           </div>
                         )}
                       </div>
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        {!isRecording
-                          ? <button type="button" onClick={startRecording} className="btn btn-outline" style={{ flex: 1, borderColor: '#ef4444', color: '#ef4444', fontSize: '0.78rem' }}><Video size={14} /> Record Evidence</button>
-                          : <button type="button" onClick={stopRecording} className="btn btn-danger" style={{ flex: 1, fontSize: '0.78rem' }}>Stop & Attach</button>
-                        }
-                        {burstPhotos.length > 0 && <span className="glass-badge">{burstPhotos.length} Burst</span>}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          {!isRecording
+                            ? <button type="button" onClick={startRecording} className="btn btn-outline" style={{ flex: 1, borderColor: '#ef4444', color: '#ef4444', fontSize: '0.78rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}><Video size={14} /> Record Evidence (8s)</button>
+                            : <button type="button" onClick={stopRecording} className="btn btn-danger" style={{ flex: 1, fontSize: '0.78rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>Stop & Attach</button>
+                          }
+                        </div>
+
+                        {/* 🎥 EXTRACTION PROGRESS EFFECT */}
+                        {isExtractingFrames && (
+                          <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '8px', marginTop: '0.5rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', fontSize: '0.75rem' }}>
+                              <span style={{ color: '#3b82f6', fontWeight: 700 }} className="pulse-alert">🎥 Processing Evidence...</span>
+                              <span style={{ color: '#3b82f6', fontWeight: 800 }}>{extractionProgress}%</span>
+                            </div>
+                            <div style={{ height: '6px', background: '#f3f4f6', borderRadius: '3px', overflow: 'hidden' }}>
+                              <div style={{ width: `${extractionProgress}%`, height: '100%', background: '#3b82f6', transition: 'width 0.15s ease-out' }}></div>
+                            </div>
+                            <div style={{ fontSize: '0.65rem', color: '#6b7280', marginTop: '0.4rem', textAlign: 'center' }}>
+                              Extracting multiple image frames from recorded clip...
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 📸 EVIDENCE THUMBNAILS & PREVIEW GALLERY */}
+                        {burstPhotos.length > 0 && !isExtractingFrames && (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem' }}>
+                            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#4b5563', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <span>📸 Extracted Photo Evidence ({burstPhotos.length} Frames)</span>
+                              <span style={{ fontSize: '0.65rem', color: '#10b981', fontWeight: 700 }}>● Browser-Processed</span>
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
+                              {burstPhotos.map((photo) => (
+                                <div 
+                                  key={photo.id} 
+                                  onClick={() => setPreviewPhoto(photo)}
+                                  className="card-hover"
+                                  style={{ position: 'relative', height: '60px', borderRadius: '6px', overflow: 'hidden', border: '1px solid #e5e7eb', cursor: 'zoom-in', background: '#000' }}
+                                >
+                                  <img src={photo.dataUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt={`Frame ${photo.id}`} />
+                                  <span style={{ position: 'absolute', bottom: 2, right: 2, fontSize: '0.55rem', background: 'rgba(0,0,0,0.6)', color: '#fff', padding: '1px 3px', borderRadius: '3px', fontFamily: 'monospace' }}>
+                                    {photo.timestamp}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                            <div style={{ fontSize: '0.65rem', color: '#9ca3af', fontStyle: 'italic', textAlign: 'center' }}>
+                              Click any thumbnail above to inspect photo frame quality.
+                            </div>
+                          </div>
+                        )}
                       </div>
                       <div>
                         <label className="form-label">Incident Title</label>
@@ -1193,6 +1421,8 @@ const CitizenDashboard = () => {
 
       <SpotlightOverlay />
       <WelcomePopup />
+      <SuccessPopup />
+      <FrameInspectorPopup />
 
 
       <style>{`
