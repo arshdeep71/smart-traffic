@@ -342,11 +342,21 @@ const CitizenDashboard = () => {
         }
       }
 
-      if (['verified', 'police team notified', 'patrol unit dispatched', 'unit en route', 'officers approaching', 'investigation active'].includes(status?.toLowerCase())) {
+      if (['verified', 'police team notified', 'patrol unit dispatched', 'unit en route', 'officers approaching', 'investigation active', 'police assigned', 'officer en route', 'officer nearby', 'officer reached scene'].includes(status?.toLowerCase())) {
         if ('speechSynthesis' in window) {
           const utterance = new SpeechSynthesisUtterance("Police unit dispatched.");
           window.speechSynthesis.speak(utterance);
         }
+        setAssignedAmbulance({
+          driverName: data.officer_name || data.police_name || "Officer Patrol Unit",
+          driverPhone: "+91 99999-99999",
+          vehicleNumber: "PB-08-POLICE",
+          plateNumber: "POLICE-911",
+          currentLocation: {
+            lat: data.lat || 31.2592,
+            lng: data.lng || 75.6980
+          }
+        });
       }
 
       setActiveIncident(prev => {
@@ -408,7 +418,29 @@ const CitizenDashboard = () => {
     try {
       const res = await api.get('/accidents');
       const raw = res.data?.data;
-      setAccidents(Array.isArray(raw) ? raw.slice(0, 5) : Array.isArray(raw?.data) ? raw.data.slice(0, 5) : []);
+      const list = Array.isArray(raw) ? raw : Array.isArray(raw?.data) ? raw.data : [];
+      setAccidents(list.slice(0, 10));
+
+      // Restore active tracking if there's any active police/ambulance case!
+      const active = list.find(a => {
+        const s = a.status?.toLowerCase() || '';
+        return ['pending', 'report received', 'sos received', 'police assigned', 'officer en route', 'officer nearby', 'officer reached scene', 'investigation active', 'police team notified', 'patrol unit dispatched', 'unit en route', 'officers approaching'].includes(s);
+      });
+      if (active) {
+        setActiveIncident(active);
+        const s = active.status?.toLowerCase() || '';
+        const isPolice = s.includes('police') || s.includes('officer') || s.includes('patrol') || s.includes('investigation');
+        setAssignedAmbulance({
+          driverName: isPolice ? "Officer Patrol Unit" : "Assigned Driver",
+          driverPhone: "+91 99999-99999",
+          vehicleNumber: isPolice ? "PB-08-POLICE" : "PB-08-AMB",
+          plateNumber: isPolice ? "POLICE-911" : "AMB-001",
+          currentLocation: {
+            lat: active.police_live_location?.[1] || 31.2592,
+            lng: active.police_live_location?.[0] || 75.6980
+          }
+        });
+      }
     } catch (_) { }
   };
 

@@ -11,9 +11,15 @@ function getInitials(name = "") {
 }
 
 export default function DriverSheet({ ambulance, incident }) {
-  const driverName   = ambulance?.driverName    || ambulance?.driver?.name    || "Assigned Driver";
-  const hospitalName = ambulance?.hospitalName  || ambulance?.hospital?.name  || "City Hospital";
-  const plateNumber  = ambulance?.ambulanceNumber || ambulance?.vehicleNumber || ambulance?.plateNumber || "AMB-0000";
+  const isPolice = incident?.status?.toLowerCase().includes('police') || 
+                   incident?.status?.toLowerCase().includes('officer') || 
+                   ambulance?.vehicleNumber?.toLowerCase().includes('police') || 
+                   ambulance?.plateNumber?.toLowerCase().includes('police') ||
+                   ambulance?.driverName?.toLowerCase().includes('officer');
+
+  const driverName   = ambulance?.driverName    || ambulance?.driver?.name    || (isPolice ? "Officer Patrol Unit" : "Assigned Driver");
+  const hospitalName = ambulance?.hospitalName  || ambulance?.hospital?.name  || (isPolice ? "LPU Traffic Command Center" : "City Hospital");
+  const plateNumber  = ambulance?.ambulanceNumber || ambulance?.vehicleNumber || ambulance?.plateNumber || (isPolice ? "POLICE-911" : "AMB-0000");
   const phone        = ambulance?.driverPhone   || ambulance?.driver?.phone   || null;
 
   const handleCall = () => {
@@ -30,10 +36,10 @@ export default function DriverSheet({ ambulance, incident }) {
       <div className="ltv-sheet">
         <div className="ltv-sheet-handle" />
 
-        {/* Ambulance info */}
+        {/* Ambulance/Police info */}
         <div className="ltv-sheet-header">
           <div className="ltv-ambulance-badge">
-            <div className="ltv-ambulance-icon-wrap">🚑</div>
+            <div className="ltv-ambulance-icon-wrap">{isPolice ? "🚔" : "🚑"}</div>
             <div className="ltv-ambulance-meta">
               <span className="ltv-ambulance-num">{plateNumber}</span>
               <span className="ltv-hospital-name">{hospitalName}</span>
@@ -54,16 +60,16 @@ export default function DriverSheet({ ambulance, incident }) {
 
         <div className="ltv-divider" />
 
-        {/* Driver row */}
+        {/* Driver/Officer row */}
         <div className="ltv-driver-row">
           <div className="ltv-avatar">{getInitials(driverName)}</div>
           <div className="ltv-driver-info">
             <div className="ltv-driver-name">{driverName}</div>
-            <div className="ltv-driver-role">Emergency Medical Technician</div>
+            <div className="ltv-driver-role">{isPolice ? "Police Patrol Officer" : "Emergency Medical Technician"}</div>
           </div>
           <div className="ltv-rating">
             <span className="ltv-star">★</span>
-            4.9
+            {isPolice ? "5.0" : "4.9"}
           </div>
         </div>
       </div>

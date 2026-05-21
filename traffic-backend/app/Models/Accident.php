@@ -38,6 +38,12 @@ class Accident extends Model
         'handover_address',
         'reporter_name',
         'reporter_email',
+        'assigned_police_id',
+        'police_live_location',
+        'tracking_active',
+        'police_status',
+        'ETA',
+        'tracking_session_id',
     ];
 
     protected $casts = [

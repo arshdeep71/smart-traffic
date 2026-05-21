@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { AuthContext } from '../../context/AuthContext';
 import { Marker, Popup } from 'react-leaflet';
 import api from '../../services/api';
 import { PremiumMap } from '../../components/LiveTracking/LiveTrackingView';
@@ -74,6 +75,7 @@ const normalizeImageUrl = (img) => {
 };
 
 export const PoliceDashboard = () => {
+  const { user } = useContext(AuthContext);
   const [searchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'complaints';
 
@@ -88,6 +90,11 @@ export const PoliceDashboard = () => {
   const [timelineStep, setTimelineStep] = useState(0); 
   const [policeCoords, setPoliceCoords] = useState(null);
   const timelineInterval = useRef(null);
+
+  // Live Tracking States
+  const [isTrackingActive, setIsTrackingActive] = useState(false);
+  const [policeGpsWatcher, setPoliceGpsWatcher] = useState(null);
+  const [policeHeading, setPoliceHeading] = useState(0);
 
   // Socket Connection
   const socketRef = useRef(null);
@@ -137,21 +144,280 @@ export const PoliceDashboard = () => {
   useEffect(() => {
     if (selectedIncident) {
       const statusLower = selectedIncident.status?.toLowerCase() || '';
+      
+      // Auto-enable live tracking UI if case is already accepted/active
+      if (selectedIncident.tracking_active || ['police assigned', 'officer en route', 'officer nearby', 'officer reached scene', 'investigation active'].includes(statusLower)) {
+        setIsTrackingActive(true);
+        setPoliceCoords(prev => prev || [selectedIncident.police_live_location?.[1] || 31.2592, selectedIncident.police_live_location?.[0] || 75.6980]);
+      } else {
+        setIsTrackingActive(false);
+      }
+
       if (statusLower.includes('active') || statusLower.includes('investigation') || statusLower.includes('approaching') || statusLower.includes('route') || statusLower.includes('dispatched') || statusLower.includes('notified')) {
         setTimelineStep(5);
         const lat = selectedIncident.location?.coordinates?.[1] || 31.2522427094373;
         const lng = selectedIncident.location?.coordinates?.[0] || 75.70313062579577;
-        setPoliceCoords([lat, lng]);
+        setPoliceCoords(prev => prev || [lat, lng]);
       } else {
         setTimelineStep(0);
-        setPoliceCoords(null);
       }
     } else {
       setTimelineStep(0);
       setPoliceCoords(null);
+      setIsTrackingActive(false);
       if (timelineInterval.current) clearInterval(timelineInterval.current);
     }
   }, [selectedIncident]);
+
+  const handleAcceptPolice = async (incidentId) => {
+    setUpdatingStatus(true);
+    try {
+      const res = await api.post(`/accidents/${incidentId}/accept-police`);
+      const updatedIncident = res.data?.data;
+      if (updatedIncident) {
+        setAccidents(prev => prev.map(a => (a.id === updatedIncident.id || a._id === updatedIncident._id) ? { ...a, ...updatedIncident } : a));
+        setSelectedIncident(updatedIncident);
+        setIsTrackingActive(true);
+        setPoliceCoords([31.2592, 75.6980]); // Set initial patrol station coords
+
+        // Broadcast status update
+        if (socketRef.current) {
+          socketRef.current.emit('emergency-status-updated', {
+            emergencyId: incidentId,
+            status: 'Police Assigned',
+            officer_name: user?.name || "Officer Patrol Unit",
+            lat: 31.2592,
+            lng: 75.6980
+          });
+        }
+        alert('Emergency accepted! Fullscreen tactical command map activated.');
+      }
+    } catch (e) {
+      alert('Accepting incident failed.');
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  const startPoliceNavigation = () => {
+    if (!selectedIncident) return;
+    const incidentId = selectedIncident.id || selectedIncident._id;
+
+    // 1. Update backend status to 'Officer En Route'
+    api.post(`/accidents/${incidentId}/update-police-status`, { status: 'Officer En Route' })
+      .then(res => {
+        const updated = res.data?.data;
+        if (updated) {
+          setAccidents(prev => prev.map(a => (a.id === updated.id || a._id === updated._id) ? { ...a, ...updated } : a));
+          setSelectedIncident(updated);
+        }
+      });
+      
+    // Broadcast status to citizen
+    if (socketRef.current) {
+      socketRef.current.emit('emergency-status-updated', {
+        emergencyId: incidentId,
+        status: 'Officer En Route',
+        officer_name: user?.name || "Officer Patrol Unit",
+        lat: policeCoords?.[0] || 31.2592,
+        lng: policeCoords?.[1] || 75.6980
+      });
+    }
+
+    // 2. Continuous high-accuracy Geolocation Watcher
+    if (navigator.geolocation) {
+      console.log("[POLICE WATCH] Starting live high-accuracy GPS watch...");
+      const watchId = navigator.geolocation.watchPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          const heading = pos.coords.heading || 0;
+          setPoliceCoords([lat, lng]);
+          setPoliceHeading(heading);
+          
+          // Send to backend
+          api.post(`/accidents/${incidentId}/update-police-location`, { latitude: lat, longitude: lng, heading })
+            .catch(() => {});
+            
+          // Broadcast to citizen
+          if (socketRef.current) {
+            socketRef.current.emit('ambulance-gps', {
+              emergencyId: incidentId,
+              lat,
+              lng,
+              driverId: 'police-patrol'
+            });
+          }
+        },
+        (err) => {
+          console.warn("[POLICE WATCH] Geolocation watch permission denied or failed, launching LPU fallback simulation...", err.message);
+          startDemoFallbackSimulation(incidentId);
+        },
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+      );
+      setPoliceGpsWatcher(watchId);
+    } else {
+      console.warn("[POLICE WATCH] Geolocation not supported, launching LPU fallback simulation...");
+      startDemoFallbackSimulation(incidentId);
+    }
+  };
+
+  const startDemoFallbackSimulation = (incidentId) => {
+    // 5-step path interpolation from LPU Police starting coordinates to citizen location
+    const startLat = 31.2592;
+    const startLng = 75.6980;
+    const destLat = 31.252243;
+    const destLng = 75.703131;
+    
+    let step = 0;
+    const statuses = [
+      'Officer En Route',
+      'Officer En Route',
+      'Officer Nearby',
+      'Officer Reached Scene',
+      'Investigation Active'
+    ];
+    
+    if (timelineInterval.current) clearInterval(timelineInterval.current);
+    
+    timelineInterval.current = setInterval(() => {
+      step += 1;
+      const pct = Math.min(step / 4, 1);
+      const curLat = startLat + (destLat - startLat) * pct;
+      const curLng = startLng + (destLng - startLng) * pct;
+      setPoliceCoords([curLat, curLng]);
+      
+      const curStatus = statuses[Math.min(step, statuses.length - 1)];
+
+      // Send to backend
+      api.post(`/accidents/${incidentId}/update-police-location`, { latitude: curLat, longitude: curLng, heading: 0 })
+        .catch(() => {});
+        
+      if (step === 3 || step === 4) {
+        api.post(`/accidents/${incidentId}/update-police-status`, { status: curStatus })
+          .then(res => {
+            const updated = res.data?.data;
+            if (updated) {
+              setAccidents(prev => prev.map(a => (a.id === updated.id || a._id === updated._id) ? { ...a, ...updated } : a));
+              setSelectedIncident(updated);
+            }
+          });
+      }
+
+      // Broadcast coordinates
+      if (socketRef.current) {
+        socketRef.current.emit('ambulance-gps', {
+          emergencyId: incidentId,
+          lat: curLat,
+          lng: curLng,
+          driverId: 'police-patrol'
+        });
+        
+        socketRef.current.emit('emergency-status-updated', {
+          emergencyId: incidentId,
+          status: curStatus,
+          lat: curLat,
+          lng: curLng
+        });
+      }
+
+      if (step >= 4) {
+        clearInterval(timelineInterval.current);
+      }
+    }, 6000);
+  };
+
+  const handleReachedScene = async () => {
+    if (!selectedIncident) return;
+    const incidentId = selectedIncident.id || selectedIncident._id;
+    setUpdatingStatus(true);
+    try {
+      if (policeGpsWatcher) {
+        navigator.geolocation.clearWatch(policeGpsWatcher);
+        setPoliceGpsWatcher(null);
+      }
+      if (timelineInterval.current) clearInterval(timelineInterval.current);
+
+      const res = await api.post(`/accidents/${incidentId}/update-police-status`, { status: 'Officer Reached Scene' });
+      const updatedIncident = res.data?.data;
+      if (updatedIncident) {
+        setAccidents(prev => prev.map(a => (a.id === updatedIncident.id || a._id === updatedIncident._id) ? { ...a, ...updatedIncident } : a));
+        setSelectedIncident(updatedIncident);
+        
+        // Broadcast socket status
+        if (socketRef.current) {
+          socketRef.current.emit('emergency-status-updated', {
+            emergencyId: incidentId,
+            status: 'Officer Reached Scene'
+          });
+        }
+      }
+    } catch (e) {
+      alert('Failed to update status.');
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  const handleInvestigationStarted = async () => {
+    if (!selectedIncident) return;
+    const incidentId = selectedIncident.id || selectedIncident._id;
+    setUpdatingStatus(true);
+    try {
+      const res = await api.post(`/accidents/${incidentId}/update-police-status`, { status: 'Investigation Active' });
+      const updatedIncident = res.data?.data;
+      if (updatedIncident) {
+        setAccidents(prev => prev.map(a => (a.id === updatedIncident.id || a._id === updatedIncident._id) ? { ...a, ...updatedIncident } : a));
+        setSelectedIncident(updatedIncident);
+        
+        // Broadcast socket status
+        if (socketRef.current) {
+          socketRef.current.emit('emergency-status-updated', {
+            emergencyId: incidentId,
+            status: 'Investigation Active'
+          });
+        }
+      }
+    } catch (e) {
+      alert('Failed to update status.');
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  const handleCloseIncident = async () => {
+    if (!selectedIncident) return;
+    const incidentId = selectedIncident.id || selectedIncident._id;
+    setUpdatingStatus(true);
+    try {
+      if (policeGpsWatcher) {
+        navigator.geolocation.clearWatch(policeGpsWatcher);
+        setPoliceGpsWatcher(null);
+      }
+      if (timelineInterval.current) clearInterval(timelineInterval.current);
+
+      const res = await api.put(`/accidents/${incidentId}`, { status: 'resolved' });
+      const updatedIncident = res.data?.data;
+      if (updatedIncident) {
+        setAccidents(prev => prev.map(a => (a.id === updatedIncident.id || a._id === updatedIncident._id) ? { ...a, ...updatedIncident } : a));
+        setSelectedIncident(null);
+        setIsTrackingActive(false);
+        
+        // Broadcast socket status
+        if (socketRef.current) {
+          socketRef.current.emit('emergency-status-updated', {
+            emergencyId: incidentId,
+            status: 'completed'
+          });
+        }
+        alert('Case resolved and logged in history archive.');
+      }
+    } catch (e) {
+      alert('Failed to close case.');
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
 
   // Dynamic dispatch status timeline simulator with real-time socket broadcasting
   const startPoliceDispatch = async (incidentId) => {
@@ -492,7 +758,166 @@ export const PoliceDashboard = () => {
         {/* RIGHT COLUMN: ACTIVE INVESTIGATION CONSOLE & EVIDENCE INSPECTOR */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           
-          {!selectedIncident ? (
+          {isTrackingActive && selectedIncident ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              
+              {/* TACTICAL HEADER & SUMMARY */}
+              <div className="glass-panel" style={{ padding: '1.5rem', background: '#090d16', border: '1px solid #3b82f6', borderRadius: '12px', boxShadow: '0 0 20px rgba(59, 130, 246, 0.15)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.75rem', marginBottom: '0.75rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span className="badge badge-danger pulse-alert" style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', background: '#ef4444', color: '#fff', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
+                      📡 LIVE TELEMETRY STREAM
+                    </span>
+                    <span style={{ fontSize: '0.65rem', fontWeight: 800, color: '#6b7280', fontFamily: 'monospace' }}>
+                      CASE: {selectedIncident.id || selectedIncident._id}
+                    </span>
+                  </div>
+                  <button 
+                    onClick={() => setIsTrackingActive(false)}
+                    style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '4px', padding: '0.2rem 0.6rem', color: '#9ca3af', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 800 }}
+                  >
+                    Minimize HUD
+                  </button>
+                </div>
+                
+                <h3 style={{ margin: 0, color: '#fff', fontSize: '1.2rem', fontWeight: 900 }}>
+                  🚨 {selectedIncident.title}
+                </h3>
+
+                {/* Citizen Details Block */}
+                <div style={{ background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '8px', padding: '0.85rem', marginTop: '0.85rem' }}>
+                  <div style={{ fontSize: '0.62rem', color: '#3b82f6', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.4rem' }}>
+                    👤 Dynamic Citizen Identity Logs
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '0.6rem', fontSize: '0.76rem', color: '#cbd5e1' }}>
+                    <div>Reporter: <strong style={{ color: '#fff' }}>{getCitizenDetails(selectedIncident).name}</strong></div>
+                    <div>Contact: <span style={{ color: '#3b82f6' }}>{getCitizenDetails(selectedIncident).email}</span></div>
+                    <div>UID: <span style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: '#10b981' }}>{getCitizenDetails(selectedIncident).userId}</span></div>
+                    <div>Role: <span style={{ color: '#fff', fontWeight: 700 }}>{getCitizenDetails(selectedIncident).role}</span></div>
+                  </div>
+                </div>
+
+                {/* Navigation Status HUD */}
+                <div style={{ marginTop: '1rem', background: '#040810', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '8px', padding: '0.85rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.7rem', color: '#64748b', fontWeight: 800, marginBottom: '0.4rem' }}>
+                    <span>PATROL UNIT STATE</span>
+                    <span style={{ color: '#10b981' }} className="animate-pulse">● SIGNAL CONNECTED</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1rem', fontWeight: 900, color: '#fff' }}>
+                    🚔 {selectedIncident.status}
+                  </div>
+                  {policeCoords && (
+                    <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem', fontSize: '0.72rem', color: '#94a3b8', fontFamily: 'monospace' }}>
+                      <div>Lat: {policeCoords[0].toFixed(6)}</div>
+                      <div>Lng: {policeCoords[1].toFixed(6)}</div>
+                      <div>Heading: {policeHeading.toFixed(1)}°</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* TACTICAL MAP */}
+              <div className="glass-panel" style={{ padding: '1rem', background: '#090d16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', height: '380px' }}>
+                <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#fff', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <MapPin size={16} style={{ color: '#ef4444' }} /> LIVE RESPONSE VEHICLE TACTICAL GRID
+                </div>
+                <div style={{ width: '100%', height: 'calc(100% - 25px)', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <PremiumMap center={[31.252243, 75.703131]} zoom={15}>
+                    {/* Fixed Citizen Marker */}
+                    <Marker position={[31.252243, 75.703131]} icon={createLocationPin(selectedIncident.title)}>
+                      <Popup className="uber-popup">
+                        <div style={{ padding: '0.2rem' }}>
+                          <strong>{selectedIncident.title}</strong><br/>
+                          Reporter: {getCitizenDetails(selectedIncident).name}
+                        </div>
+                      </Popup>
+                    </Marker>
+                    {/* Moving Police Marker */}
+                    {policeCoords && (
+                      <Marker position={policeCoords} icon={createPoliceIcon()}>
+                        <Popup className="uber-popup">
+                          <div style={{ padding: '0.2rem' }}>
+                            <strong>Patrol Officer:</strong> {user?.name || "Patrol Unit"}<br/>
+                            Status: {selectedIncident.status}
+                          </div>
+                        </Popup>
+                      </Marker>
+                    )}
+                  </PremiumMap>
+                </div>
+              </div>
+
+              {/* EVIDENCE PHOTO STRIP */}
+              <div className="glass-panel" style={{ padding: '1rem', background: '#090d16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px' }}>
+                <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#fff', marginBottom: '0.75rem' }}>
+                  📸 Multi-Evidence Photo Burst Strip
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.4rem' }}>
+                  {(selectedIncident.images || []).filter(img => !img.endsWith('.mp4')).slice(0, 4).map((img, i) => (
+                    <div 
+                      key={i} 
+                      onClick={() => setPreviewPhoto({ url: normalizeImageUrl(img), index: i + 1, timestamp: `+${(i+1).toFixed(1)}s` })}
+                      style={{ height: '55px', borderRadius: '4px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.06)', cursor: 'zoom-in' }}
+                    >
+                      <img src={normalizeImageUrl(img)} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.src = getSvgFallback(i + 1); }} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* COMMAND ACTION BUTTONS */}
+              <div style={{ display: 'flex', gap: '0.75rem', background: '#090d16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '1rem' }}>
+                {selectedIncident.status?.toLowerCase() === 'police assigned' && (
+                  <button 
+                    onClick={startPoliceNavigation}
+                    className="btn btn-primary"
+                    style={{ flex: 1, padding: '0.8rem', fontSize: '0.85rem', fontWeight: 800, background: '#3b82f6', border: 'none', color: '#fff', borderRadius: 8, cursor: 'pointer' }}
+                  >
+                    🛰️ Start Active Navigation
+                  </button>
+                )}
+
+                {selectedIncident.status?.toLowerCase() === 'officer en route' && (
+                  <button 
+                    onClick={handleReachedScene}
+                    className="btn btn-warning"
+                    style={{ flex: 1, padding: '0.8rem', fontSize: '0.85rem', fontWeight: 800, background: '#f59e0b', border: 'none', color: '#000', borderRadius: 8, cursor: 'pointer' }}
+                  >
+                    🏁 Mark: Reached Scene
+                  </button>
+                )}
+
+                {['officer en route', 'officer nearby', 'officer reached scene'].includes(selectedIncident.status?.toLowerCase()) && (
+                  <button 
+                    onClick={handleInvestigationStarted}
+                    className="btn btn-outline"
+                    style={{ flex: 1, padding: '0.8rem', fontSize: '0.85rem', fontWeight: 800, borderColor: '#8b5cf6', color: '#8b5cf6', background: 'transparent', border: '1px solid #8b5cf6', borderRadius: 8, cursor: 'pointer' }}
+                  >
+                    🔍 Start Investigation
+                  </button>
+                )}
+
+                {['officer reached scene', 'investigation active'].includes(selectedIncident.status?.toLowerCase()) && (
+                  <button 
+                    onClick={handleCloseIncident}
+                    className="btn btn-danger"
+                    style={{ flex: 1, padding: '0.8rem', fontSize: '0.85rem', fontWeight: 800, background: '#ef4444', border: 'none', color: '#fff', borderRadius: 8, cursor: 'pointer' }}
+                  >
+                    🔒 Close & Resolve Incident
+                  </button>
+                )}
+
+                <button 
+                  onClick={() => setIsTrackingActive(false)}
+                  className="btn btn-outline"
+                  style={{ padding: '0.8rem', fontSize: '0.8rem', fontWeight: 800, borderColor: 'rgba(255,255,255,0.15)', color: '#9ca3af', background: 'transparent', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8, cursor: 'pointer' }}
+                >
+                  Exit HUD
+                </button>
+              </div>
+
+            </div>
+          ) : !selectedIncident ? (
             <div className="glass-panel" style={{ padding: '3.5rem 2rem', background: '#090d16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.25rem', height: '100%', minHeight: '480px', textAlign: 'center' }}>
               <div className="pulse-alert" style={{ width: '70px', height: '70px', borderRadius: '50%', background: 'rgba(59,130,246,0.05)', border: '2px solid rgba(59,130,246,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3b82f6' }}>
                 <ShieldAlert size={34} />
@@ -741,6 +1166,29 @@ export const PoliceDashboard = () => {
               {/* ACTION COMMAND CONTROLS */}
               <div style={{ display: 'flex', gap: '1rem', background: '#090d16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '1rem' }}>
                 
+                {/* 🚔 NEW SYNCED ACCCEPT BUTTON */}
+                {['pending', 'report received', 'sos received', 'verified', 'police team notified', 'patrol unit dispatched', 'unit en route', 'officers approaching'].includes(selectedIncident.status?.toLowerCase()) && (
+                  <button 
+                    onClick={() => handleAcceptPolice(selectedIncident.id || selectedIncident._id)}
+                    disabled={updatingStatus}
+                    className="btn btn-primary animate-pulse"
+                    style={{ 
+                      flex: 1, 
+                      padding: '0.75rem', 
+                      fontSize: '0.85rem', 
+                      fontWeight: 900, 
+                      background: 'linear-gradient(135deg, #1d4ed8, #2563eb)', 
+                      boxShadow: '0 0 15px rgba(37, 99, 235, 0.4)', 
+                      color: '#fff', 
+                      border: 'none', 
+                      borderRadius: 8, 
+                      cursor: 'pointer' 
+                    }}
+                  >
+                    🚔 Accept Case & Start Tactical Tracking
+                  </button>
+                )}
+
                 {selectedIncident.status?.toLowerCase() === 'pending' && (
                   <button 
                     onClick={() => handleVerify(selectedIncident.id || selectedIncident._id)}
@@ -749,31 +1197,6 @@ export const PoliceDashboard = () => {
                     style={{ flex: 1, borderColor: '#f59e0b', color: '#f59e0b', padding: '0.75rem', fontSize: '0.8rem', fontWeight: 800 }}
                   >
                     ✓ Start Manual Review
-                  </button>
-                )}
-
-                {selectedIncident.status?.toLowerCase() !== 'resolved' && selectedIncident.status?.toLowerCase() !== 'rejected' && (
-                  <button 
-                    onClick={() => startPoliceDispatch(selectedIncident.id || selectedIncident._id)}
-                    disabled={updatingStatus || timelineStep > 0}
-                    className="btn btn-primary"
-                    style={{ 
-                      flex: 1, 
-                      padding: '0.75rem', 
-                      fontSize: '0.8rem', 
-                      fontWeight: 800, 
-                      background: timelineStep > 0 ? 'rgba(59, 130, 246, 0.2)' : '#3b82f6', 
-                      color: timelineStep > 0 ? '#64748b' : '#fff', 
-                      border: 'none', 
-                      borderRadius: 8, 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center', 
-                      gap: '0.4rem', 
-                      cursor: timelineStep > 0 ? 'not-allowed' : 'pointer' 
-                    }}
-                  >
-                    <Shield size={14} /> {timelineStep > 0 ? 'Patrol Units Dispatched' : 'Dispatch Police Unit'}
                   </button>
                 )}
 

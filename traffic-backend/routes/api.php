@@ -54,6 +54,9 @@ Route::middleware(['auth:sanctum', 'check.status'])->group(function () {
             Route::post('/{id}/verify',  [AccidentController::class, 'verify']);
             Route::post('/{id}/resolve', [AccidentController::class, 'resolve']);
             Route::post('/{id}/reject',  [AccidentController::class, 'reject']);
+            Route::post('/{id}/accept-police',  [AccidentController::class, 'acceptPolice']);
+            Route::post('/{id}/update-police-location',  [AccidentController::class, 'updatePoliceLocation']);
+            Route::post('/{id}/update-police-status',  [AccidentController::class, 'updatePoliceStatus']);
         });
     });
 

@@ -322,4 +322,91 @@ class AccidentController extends Controller
             'data'    => $accident->fresh(),
         ]);
     }
+
+    // POST /api/accidents/{id}/accept-police (Police only)
+    public function acceptPolice(string $id): JsonResponse
+    {
+        $accident = Accident::findOrFail($id);
+        
+        \Illuminate\Support\Facades\Log::info("[POLICE TRACKING] Accepting case: {$id} by User: " . auth()->id());
+
+        $accident->status = 'Police Assigned';
+        $accident->assigned_police_id = auth()->id();
+        $accident->tracking_active = true;
+        $accident->police_status = 'Police Assigned';
+        $accident->ETA = 5;
+        $accident->tracking_session_id = uniqid('pol_track_');
+        // Initial location set to LPU Police Point [lng, lat]
+        $accident->police_live_location = [75.6980, 31.2592];
+        $accident->save();
+
+        \Illuminate\Support\Facades\Log::info("[POLICE TRACKING] Case accepted successfully! Session: " . $accident->tracking_session_id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Accident accepted by Police Patrol.',
+            'data'    => $accident->fresh(),
+        ]);
+    }
+
+    // POST /api/accidents/{id}/update-police-location (Police only)
+    public function updatePoliceLocation(Request $request, string $id): JsonResponse
+    {
+        $request->validate([
+            'latitude'  => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'heading'   => 'nullable|numeric',
+        ]);
+
+        $accident = Accident::findOrFail($id);
+        
+        \Illuminate\Support\Facades\Log::info("[POLICE TRACKING] Received Live Coordinates for Case {$id}: Lat={$request->latitude}, Lng={$request->longitude}");
+
+        $accident->police_live_location = [ (float)$request->longitude, (float)$request->latitude ];
+        
+        // Simple dynamic ETA calculation based on distance to LPU Block 38
+        $destLat = 31.252243;
+        $destLng = 75.703131;
+        $dist = sqrt(pow($request->latitude - $destLat, 2) + pow($request->longitude - $destLng, 2)) * 111.32; // rough distance in km
+        $accident->ETA = max(1, round($dist * 2)); // roughly 2 min per km
+        
+        $accident->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Police live location updated.',
+            'data'    => $accident->fresh(),
+        ]);
+    }
+
+    // POST /api/accidents/{id}/update-police-status (Police only)
+    public function updatePoliceStatus(Request $request, string $id): JsonResponse
+    {
+        $request->validate([
+            'status' => 'required|string',
+        ]);
+
+        $accident = Accident::findOrFail($id);
+        
+        \Illuminate\Support\Facades\Log::info("[POLICE TRACKING] Update status for Case {$id} to: {$request->status}");
+
+        $accident->police_status = $request->status;
+        
+        // Sync the general accident status to match
+        if (in_array(strtolower($request->status), ['officer en route', 'officer nearby', 'officer reached scene', 'investigation active'])) {
+            $accident->status = $request->status;
+        }
+
+        if (strtolower($request->status) === 'officer reached scene') {
+            $accident->reached_scene_time = now()->toTimeString();
+        }
+
+        $accident->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Police tracking status updated.',
+            'data'    => $accident->fresh(),
+        ]);
+    }
 }
