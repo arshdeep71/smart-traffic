@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import api from '../../services/api';
 import { connectSocket, socket } from '../../services/socket';
-import { AlertTriangle, MapPin, Camera, Video, Loader2, Zap, Activity, UserCheck, Smartphone, Package, Navigation, Compass, CheckCircle, XCircle, Shield } from 'lucide-react';
+import { AlertTriangle, MapPin, Camera, Video, Loader2, Zap, Activity, UserCheck, Smartphone, Package, Navigation, Compass, CheckCircle, XCircle, Shield, ShieldAlert } from 'lucide-react';
 import { Marker, Popup, Circle } from 'react-leaflet';
 import { PremiumMap, AmbulanceMarker } from '../../components/LiveTracking/LiveTrackingView';
 import { createLocationPin } from '../../components/LiveTracking/mapIcons';
