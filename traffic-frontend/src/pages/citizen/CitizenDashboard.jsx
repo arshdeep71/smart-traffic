@@ -309,8 +309,8 @@ const CitizenDashboard = () => {
 
   // Hook 3: Socket Event Handlers (Using locationRef to stay completely decoupled from GPS jitter)
   useEffect(() => {
-    connectSocket({ role: 'citizen' });
-    if (!socket) return;
+    const s = connectSocket({ role: 'citizen' });
+    if (!s) return;
 
     const handleAssigned = (data) => {
       setAssignedAmbulance(data);
@@ -318,13 +318,34 @@ const CitizenDashboard = () => {
     };
 
     const handleGps = (data) => {
-      setAmbLocation([data.lat, data.lng]);
+      const lat = data.lat;
+      const lng = data.lng;
+      
+      console.log("[CITIZEN REALTIME GPS] Live dispatch GPS coordinates received:", lat, lng);
+      setAmbLocation([lat, lng]);
+
+      // Dynamically update assignedAmbulance currentLocation so map updates instantly
+      setAssignedAmbulance(prev => {
+        if (!prev) {
+          return {
+            driverName: "Officer Patrol Unit",
+            driverPhone: "+91 99999-99999",
+            vehicleNumber: "PB-08-POLICE",
+            plateNumber: "POLICE-911",
+            currentLocation: { lat, lng }
+          };
+        }
+        return {
+          ...prev,
+          currentLocation: { lat, lng }
+        };
+      });
 
       // Auto Arrival Detection (Uses ref to get latest position without re-triggering useEffect)
       const currentLoc = locationRef.current;
       if (currentLoc) {
-        const dLat = Math.abs(data.lat - currentLoc.lat);
-        const dLng = Math.abs(data.lng - currentLoc.lng);
+        const dLat = Math.abs(lat - currentLoc.lat);
+        const dLng = Math.abs(lng - currentLoc.lng);
         if (dLat < 0.0003 && dLng < 0.0003) {
           setActiveIncident(prev => prev ? { ...prev, status: 'Ambulance Arrived' } : prev);
         } else if (dLat < 0.001 && dLng < 0.001) {
@@ -335,6 +356,7 @@ const CitizenDashboard = () => {
 
     const handleStatusUpdated = (data) => {
       const { status } = data;
+      console.log("[CITIZEN REALTIME STATUS] Live status update received:", status, data);
 
       if (status === 'completed' || status === 'resolved' || status?.toLowerCase() === 'resolved') {
         setIsSOS(false);
@@ -386,21 +408,22 @@ const CitizenDashboard = () => {
       });
     };
 
-    socket.on('ambulance-assigned', handleAssigned);
-    socket.on('ambulance-gps', handleGps);
-    socket.on('emergency-status-updated', handleStatusUpdated);
+    s.on('ambulance-assigned', handleAssigned);
+    s.on('ambulance-gps', handleGps);
+    s.on('emergency-status-updated', handleStatusUpdated);
 
     return () => {
-      socket.off('ambulance-assigned', handleAssigned);
-      socket.off('ambulance-gps', handleGps);
-      socket.off('emergency-status-updated', handleStatusUpdated);
+      s.off('ambulance-assigned', handleAssigned);
+      s.off('ambulance-gps', handleGps);
+      s.off('emergency-status-updated', handleStatusUpdated);
     };
-  }, [socket, formData.location]);
+  }, [formData.location]);
 
   // EMIT LIVE CITIZEN GPS
   useEffect(() => {
-    if (activeIncident && formData.location && socket?.connected) {
-      socket.emit('citizen-gps', {
+    const s = socket;
+    if (activeIncident && formData.location && s?.connected) {
+      s.emit('citizen-gps', {
         incidentId: activeIncident._id || activeIncident.id,
         lat: formData.location.lat,
         lng: formData.location.lng
@@ -408,15 +431,28 @@ const CitizenDashboard = () => {
     }
   }, [formData.location, activeIncident]);
 
-  // AUTO REGISTER SOCKET ROOM FOR ANY ACTIVE/HISTORIC INCIDENTS
+  // AUTO REGISTER SOCKET ROOM FOR ANY ACTIVE/HISTORIC INCIDENTS (CONNECTION-AWARE PIPELINE)
   useEffect(() => {
-    if (activeIncident && socket?.connected) {
+    const s = socket;
+    if (!s || !activeIncident) return;
+
+    const registerRoom = () => {
       const eId = activeIncident._id || activeIncident.id;
       if (eId) {
-        socket.emit('register-citizen', { role: 'citizen', emergencyId: eId });
+        console.log("[SOCKET ROOM REGISTER] Dynamic room sign-on verified for emergency ID:", eId);
+        s.emit('register-citizen', { role: 'citizen', emergencyId: eId });
       }
+    };
+
+    if (s.connected) {
+      registerRoom();
     }
-  }, [activeIncident, socket?.connected]);
+    s.on('connect', registerRoom);
+
+    return () => {
+      s.off('connect', registerRoom);
+    };
+  }, [activeIncident]);
 
   // RESOLUTION COUNTDOWN AUTOMATED EXIT PIPELINE
   useEffect(() => {

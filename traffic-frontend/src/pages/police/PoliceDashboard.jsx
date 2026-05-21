@@ -187,14 +187,27 @@ export const PoliceDashboard = () => {
     };
   }, []);
 
-  // Auto register socket room for the selected incident
+  // Auto register socket room for the selected incident (Connection-Aware Pipeline)
   useEffect(() => {
-    if (selectedIncident && socketRef.current) {
+    const s = socketRef.current;
+    if (!selectedIncident || !s) return;
+
+    const registerRoom = () => {
       const eId = selectedIncident.id || selectedIncident._id;
       if (eId) {
-        socketRef.current.emit('register-citizen', { role: 'traffic_police', emergencyId: eId });
+        console.log("[POLICE SOCKET ROOM REGISTER] Dynamic room sign-on verified for emergency ID:", eId);
+        s.emit('register-citizen', { role: 'traffic_police', emergencyId: eId });
       }
+    };
+
+    if (s.connected) {
+      registerRoom();
     }
+    s.on('connect', registerRoom);
+
+    return () => {
+      s.off('connect', registerRoom);
+    };
   }, [selectedIncident]);
 
   const fetchAccidents = async () => {
