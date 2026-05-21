@@ -171,6 +171,14 @@ const CitizenDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [activeIncident, setActiveIncident] = useState(null);
+  const [forceMapOpen, setForceMapOpen] = useState(false);
+
+  // Reset forceMapOpen when activeIncident is cleared
+  useEffect(() => {
+    if (!activeIncident) {
+      setForceMapOpen(false);
+    }
+  }, [activeIncident]);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [submittedAccident, setSubmittedAccident] = useState(null);
   const [isExtractingFrames, setIsExtractingFrames] = useState(false);
@@ -369,6 +377,8 @@ const CitizenDashboard = () => {
       }
 
       if (['verified', 'police team notified', 'patrol unit dispatched', 'unit en route', 'officers approaching', 'investigation active', 'police assigned', 'officer en route', 'officer nearby', 'officer reached scene'].includes(status?.toLowerCase())) {
+        console.log("[CITIZEN AUTO MAP OPEN] Dispatch event matches police assignment! Closing waiting screen, forcing tactical map edge-to-edge.");
+        setForceMapOpen(true);
         if ('speechSynthesis' in window) {
           const utterance = new SpeechSynthesisUtterance("Police unit dispatched.");
           window.speechSynthesis.speak(utterance);
@@ -1109,7 +1119,7 @@ const CitizenDashboard = () => {
     );
   }
 
-  const isWaiting = activeIncident && ['pending', 'report received', 'sos received'].includes(activeIncident.status?.toLowerCase());
+  const isWaiting = activeIncident && ['pending', 'report received', 'sos received'].includes(activeIncident.status?.toLowerCase()) && !forceMapOpen;
 
   return (
     <div className={`fade-in ${emergencyMode ? 'emergency-mode-active' : ''}`} style={{ padding: '0 1rem' }}>

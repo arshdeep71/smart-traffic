@@ -280,9 +280,10 @@ export const PoliceDashboard = () => {
         setIsTrackingActive(true);
         setPoliceCoords([31.2592, 75.6980]); // Set initial patrol station coords
 
-        // Broadcast status update
+        // Broadcast status update via update-emergency-status
         if (socketRef.current) {
-          socketRef.current.emit('emergency-status-updated', {
+          console.log("[POLICE REALTIME EVENT] Emitting update-emergency-status: Police Assigned");
+          socketRef.current.emit('update-emergency-status', {
             emergencyId: incidentId,
             status: 'Police Assigned',
             officer_name: user?.name || "Officer Patrol Unit",
@@ -317,7 +318,8 @@ export const PoliceDashboard = () => {
       
     // Broadcast status to citizen
     if (socketRef.current) {
-      socketRef.current.emit('emergency-status-updated', {
+      console.log("[POLICE REALTIME EVENT] Emitting update-emergency-status: Officer En Route");
+      socketRef.current.emit('update-emergency-status', {
         emergencyId: incidentId,
         status: 'Officer En Route',
         officer_name: user?.name || "Officer Patrol Unit",
@@ -326,14 +328,25 @@ export const PoliceDashboard = () => {
       });
     }
 
-    // 2. Continuous high-accuracy Geolocation Watcher
+    // 2. Start Demo Simulation IMMEDIATELY so we do not wait for timeouts
+    console.log("[POLICE DISPATCH] Initiating immediate LPU demo simulation fallback...");
+    startDemoFallbackSimulation(incidentId);
+
+    // 3. Optional continuous Geolocation Watcher
     if (navigator.geolocation) {
-      console.log("[POLICE WATCH] Starting live high-accuracy GPS watch...");
+      console.log("[POLICE WATCH] Monitoring optional live high-accuracy GPS watch...");
       const watchId = navigator.geolocation.watchPosition(
         (pos) => {
           const lat = pos.coords.latitude;
           const lng = pos.coords.longitude;
           const heading = pos.coords.heading || 0;
+          
+          console.log("[POLICE GPS watchPosition] Live coordinates received, taking over from demo simulation:", lat, lng);
+          if (timelineInterval.current) {
+            clearInterval(timelineInterval.current);
+            timelineInterval.current = null;
+          }
+          
           setPoliceCoords([lat, lng]);
           setPoliceHeading(heading);
           
@@ -341,26 +354,24 @@ export const PoliceDashboard = () => {
           api.post(`/accidents/${incidentId}/update-police-location`, { latitude: lat, longitude: lng, heading })
             .catch(() => {});
             
-          // Broadcast to citizen
+          // Broadcast to citizen via gps-update
           if (socketRef.current) {
-            socketRef.current.emit('ambulance-gps', {
+            console.log("[POLICE REALTIME EVENT] Emitting gps-update via watchPosition:", lat, lng);
+            socketRef.current.emit('gps-update', {
               emergencyId: incidentId,
+              driverId: 'police-patrol',
               lat,
               lng,
-              driverId: 'police-patrol'
+              heading
             });
           }
         },
         (err) => {
-          console.warn("[POLICE WATCH] Geolocation watch permission denied or failed, launching LPU fallback simulation...", err.message);
-          startDemoFallbackSimulation(incidentId);
+          console.warn("[POLICE WATCH] Geolocation watch permission denied or failed: ", err.message);
         },
-        { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
       );
       setPoliceGpsWatcher(watchId);
-    } else {
-      console.warn("[POLICE WATCH] Geolocation not supported, launching LPU fallback simulation...");
-      startDemoFallbackSimulation(incidentId);
     }
   };
 
@@ -387,6 +398,8 @@ export const PoliceDashboard = () => {
       const pct = Math.min(step / 4, 1);
       const curLat = startLat + (destLat - startLat) * pct;
       const curLng = startLng + (destLng - startLng) * pct;
+      
+      console.log(`[POLICE SIMULATOR STEP ${step}] Moving coords to: [${curLat}, ${curLng}], Status: ${statuses[Math.min(step, statuses.length - 1)]}`);
       setPoliceCoords([curLat, curLng]);
       
       const curStatus = statuses[Math.min(step, statuses.length - 1)];
@@ -406,16 +419,18 @@ export const PoliceDashboard = () => {
           });
       }
 
-      // Broadcast coordinates
+      // Broadcast coordinates via gps-update and status via update-emergency-status
       if (socketRef.current) {
-        socketRef.current.emit('ambulance-gps', {
+        console.log("[POLICE SIMULATOR SOCKET] Emitting gps-update and update-emergency-status...");
+        socketRef.current.emit('gps-update', {
           emergencyId: incidentId,
           lat: curLat,
           lng: curLng,
-          driverId: 'police-patrol'
+          driverId: 'police-patrol',
+          heading: 0
         });
         
-        socketRef.current.emit('emergency-status-updated', {
+        socketRef.current.emit('update-emergency-status', {
           emergencyId: incidentId,
           status: curStatus,
           lat: curLat,
@@ -446,9 +461,10 @@ export const PoliceDashboard = () => {
         setAccidents(prev => prev.map(a => (a.id === updatedIncident.id || a._id === updatedIncident._id) ? { ...a, ...updatedIncident } : a));
         setSelectedIncident(updatedIncident);
         
-        // Broadcast socket status
+        // Broadcast socket status via update-emergency-status
         if (socketRef.current) {
-          socketRef.current.emit('emergency-status-updated', {
+          console.log("[POLICE REALTIME EVENT] Emitting update-emergency-status: Officer Reached Scene");
+          socketRef.current.emit('update-emergency-status', {
             emergencyId: incidentId,
             status: 'Officer Reached Scene'
           });
@@ -472,9 +488,10 @@ export const PoliceDashboard = () => {
         setAccidents(prev => prev.map(a => (a.id === updatedIncident.id || a._id === updatedIncident._id) ? { ...a, ...updatedIncident } : a));
         setSelectedIncident(updatedIncident);
         
-        // Broadcast socket status
+        // Broadcast socket status via update-emergency-status
         if (socketRef.current) {
-          socketRef.current.emit('emergency-status-updated', {
+          console.log("[POLICE REALTIME EVENT] Emitting update-emergency-status: Investigation Active");
+          socketRef.current.emit('update-emergency-status', {
             emergencyId: incidentId,
             status: 'Investigation Active'
           });
@@ -506,9 +523,10 @@ export const PoliceDashboard = () => {
         setIsTrackingActive(false);
         setIsPoliceFullscreen(false);
         
-        // Broadcast socket status
+        // Broadcast socket status via update-emergency-status
         if (socketRef.current) {
-          socketRef.current.emit('emergency-status-updated', {
+          console.log("[POLICE REALTIME EVENT] Emitting update-emergency-status: completed");
+          socketRef.current.emit('update-emergency-status', {
             emergencyId: incidentId,
             status: 'completed'
           });
