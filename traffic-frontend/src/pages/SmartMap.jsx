@@ -42,8 +42,9 @@ const SmartMap = () => {
   const [signals, setSignals] = useState([]);
   const [greenCorridors, setGreenCorridors] = useState([]);
 
-  // Default center (New York roughly, or fallback to 0,0 if no data)
-  const [center, setCenter] = useState([40.7128, -74.0060]);
+  // Default center (LPU Block 38)
+  // TEMPORARY DEMO LOCATION OVERRIDE
+  const [center, setCenter] = useState([31.2522427094373, 75.70313062579577]);
 
   const fetchData = async () => {
     try {
@@ -70,11 +71,13 @@ const SmartMap = () => {
       setUnits(unitData);
       
       if (accData.length > 0 && accData[0].location?.coordinates) {
-        const [lng, lat] = accData[0].location.coordinates;
-        setCenter([lat, lng]);
+        // TEMPORARY DEMO LOCATION OVERRIDE: Ensure center is always LPU Block 38
+        const forcedLat = 31.2522427094373;
+        const forcedLng = 75.70313062579577;
+        setCenter([forcedLat, forcedLng]);
 
         // Generate dynamic AI heatmap around the center
-        generateOperationalData(lat, lng, accData, unitData);
+        generateOperationalData(forcedLat, forcedLng, accData, unitData);
       }
     } catch (error) {
       console.error("Error fetching map data:", error);

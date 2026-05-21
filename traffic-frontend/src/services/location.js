@@ -43,42 +43,8 @@ export const fetchIpLocation = async (timeoutMs = 2000) => {
  * D. Final emergency-safe fallback: LPU Block 38.
  */
 export const resolveStartingLocation = async (role = 'citizen') => {
-  const latKey = `${role}_lat`;
-  const lngKey = `${role}_lng`;
-  const accKey = `${role}_accuracy`;
-
-  // B. Last successful cached coordinates
-  const cachedLat = localStorage.getItem(latKey) || localStorage.getItem('citizen_lat') || localStorage.getItem('driver_lat');
-  const cachedLng = localStorage.getItem(lngKey) || localStorage.getItem('citizen_lng') || localStorage.getItem('driver_lng');
-  const cachedAcc = localStorage.getItem(accKey) || localStorage.getItem('citizen_accuracy') || localStorage.getItem('driver_accuracy');
-
-  if (cachedLat && cachedLng) {
-    console.log(`[Location Service] Using cached location for ${role}: ${cachedLat}, ${cachedLng}`);
-    return {
-      lat: parseFloat(cachedLat),
-      lng: parseFloat(cachedLng),
-      accuracy: parseFloat(cachedAcc || '15'),
-      isFallback: false,
-      isIp: false,
-      label: "Cached Location"
-    };
-  }
-
-  // C. IP Location
-  const ipLoc = await fetchIpLocation();
-  if (ipLoc) {
-    return {
-      lat: ipLoc.lat,
-      lng: ipLoc.lng,
-      accuracy: ipLoc.accuracy,
-      isFallback: true,
-      isIp: true,
-      label: "Approximate IP Location"
-    };
-  }
-
-  // D. Final emergency-safe fallback: LPU Block 38
-  console.log(`[Location Service] Using final emergency fallback: LPU Block 38`);
+  // TEMPORARY DEMO LOCATION OVERRIDE
+  console.log(`[TEMPORARY DEMO LOCATION OVERRIDE] resolveStartingLocation forced to LPU Block 38 for role: ${role}`);
   return {
     lat: LPU_FALLBACK.lat,
     lng: LPU_FALLBACK.lng,

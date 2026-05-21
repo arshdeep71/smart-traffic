@@ -543,6 +543,8 @@ export default function LiveTrackingView({ incident, ambulance, socket, citizenL
 
   // Handle Arrival Mode map zoom to street-level
   useEffect(() => {
+    // TEMPORARY DEMO LOCATION OVERRIDE: Disable automatic live browser GPS recentering temporarily for showcase stability.
+    /*
     if (isArrivalMode && mapInstance && incidentPos) {
       mapInstance.flyTo(incidentPos, 18, {
         animate: true,
@@ -550,6 +552,7 @@ export default function LiveTrackingView({ incident, ambulance, socket, citizenL
         easeLinearity: 0.2
       });
     }
+    */
   }, [isArrivalMode, mapInstance, incidentPos]);
 
   // ── Socket listeners ──────────────────────────────────────────────────────
