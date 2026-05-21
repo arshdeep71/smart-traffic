@@ -306,7 +306,10 @@ export const PoliceDashboard = () => {
     const incidentId = selectedIncident.id || selectedIncident._id;
     setIsPoliceFullscreen(true);
 
-    // 1. Update backend status to 'Officer En Route'
+    // 1. Force state coordinates to start exactly at patrol station
+    setPoliceCoords([31.2592, 75.6980]);
+
+    // 2. Update backend status to 'Officer En Route'
     api.post(`/accidents/${incidentId}/update-police-status`, { status: 'Officer En Route' })
       .then(res => {
         const updated = res.data?.data;
@@ -318,61 +321,19 @@ export const PoliceDashboard = () => {
       
     // Broadcast status to citizen
     if (socketRef.current) {
-      console.log("[POLICE REALTIME EVENT] Emitting update-emergency-status: Officer En Route");
+      console.log("[POLICE REALTIME EVENT] Emitting update-emergency-status: Officer En Route starting at LPU station");
       socketRef.current.emit('update-emergency-status', {
         emergencyId: incidentId,
         status: 'Officer En Route',
         officer_name: user?.name || "Officer Patrol Unit",
-        lat: policeCoords?.[0] || 31.2592,
-        lng: policeCoords?.[1] || 75.6980
+        lat: 31.2592,
+        lng: 75.6980
       });
     }
 
-    // 2. Start Demo Simulation IMMEDIATELY so we do not wait for timeouts
-    console.log("[POLICE DISPATCH] Initiating immediate LPU demo simulation fallback...");
+    // 3. Start Demo Simulation IMMEDIATELY so we do not wait for timeouts or use raw browser GPS
+    console.log("[POLICE DISPATCH] Initiating immediate LPU demo simulation from station...");
     startDemoFallbackSimulation(incidentId);
-
-    // 3. Optional continuous Geolocation Watcher
-    if (navigator.geolocation) {
-      console.log("[POLICE WATCH] Monitoring optional live high-accuracy GPS watch...");
-      const watchId = navigator.geolocation.watchPosition(
-        (pos) => {
-          const lat = pos.coords.latitude;
-          const lng = pos.coords.longitude;
-          const heading = pos.coords.heading || 0;
-          
-          console.log("[POLICE GPS watchPosition] Live coordinates received, taking over from demo simulation:", lat, lng);
-          if (timelineInterval.current) {
-            clearInterval(timelineInterval.current);
-            timelineInterval.current = null;
-          }
-          
-          setPoliceCoords([lat, lng]);
-          setPoliceHeading(heading);
-          
-          // Send to backend
-          api.post(`/accidents/${incidentId}/update-police-location`, { latitude: lat, longitude: lng, heading })
-            .catch(() => {});
-            
-          // Broadcast to citizen via gps-update
-          if (socketRef.current) {
-            console.log("[POLICE REALTIME EVENT] Emitting gps-update via watchPosition:", lat, lng);
-            socketRef.current.emit('gps-update', {
-              emergencyId: incidentId,
-              driverId: 'police-patrol',
-              lat,
-              lng,
-              heading
-            });
-          }
-        },
-        (err) => {
-          console.warn("[POLICE WATCH] Geolocation watch permission denied or failed: ", err.message);
-        },
-        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-      );
-      setPoliceGpsWatcher(watchId);
-    }
   };
 
   const startDemoFallbackSimulation = (incidentId) => {
@@ -1532,12 +1493,7 @@ export const PoliceDashboard = () => {
                         </Marker>
                       )}
 
-                      {/* Ambulance marker if dispatched */}
-                      {(selectedIncident.status?.toLowerCase().includes('dispatch') || selectedIncident.status?.toLowerCase().includes('notified')) && (
-                        <Marker position={[selectedIncident.location?.coordinates?.[1] - 0.0008, selectedIncident.location?.coordinates?.[0] + 0.0008]} icon={createAmbulanceIcon()}>
-                          <Popup className="uber-popup"><div style={{padding:'0.2rem'}}>Ambulance Unit 14</div></Popup>
-                        </Marker>
-                      )}
+
                     </PremiumMap>
                   </div>
                 </div>

@@ -322,7 +322,7 @@ const CitizenDashboard = () => {
 
     const handleAssigned = (data) => {
       setAssignedAmbulance(data);
-      setActiveIncident(prev => prev ? { ...prev, status: 'Ambulance En Route' } : prev);
+      setActiveIncident(prev => prev ? { ...prev, status: 'Officer En Route' } : prev);
     };
 
     const handleGps = (data) => {
@@ -355,9 +355,9 @@ const CitizenDashboard = () => {
         const dLat = Math.abs(lat - currentLoc.lat);
         const dLng = Math.abs(lng - currentLoc.lng);
         if (dLat < 0.0003 && dLng < 0.0003) {
-          setActiveIncident(prev => prev ? { ...prev, status: 'Ambulance Arrived' } : prev);
+          setActiveIncident(prev => prev ? { ...prev, status: 'Officer Reached Scene' } : prev);
         } else if (dLat < 0.001 && dLng < 0.001) {
-          setActiveIncident(prev => prev ? { ...prev, status: 'Ambulance Nearby' } : prev);
+          setActiveIncident(prev => prev ? { ...prev, status: 'Officer Nearby' } : prev);
         }
       }
     };

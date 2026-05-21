@@ -3,20 +3,23 @@ import { motion, AnimatePresence } from "framer-motion";
 import "./LiveTrackingView.css";
 
 const STATUS_MAP = {
-  assigned: { label: "Driver assigned — en route to you", dot: "assigned" },
-  enroute:  { label: "Ambulance is on the way",           dot: "enroute"  },
-  nearby:   { label: "Ambulance is nearby",               dot: "nearby"   },
-  arrived:  { label: "Help has arrived",                  dot: "arrived"  },
+  assigned: { label: "Police Unit Assigned — en route to you", dot: "assigned" },
+  enroute:  { label: "Officer is on the way",           dot: "enroute"  },
+  nearby:   { label: "Officer is nearby",               dot: "nearby"   },
+  arrived:  { label: "Officers have reached scene",     dot: "arrived"  },
   
-  "ambulance en route": { label: "Driver assigned — en route to you", dot: "enroute" },
-  "ambulance nearby":   { label: "Ambulance is nearby — prepare for arrival", dot: "nearby" },
-  "ambulance arrived":  { label: "Ambulance has arrived at your location", dot: "arrived" },
-  "arrived_scene":      { label: "Ambulance has arrived at scene", dot: "arrived" },
-  "patient_picked":     { label: "Patient secured safely — preparing transit", dot: "arrived" },
-  "patient secured":    { label: "Patient secured — navigating to hospital", dot: "arrived" },
-  "transporting_to_hospital": { label: "Emergency transport active — heading to hospital", dot: "enroute" },
-  "reached_hospital":   { label: "Arrived at hospital medical bay", dot: "arrived" },
-  "completed":          { label: "Emergency response completed successfully", dot: "arrived" },
+  "police assigned": { label: "Police Unit Assigned — en route to you", dot: "enroute" },
+  "officer en route": { label: "Officer is en route to you", dot: "enroute" },
+  "officer nearby":   { label: "Officer is nearby — prepare for arrival", dot: "nearby" },
+  "officer reached scene":  { label: "Officers have reached scene", dot: "arrived" },
+  
+  "ambulance en route": { label: "Officer is en route to you", dot: "enroute" },
+  "ambulance nearby":   { label: "Officer is nearby — prepare for arrival", dot: "nearby" },
+  "ambulance arrived":  { label: "Officers have reached scene", dot: "arrived" },
+  "arrived_scene":      { label: "Officers have reached scene", dot: "arrived" },
+  "investigation active": { label: "Perimeter secured — investigation active", dot: "arrived" },
+  "completed":          { label: "Police response completed successfully", dot: "arrived" },
+  "resolved":           { label: "Police response completed successfully", dot: "arrived" }
 };
 
 export default function StatusBanner({ status }) {
