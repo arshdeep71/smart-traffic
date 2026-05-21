@@ -4,7 +4,9 @@ const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
 
 export const socket = io(SOCKET_URL, {
   autoConnect: false, // Connect manually when authenticated
+  transports: ['websocket'],
 });
+
 
 // Store current role to re-register on reconnect
 let currentRoleData = null;
@@ -16,6 +18,7 @@ export const connectSocket = (roleData) => {
   }
 
   if (!socket.connected) {
+    console.log("[Socket] Connecting to real-time engine:", SOCKET_URL);
     socket.connect();
   }
   
