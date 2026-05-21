@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import { Marker, Popup } from 'react-leaflet';
 import api from '../../services/api';
-import { PremiumMap } from '../../components/LiveTracking/LiveTrackingView';
+import LiveTrackingView, { PremiumMap } from '../../components/LiveTracking/LiveTrackingView';
 import { createLocationPin, createAmbulanceIcon, createPoliceIcon } from '../../components/LiveTracking/mapIcons';
 import { connectSocket } from '../../services/socket';
 import L from 'leaflet';
@@ -12,6 +12,81 @@ import {
   Activity, Phone, ExternalLink, ShieldCheck, Eye, Compass, RefreshCw, X, Radio, Server, ShieldAlert,
   Film, FileText, CheckCircle2, ChevronRight, ZoomIn
 } from 'lucide-react';
+
+class TacticalErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("[TACTICAL MAP ERROR]", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: '#090d16',
+          border: '2px dashed rgba(239, 68, 68, 0.4)',
+          borderRadius: '16px',
+          padding: '2.5rem 2rem',
+          color: '#fff',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          textAlign: 'center',
+          gap: '1.25rem',
+          fontFamily: 'monospace',
+          zIndex: 999999
+        }}>
+          <span style={{ fontSize: '2.5rem', animation: 'pulse 1.5s infinite' }}>📡</span>
+          <h3 style={{ margin: 0, color: '#ef4444', fontSize: '1.1rem', fontWeight: 900 }}>
+            Emergency Navigation System Recovering...
+          </h3>
+          <p style={{ margin: 0, fontSize: '0.78rem', color: '#94a3b8', maxWidth: '380px', lineHeight: 1.5 }}>
+            A telemetry parsing or rendering error occurred. Attempting to re-synchronize tracking coordinates.
+          </p>
+          <div style={{
+            background: '#030712',
+            padding: '0.75rem 1rem',
+            borderRadius: '8px',
+            fontSize: '0.7rem',
+            color: '#ef4444',
+            maxWidth: '100%',
+            overflowX: 'auto',
+            border: '1px solid rgba(239, 68, 68, 0.1)'
+          }}>
+            {this.state.error?.toString() || "Unknown Telemetry Error"}
+          </div>
+          <button 
+            onClick={() => this.setState({ hasError: false, error: null })}
+            style={{
+              padding: '0.6rem 1.25rem',
+              background: '#3b82f6',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              fontWeight: 800,
+              cursor: 'pointer',
+              fontSize: '0.75rem'
+            }}
+          >
+            Force Sync GIS Coordinates
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const getSvgFallback = (index = 1, timestamp = "+1.0s") => {
   return `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='640' height='360' viewBox='0 0 640 360'>
@@ -96,6 +171,22 @@ export const PoliceDashboard = () => {
   const [policeGpsWatcher, setPoliceGpsWatcher] = useState(null);
   const [policeHeading, setPoliceHeading] = useState(0);
   const [isPoliceFullscreen, setIsPoliceFullscreen] = useState(false);
+  const [isMapMounted, setIsMapMounted] = useState(false);
+
+  // Staged initialization timer to prevent Leaflet mount during DOM sizing updates
+  useEffect(() => {
+    if (isPoliceFullscreen) {
+      console.log("[TACTICAL TRANSITION STAGE] Fullscreen active. Initializing staged map mount delay...");
+      setIsMapMounted(false);
+      const timer = setTimeout(() => {
+        setIsMapMounted(true);
+        console.log("[TACTICAL TRANSITION STAGE] Staged delay completed. Mounting GIS map canvas.");
+      }, 500);
+      return () => clearTimeout(timer);
+    } else {
+      setIsMapMounted(false);
+    }
+  }, [isPoliceFullscreen]);
 
   // Socket Connection
   const socketRef = useRef(null);
@@ -700,19 +791,97 @@ export const PoliceDashboard = () => {
           </div>
 
           {/* Center Area: Fullscreen Map */}
-          <div style={{ flex: 1, position: 'relative' }}>
-            <LiveTrackingView
-              incident={selectedIncident}
-              ambulance={{
-                driverName: user?.name || "Officer Patrol Unit",
-                driverPhone: "+91 99999-99999",
-                vehicleNumber: "PB-08-POLICE",
-                plateNumber: "POLICE-911",
-                lat: policeCoords?.[0] || 31.2592,
-                lng: policeCoords?.[1] || 75.6980
-              }}
-              socket={socketRef.current}
-            />
+          <div style={{ flex: 1, position: 'relative', height: '100%', width: '100%' }}>
+            <TacticalErrorBoundary>
+              {(() => {
+                // Console logging diagnostics before rendering the map
+                console.log("[TACTICAL MAP DIAGNOSTICS]", {
+                  selectedIncident,
+                  policeCoords,
+                  isPoliceFullscreen,
+                  isMapMounted,
+                  socketConnected: !!socketRef.current?.connected
+                });
+
+                // Phase 1: Wait for staged state (staged loader animation overlay)
+                if (!isMapMounted) {
+                  return (
+                    <div style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: '#040810',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '1rem',
+                      zIndex: 9999
+                    }}>
+                      <div className="pulse-alert" style={{ fontSize: '2.5rem', animation: 'pulse 1s infinite' }}>🛰️</div>
+                      <div style={{ color: '#fff', fontSize: '0.9rem', fontWeight: 800, letterSpacing: '0.05em' }}>
+                        INITIALIZING SECURE GNSS TACTICAL UPLINK...
+                      </div>
+                      <div style={{ color: '#6b7280', fontSize: '0.72rem' }}>
+                        Synchronizing real-time tracking session variables & stabilizing container bounds
+                      </div>
+                    </div>
+                  );
+                }
+
+                // Phase 2: Hard Render guards
+                const mapCenter = [
+                  selectedIncident?.location?.coordinates?.[1] || 31.252243,
+                  selectedIncident?.location?.coordinates?.[0] || 75.703131
+                ];
+
+                const citizenCoords = [
+                  selectedIncident?.location?.coordinates?.[1] || 31.252243,
+                  selectedIncident?.location?.coordinates?.[0] || 75.703131
+                ];
+
+                const finalPoliceCoords = [
+                  policeCoords?.[0] || 31.2592,
+                  policeCoords?.[1] || 75.6980
+                ];
+
+                if (!selectedIncident || !mapCenter || !citizenCoords || !finalPoliceCoords) {
+                  return (
+                    <div style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: '#040810',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '1rem'
+                    }}>
+                      <div style={{ color: '#ef4444', fontSize: '0.9rem', fontWeight: 800 }}>
+                        TELEMETRY FAULT: GPS COORDINATES INCOMPATIBLE
+                      </div>
+                      <div style={{ color: '#6b7280', fontSize: '0.72rem' }}>
+                        Re-acquiring lock on satellite coordinates...
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <LiveTrackingView
+                    incident={selectedIncident}
+                    ambulance={{
+                      driverName: user?.name || "Officer Patrol Unit",
+                      driverPhone: "+91 99999-99999",
+                      vehicleNumber: "PB-08-POLICE",
+                      plateNumber: "POLICE-911",
+                      lat: finalPoliceCoords[0],
+                      lng: finalPoliceCoords[1]
+                    }}
+                    socket={socketRef.current}
+                  />
+                );
+              })()}
+            </TacticalErrorBoundary>
 
             {/* Tactical overlay floating sidebar */}
             <div style={{
