@@ -21,10 +21,17 @@ export const AmbulanceDashboard = () => {
   const emergencyRef = useRef(null); // Ref to access latest emergency inside watchPosition
   
   // Real-time GPS & Telemetry
-  const [location, setLocation] = useState(null);
+  const savedLat = localStorage.getItem('driver_lat');
+  const savedLng = localStorage.getItem('driver_lng');
+  const savedAcc = localStorage.getItem('driver_accuracy');
+  const initialLocation = savedLat && savedLng ? [parseFloat(savedLat), parseFloat(savedLng)] : null;
+
+  const [location, setLocation] = useState(initialLocation);
+  const [locationPermissionState, setLocationPermissionState] = useState(initialLocation ? 'granted' : 'prompt');
+  
   const [speed, setSpeed] = useState(0);
   const [heading, setHeading] = useState(0);
-  const [gpsAccuracy, setGpsAccuracy] = useState(0);
+  const [gpsAccuracy, setGpsAccuracy] = useState(initialLocation ? parseFloat(savedAcc || '10') : 0);
   const [networkStatus, setNetworkStatus] = useState('online');
   
   // Real-time Broadcast State
@@ -52,6 +59,77 @@ export const AmbulanceDashboard = () => {
       setPastTrips(history.slice(0, 10)); // Last 10 trips
     } catch(e) {}
   };
+
+  const startRealGps = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      setLocationPermissionState('denied');
+      return;
+    }
+
+    console.log("[GPS] Starting real-time ambulance driver GPS watch...");
+    const watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const spd = pos.coords.speed ? Math.round(pos.coords.speed * 3.6) : 0; // m/s to km/h
+        const hd = pos.coords.heading || 0;
+        
+        console.log(`[GPS] Driver GPS watch update: lat=${lat}, lng=${lng}, accuracy=${pos.coords.accuracy}m, speed=${spd} km/h`);
+        setLocation([lat, lng]);
+        setSpeed(spd > 0 ? spd : 0);
+        setHeading(hd);
+        setGpsAccuracy(Math.floor(pos.coords.accuracy));
+        setLocationPermissionState('granted');
+
+        localStorage.setItem('driver_lat', lat.toString());
+        localStorage.setItem('driver_lng', lng.toString());
+        localStorage.setItem('driver_accuracy', pos.coords.accuracy.toString());
+
+        // Emit Live GPS via Socket! (Ensure continuous telemetry sync when active emergency is present)
+        const currentEmerg = emergencyRef.current;
+        if (socket?.connected && currentEmerg) {
+          console.log(`[GPS] Syncing driver live telemetry to socket for emergency ${currentEmerg.emergencyId || currentEmerg._id}`);
+          socket.emit('gps-update', {
+            driverId: me?.employee?.employee_id || user?._id || user?.uid,
+            emergencyId: currentEmerg.emergencyId || currentEmerg._id,
+            hospitalId: me?.hospital?._id || me?.hospital?.id,
+            lat: lat,
+            lng: lng,
+            speed: spd > 0 ? spd : 0,
+            heading: hd
+          });
+        }
+      },
+      (err) => {
+        console.error("[GPS] Driver watchPosition error:", err.code, err.message);
+        if (!localStorage.getItem('driver_lat')) {
+          setLocationPermissionState('denied');
+        } else {
+          setLocationPermissionState('granted');
+        }
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
+  };
+
+  useEffect(() => {
+    if (locationPermissionState === 'prompt') {
+      const stopGps = startRealGps();
+      return () => {
+        if (stopGps) stopGps();
+      };
+    } else if (locationPermissionState === 'granted') {
+      const stopGps = startRealGps();
+      return () => {
+        if (stopGps) stopGps();
+      };
+    }
+  }, [locationPermissionState, me]);
 
   useEffect(() => {
     if (!me) return;
@@ -94,11 +172,7 @@ export const AmbulanceDashboard = () => {
         });
     });
 
-    // Setup REAL GPS Tracking
-    const stopGps = startRealGps();
-
     return () => {
-        if (stopGps) stopGps();
         s.off('emergency-broadcast');
         s.off('emergency-taken');
         s.off('citizen-gps');
@@ -110,67 +184,15 @@ export const AmbulanceDashboard = () => {
       emergencyRef.current = emergency;
   }, [emergency]);
 
-    const getFallbackCoords = () => {
-        const activeEmerg = emergency || broadcastAlert;
-        if (activeEmerg) {
-            const lat = activeEmerg.lat || (activeEmerg.coords ? activeEmerg.coords[1] : null);
-            const lng = activeEmerg.lng || (activeEmerg.coords ? activeEmerg.coords[0] : null);
-            if (lat && lng) return [lat, lng];
-        }
-        return [30.9010, 75.8573];
-    };
-
-    const startRealGps = () => {
-        // Setup a 3.5-second fallback timer if browser geolocation is slow/blocked
-        const fallbackTimer = setTimeout(() => {
-            setLocation(prev => prev ? prev : getFallbackCoords());
-        }, 3500);
-
-        if (navigator.geolocation) {
-            const watchId = navigator.geolocation.watchPosition(
-                (pos) => {
-                    clearTimeout(fallbackTimer);
-                    const lat = pos.coords.latitude;
-                    const lng = pos.coords.longitude;
-                    const spd = pos.coords.speed ? Math.round(pos.coords.speed * 3.6) : 0; // m/s to km/h
-                    
-                    setLocation([lat, lng]);
-                    setSpeed(spd > 0 ? spd : 0);
-                    setGpsAccuracy(Math.floor(pos.coords.accuracy));
-                    
-                    // Emit Live GPS via Socket!
-                    const currentEmerg = emergencyRef.current;
-                    if (socket.connected && currentEmerg && ['en_route', 'near_incident'].includes(stage)) {
-                        socket.emit('gps-update', {
-                            driverId: me?.employee?.employee_id || user._id,
-                            emergencyId: currentEmerg.emergencyId || currentEmerg._id,
-                            hospitalId: me?.hospital?._id,
-                            lat: lat,
-                            lng: lng,
-                            speed: spd > 0 ? spd : 0,
-                            heading: pos.coords.heading || 0
-                        });
-                    }
-                },
-                (err) => {
-                    clearTimeout(fallbackTimer);
-                    console.warn("GPS Warning:", err.message);
-                    // Instantly drop fallback on block/failure
-                    setLocation(prev => prev ? prev : getFallbackCoords());
-                },
-                { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-            );
-            return () => {
-                clearTimeout(fallbackTimer);
-                navigator.geolocation.clearWatch(watchId);
-            };
-        } else {
-            clearTimeout(fallbackTimer);
-            setLocation(getFallbackCoords());
-
-           alert("Geolocation is not supported by your browser.");
-       }
-   };
+  const getFallbackCoords = () => {
+      const activeEmerg = emergency || broadcastAlert;
+      if (activeEmerg) {
+          const lat = activeEmerg.lat || (activeEmerg.coords ? activeEmerg.coords[1] : null);
+          const lng = activeEmerg.lng || (activeEmerg.coords ? activeEmerg.coords[0] : null);
+          if (lat && lng) return [lat, lng];
+      }
+      return [30.9010, 75.8573];
+  };
 
    const handleAcceptEmergency = () => {
        if (!broadcastAlert) return;
@@ -319,6 +341,35 @@ export const AmbulanceDashboard = () => {
   const addLog = (msg) => {
     setLogs(prev => [[new Date().toLocaleTimeString().substring(0,5), msg], ...prev].slice(0, 5));
   };
+
+  if (locationPermissionState === 'denied' || !location) {
+    return (
+      <div style={{ height: '70vh', background: '#020617', color: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '16px' }}>
+        <div className="glass-panel pop-in" style={{ width: '420px', padding: '2.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '1.5rem', border: '1px solid rgba(239, 68, 68, 0.3)', boxShadow: '0 20px 50px rgba(0,0,0,0.5)', background: 'rgba(15, 23, 42, 0.9)' }}>
+          <div style={{ width: 70, height: 70, borderRadius: '50%', background: 'linear-gradient(135deg, #ef4444, #b91c1c)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '2rem', boxShadow: '0 8px 24px rgba(239, 68, 68, 0.4)' }}>
+            🚨
+          </div>
+          <div>
+            <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.4rem', fontWeight: 900, color: '#fff' }}>Driver Location Required</h3>
+            <p style={{ margin: 0, fontSize: '0.72rem', color: '#ef4444', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>GPS Monitoring Offline</p>
+          </div>
+          <p style={{ margin: 0, fontSize: '0.88rem', color: '#cbd5e1', lineHeight: 1.6 }}>
+            Driver location access is required for emergency dispatch services. Your live location is mandatory to calculate dynamic ETAs, route you to incidents, and update citizens on your arrival.
+          </p>
+          <button 
+            type="button"
+            onClick={() => {
+              setLocationPermissionState('prompt');
+            }}
+            className="btn" 
+            style={{ width: '100%', background: 'linear-gradient(135deg, #ef4444, #dc2626)', color: '#fff', border: 'none', padding: '0.8rem', fontSize: '0.9rem', fontWeight: 800, cursor: 'pointer', borderRadius: 8, boxShadow: '0 4px 12px rgba(239, 68, 68, 0.2)' }}
+          >
+            🔄 Enable GPS Permission & Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const glassPanel = { background: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(16px)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '1.5rem', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' };
 

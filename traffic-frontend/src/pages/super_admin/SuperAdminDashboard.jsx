@@ -78,6 +78,16 @@ const SuperAdminDashboard = () => {
     };
   }, []);
 
+  const getMapCenter = () => {
+    if (accidents.length > 0) {
+      const activeAcc = accidents.find(a => a.location?.coordinates);
+      if (activeAcc) return [activeAcc.location.coordinates[1], activeAcc.location.coordinates[0]];
+    }
+    const savedLat = localStorage.getItem('citizen_lat') || localStorage.getItem('driver_lat') || '30.9010';
+    const savedLng = localStorage.getItem('citizen_lng') || localStorage.getItem('driver_lng') || '75.8573';
+    return [parseFloat(savedLat), parseFloat(savedLng)];
+  };
+
   if (!stats) return (
     <div style={{ height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', background: '#050b14' }}>
       <div className="pulse-alert">SYNCING COMMAND HUB...</div>
@@ -171,7 +181,7 @@ const SuperAdminDashboard = () => {
           </div>
           
           <div style={{ flex: 1, borderRadius: '16px', overflow: 'hidden', boxShadow: '0 8px 30px rgba(0,0,0,0.1)' }}>
-              <PremiumMap center={[30.9010, 75.8573]} zoom={12}>
+              <PremiumMap center={getMapCenter()} zoom={12}>
                   {/* PLOT LIVE INCIDENTS */}
                   {accidents.filter(a => a.status !== 'resolved' && a.location?.coordinates).map((acc) => (
                       <Marker key={`acc-${acc.id || acc._id}`} position={[acc.location.coordinates[1], acc.location.coordinates[0]]} icon={createLocationPin()}>

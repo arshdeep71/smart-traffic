@@ -585,7 +585,9 @@ export default function LiveTrackingView({ incident, ambulance, socket, citizenL
     };
   }, [socket, calcBearing]);
 
-  const center = ambulancePos || destinationPos || [28.6139, 77.209];
+  const savedLat = localStorage.getItem('citizen_lat') || localStorage.getItem('driver_lat') || '30.9010';
+  const savedLng = localStorage.getItem('citizen_lng') || localStorage.getItem('driver_lng') || '75.8573';
+  const center = ambulancePos || destinationPos || [parseFloat(savedLat), parseFloat(savedLng)];
 
   return (
     <div className="ltv-root">

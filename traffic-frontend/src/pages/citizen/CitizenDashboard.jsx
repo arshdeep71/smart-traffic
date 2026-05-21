@@ -148,7 +148,16 @@ const CitizenDashboard = () => {
 
   const [isSOS, setIsSOS] = useState(false);
   const [emergencyMode, setEmergencyMode] = useState(false);
-  const [formData, setFormData] = useState({ title: '', description: '', category: 'Vehicle Collision', severity: 'medium', location: { lat: 30.9010, lng: 75.8573, accuracy: 0 } });
+  
+  // Geolocation & persistent permission architecture
+  const savedLat = localStorage.getItem('citizen_lat');
+  const savedLng = localStorage.getItem('citizen_lng');
+  const savedAcc = localStorage.getItem('citizen_accuracy');
+  const initialLocation = savedLat && savedLng ? { lat: parseFloat(savedLat), lng: parseFloat(savedLng), accuracy: parseFloat(savedAcc || '10') } : null;
+
+  const [formData, setFormData] = useState({ title: '', description: '', category: 'Vehicle Collision', severity: 'medium', location: initialLocation });
+  const [locationPermissionState, setLocationPermissionState] = useState(initialLocation ? 'granted' : 'prompt');
+  
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [videoUrl, setVideoUrl] = useState(null);
@@ -170,17 +179,90 @@ const CitizenDashboard = () => {
   const streamRef = useRef(null);
   const recTimerRef = useRef(null);
 
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.watchPosition(pos => {
-        setFormData(p => ({ ...p, location: { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy } }));
-      });
+  const requestLocation = (force = false) => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      setLocationPermissionState('denied');
+      return;
     }
+    
+    console.log("[GPS] Requesting citizen geolocation permission...");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        console.log(`[GPS] Citizen location successfully obtained: lat=${pos.coords.latitude}, lng=${pos.coords.longitude}, accuracy=${pos.coords.accuracy}m`);
+        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy };
+        setFormData(prev => ({ ...prev, location: loc }));
+        localStorage.setItem('citizen_lat', pos.coords.latitude.toString());
+        localStorage.setItem('citizen_lng', pos.coords.longitude.toString());
+        localStorage.setItem('citizen_accuracy', pos.coords.accuracy.toString());
+        setLocationPermissionState('granted');
+      },
+      (err) => {
+        console.warn(`[GPS] Geolocation permission request failed: Code ${err.code} - ${err.message}`);
+        if (!localStorage.getItem('citizen_lat')) {
+          setLocationPermissionState('denied');
+        } else {
+          setLocationPermissionState('granted');
+        }
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+  };
+
+  // Keep location ref for socket handler to bypass dependency rebuilds
+  const locationRef = useRef(formData.location);
+  useEffect(() => {
+    locationRef.current = formData.location;
+  }, [formData.location]);
+
+  // Hook 1: Basic Telemetry Initialization & Network Watchers
+  useEffect(() => {
+    const savedLat = localStorage.getItem('citizen_lat');
+    const savedLng = localStorage.getItem('citizen_lng');
+    if (!savedLat || !savedLng) {
+      requestLocation();
+    } else {
+      setLocationPermissionState('granted');
+    }
+
     window.addEventListener('online', () => setIsOffline(false));
     window.addEventListener('offline', () => setIsOffline(true));
 
     fetchNearby();
+    return () => {
+      window.removeEventListener('online', () => setIsOffline(false));
+      window.removeEventListener('offline', () => setIsOffline(true));
+    };
+  }, []);
 
+  // Hook 2: High-accuracy Background GPS Watcher
+  useEffect(() => {
+    if (locationPermissionState !== 'granted') return;
+    
+    let watchId;
+    if (navigator.geolocation) {
+      watchId = navigator.geolocation.watchPosition(
+        (pos) => {
+          console.log(`[GPS] Active Citizen watch update: lat=${pos.coords.latitude}, lng=${pos.coords.longitude}, accuracy=${pos.coords.accuracy}m`);
+          const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy };
+          setFormData(prev => ({ ...prev, location: loc }));
+          localStorage.setItem('citizen_lat', pos.coords.latitude.toString());
+          localStorage.setItem('citizen_lng', pos.coords.longitude.toString());
+          localStorage.setItem('citizen_accuracy', pos.coords.accuracy.toString());
+        },
+        (err) => {
+          console.warn("[GPS] Active watchPosition warning:", err.message);
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      );
+    }
+    return () => {
+      if (watchId) navigator.geolocation.clearWatch(watchId);
+    };
+  }, [locationPermissionState]);
+
+  // Hook 3: Socket Event Handlers (Using locationRef to stay completely decoupled from GPS jitter)
+  useEffect(() => {
     connectSocket({ role: 'citizen' });
     if (!socket) return;
 
@@ -192,10 +274,11 @@ const CitizenDashboard = () => {
     const handleGps = (data) => {
       setAmbLocation([data.lat, data.lng]);
 
-      // Auto Arrival Detection
-      if (formData.location) {
-        const dLat = Math.abs(data.lat - formData.location.lat);
-        const dLng = Math.abs(data.lng - formData.location.lng);
+      // Auto Arrival Detection (Uses ref to get latest position without re-triggering useEffect)
+      const currentLoc = locationRef.current;
+      if (currentLoc) {
+        const dLat = Math.abs(data.lat - currentLoc.lat);
+        const dLng = Math.abs(data.lng - currentLoc.lng);
         if (dLat < 0.0003 && dLng < 0.0003) {
           setActiveIncident(prev => prev ? { ...prev, status: 'Ambulance Arrived' } : prev);
         } else if (dLat < 0.001 && dLng < 0.001) {
@@ -569,6 +652,33 @@ const CitizenDashboard = () => {
     }
   }, [user, navigate]);
 
+  if (locationPermissionState === 'denied' || !formData.location) {
+    return (
+      <div style={{ position: 'fixed', inset: 0, zIndex: 1000000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(15, 23, 42, 0.95)', backdropFilter: 'blur(8px)' }}>
+        <div className="glass-panel pop-in" style={{ width: '450px', padding: '2.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '1.5rem', border: '1px solid rgba(239, 68, 68, 0.3)', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
+          <div style={{ width: 70, height: 70, borderRadius: '50%', background: 'linear-gradient(135deg, #ef4444, #b91c1c)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '2rem', boxShadow: '0 8px 24px rgba(239, 68, 68, 0.4)' }}>
+            📍
+          </div>
+          <div>
+            <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.4rem', fontWeight: 900, color: '#1f2937' }}>Location Access Required</h3>
+            <p style={{ margin: 0, fontSize: '0.72rem', color: '#ef4444', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>GPS Permission Restricted</p>
+          </div>
+          <p style={{ margin: 0, fontSize: '0.88rem', color: '#4b5563', lineHeight: 1.6 }}>
+            Please allow location access to use SmartTraffic emergency services. Real-time GPS verification is required to route emergency first responders to your exact coordinates.
+          </p>
+          <button 
+            type="button"
+            onClick={() => requestLocation(true)}
+            className="btn" 
+            style={{ width: '100%', background: 'linear-gradient(135deg, #ef4444, #dc2626)', color: '#fff', border: 'none', padding: '0.8rem', fontSize: '0.9rem', fontWeight: 800, cursor: 'pointer', borderRadius: 8, boxShadow: '0 4px 12px rgba(239, 68, 68, 0.2)' }}
+          >
+            🔄 Grant Location Permission & Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`fade-in ${emergencyMode ? 'emergency-mode-active' : ''}`} style={{ padding: '0 1rem' }}>
       {emergencyMode && (
@@ -581,8 +691,17 @@ const CitizenDashboard = () => {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
         <div>
           <h2 style={{ margin: 0, fontSize: '1.2rem' }}>Citizen Safety Portal</h2>
-          <div style={{ color: '#6b7280', fontSize: '0.78rem' }}>
-            <MapPin size={11} style={{ verticalAlign: 'middle' }} /> {formData.location.lat.toFixed(4)}, {formData.location.lng.toFixed(4)} (±{formData.location.accuracy.toFixed(0)}m)
+          <div style={{ color: '#6b7280', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <MapPin size={11} style={{ verticalAlign: 'middle' }} /> 
+            {formData.location.lat.toFixed(4)}, {formData.location.lng.toFixed(4)} (±{formData.location.accuracy.toFixed(0)}m)
+            <button 
+              type="button"
+              onClick={() => requestLocation(true)} 
+              className="btn btn-outline" 
+              style={{ display: 'inline-flex', padding: '0.2rem 0.5rem', fontSize: '0.65rem', borderRadius: 4, cursor: 'pointer', border: '1px solid rgba(139, 92, 246, 0.3)', background: 'transparent', color: '#8b5cf6', fontWeight: 700 }}
+            >
+              🔄 Refresh GPS
+            </button>
           </div>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
