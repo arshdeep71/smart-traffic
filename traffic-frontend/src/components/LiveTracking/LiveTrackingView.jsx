@@ -2,7 +2,7 @@
 // Drop-in replacement for your tracking UI, customized 100% for Police emergency tracking.
 // Props: { incident, ambulance, socket, onClose }
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { MapContainer, TileLayer, Marker, Polyline, useMap, Circle } from "react-leaflet";
 import L from "leaflet";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,6 +15,83 @@ import { createLocationPin, createCitizenIcon, createPoliceIcon } from "./mapIco
 import { Loader2, Navigation, Shield } from "lucide-react";
 import "leaflet-routing-machine";
 
+class LiveTrackingErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("LiveTrackingErrorBoundary caught a rendering error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: '#090d16',
+          border: '2px solid rgba(239, 68, 68, 0.4)',
+          borderRadius: '16px',
+          padding: '2.5rem 2rem',
+          color: '#fff',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          textAlign: 'center',
+          gap: '1.5rem',
+          fontFamily: 'monospace',
+          zIndex: 999999
+        }}>
+          <span style={{ fontSize: '3rem', animation: 'pulse-glow 1.5s infinite' }}>⚠️</span>
+          <h3 style={{ margin: 0, color: '#ef4444', fontSize: '1.25rem', fontWeight: 900 }}>Tactical Map Subsystem Fault</h3>
+          <p style={{ margin: 0, fontSize: '0.82rem', color: '#94a3b8', maxWidth: '400px', lineHeight: 1.5 }}>
+            A rendering exception occurred in the Leaflet GIS canvas context. Let's reset the active navigation subsystem.
+          </p>
+          <div style={{
+            background: '#030712',
+            padding: '0.85rem 1.2rem',
+            borderRadius: '10px',
+            fontSize: '0.72rem',
+            color: '#ef4444',
+            maxWidth: '100%',
+            overflowX: 'auto',
+            border: '1px solid rgba(239, 68, 68, 0.2)',
+            textAlign: 'left'
+          }}>
+            {this.state.error?.toString() || "Unknown GIS Exception"}
+          </div>
+          <button 
+            onClick={() => this.setState({ hasError: false, error: null })}
+            style={{
+              padding: '0.75rem 1.5rem',
+              background: '#ef4444',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              fontWeight: 800,
+              cursor: 'pointer',
+              fontSize: '0.8rem',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)'
+            }}
+          >
+            Attempt Subsystem Recovery
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 // ─── Routing Machine Component ──────────────────────────────────────────────
 export function RoutingMachine({ start, end, onRouteCalculated }) {
   const map = useMap();
@@ -22,23 +99,38 @@ export function RoutingMachine({ start, end, onRouteCalculated }) {
   const endStr = end ? `${end[0]},${end[1]}` : "";
 
   useEffect(() => {
-    if (!start || !end) return;
-    const routingControl = L.Routing.control({
-      waypoints: [ L.latLng(start[0], start[1]), L.latLng(end[0], end[1]) ],
-      lineOptions: { styles: [{ color: '#3b82f6', weight: 6, opacity: 0.85, lineCap: "round", lineJoin: "round" }] },
-      createMarker: () => null, show: false, addWaypoints: false, routeWhileDragging: false, fitSelectedRoutes: false,
-    }).addTo(map);
+    if (!start || !end || !map) return;
+    if (!L.Routing || !L.Routing.control) {
+      console.warn("[Leaflet Routing Machine] L.Routing is not available yet.");
+      return;
+    }
+    let routingControl;
+    try {
+      routingControl = L.Routing.control({
+        waypoints: [ L.latLng(start[0], start[1]), L.latLng(end[0], end[1]) ],
+        lineOptions: { styles: [{ color: '#3b82f6', weight: 6, opacity: 0.85, lineCap: "round", lineJoin: "round" }] },
+        createMarker: () => null, show: false, addWaypoints: false, routeWhileDragging: false, fitSelectedRoutes: false,
+      }).addTo(map);
 
-    routingControl.on('routesfound', (e) => {
-      const routes = e.routes;
-      if (routes && routes.length > 0 && onRouteCalculated) {
-        onRouteCalculated({
-          distance: (routes[0].summary.totalDistance / 1000).toFixed(1),
-          time: Math.round(routes[0].summary.totalTime / 60)
-        });
+      routingControl.on('routesfound', (e) => {
+        const routes = e.routes;
+        if (routes && routes.length > 0 && onRouteCalculated) {
+          onRouteCalculated({
+            distance: (routes[0].summary.totalDistance / 1000).toFixed(1),
+            time: Math.round(routes[0].summary.totalTime / 60)
+          });
+        }
+      });
+    } catch (err) {
+      console.error("[Leaflet Routing Control Error]", err);
+    }
+    return () => {
+      if (routingControl && map) {
+        try {
+          map.removeControl(routingControl);
+        } catch (_) {}
       }
-    });
-    return () => map.removeControl(routingControl);
+    };
   }, [map, startStr, endStr]);
 
   return null;
@@ -53,9 +145,13 @@ export function MapFitter({ ambulancePos, incidentPos }) {
     if (!ambulancePos || !incidentPos) return;
     if (fitted.current) return;
     
-    const bounds = L.latLngBounds([ambulancePos, incidentPos]);
-    map.fitBounds(bounds, { padding: [80, 80], maxZoom: 17, animate: true, duration: 1.2 });
-    fitted.current = true;
+    try {
+      const bounds = L.latLngBounds([ambulancePos, incidentPos]);
+      map.fitBounds(bounds, { padding: [80, 80], maxZoom: 17, animate: true, duration: 1.2 });
+      fitted.current = true;
+    } catch (err) {
+      console.error("[Leaflet fitBounds error]", err);
+    }
   }, [ambulancePos, incidentPos]);
 
   return null;
@@ -72,8 +168,12 @@ export function AmbulanceMarker({ position, bearing }) {
 
   useEffect(() => {
     if (markerRef.current) {
-      icon.current = createPoliceIcon(bearing);
-      markerRef.current.setIcon(icon.current);
+      try {
+        icon.current = createPoliceIcon(bearing);
+        markerRef.current.setIcon(icon.current);
+      } catch (err) {
+        console.error("[Leaflet setIcon error]", err);
+      }
     }
   }, [bearing]);
 
@@ -85,8 +185,17 @@ export function AmbulanceMarker({ position, bearing }) {
 export function MapInvalidator() {
   const map = useMap();
   useEffect(() => {
-    const t = setTimeout(() => map.invalidateSize(), 300);
-    return () => clearTimeout(t);
+    if (!map) return;
+    console.log("[GIS MAP INITIATED] Invalidation queues scheduled.");
+    const timeouts = [100, 300, 800, 1500].map(delay => 
+      setTimeout(() => {
+        try {
+          map.invalidateSize();
+          console.log(`[GIS MAP RESIZE] Invalidated size after ${delay}ms`);
+        } catch (_) {}
+      }, delay)
+    );
+    return () => timeouts.forEach(t => clearTimeout(t));
   }, [map]);
   return null;
 }
@@ -164,7 +273,11 @@ export function useSmoothMarker(markerRef, position) {
 }
 
 // ─── Main component ───────────────────────────────────────────
-export default function LiveTrackingView({ incident, ambulance, socket, onClose }) {
+const isValidCoords = (coords) => {
+  return Array.isArray(coords) && coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1]);
+};
+
+export function LiveTrackingViewRaw({ incident, ambulance, socket, onClose }) {
   const [ambulancePos, setAmbulancePos] = useState(null);
   const [bearing, setBearing] = useState(0);
   const [eta, setEta] = useState(null);
@@ -179,6 +292,7 @@ export default function LiveTrackingView({ incident, ambulance, socket, onClose 
 
   // ── compute bearing between two GPS points ──
   const calcBearing = useCallback((from, to) => {
+    if (!isValidCoords(from) || !isValidCoords(to)) return 0;
     const toRad = (d) => (d * Math.PI) / 180;
     const dLng = toRad(to[1] - from[1]);
     const lat1 = toRad(from[0]);
@@ -188,9 +302,24 @@ export default function LiveTrackingView({ incident, ambulance, socket, onClose 
     return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
   }, []);
 
+  // ── console diagnostics ──
+  useEffect(() => {
+    console.log("[GIS LiveTrackingViewRaw Mount/Update] Diagnostics:", {
+      incident,
+      ambulance,
+      ambulancePos,
+      bearing,
+      eta,
+      distance,
+      status,
+      socketConnected: !!socket?.connected
+    });
+  }, [incident, ambulance, ambulancePos, bearing, eta, distance, status, socket]);
+
   // Set initial coordinates for active police dispatch
   useEffect(() => {
-    if (!ambulancePos) {
+    if (!isValidCoords(ambulancePos)) {
+      console.log("[GIS POSITION FALLBACK] Setting police unit fallback coords: [31.2592, 75.6980]");
       setAmbulancePos([31.2592, 75.6980]);
     }
   }, [ambulancePos]);
@@ -200,8 +329,12 @@ export default function LiveTrackingView({ incident, ambulance, socket, onClose 
     if (ambulance) {
       const lat = ambulance.lat || ambulance.currentLocation?.lat;
       const lng = ambulance.lng || ambulance.currentLocation?.lng;
-      if (lat && lng) {
+      if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
+        console.log("[GIS POSITION SYNC] Coordinates successfully synced from props:", { lat, lng });
         setAmbulancePos([lat, lng]);
+      } else {
+        console.log("[GIS POSITION SYNC] Coordinates missing or invalid in props, falling back to LPU coords.");
+        setAmbulancePos([31.2592, 75.6980]);
       }
     }
   }, [ambulance]);
@@ -218,11 +351,14 @@ export default function LiveTrackingView({ incident, ambulance, socket, onClose 
     if (!socket) return;
 
     const onLocation = (data) => {
+      console.log("[GIS REALTIME RECEIVED] Realtime GPS signal received over socket:", data);
       const newPos = [data.lat, data.lng];
-      setAmbulancePos((prev) => {
-        if (prev) setBearing(calcBearing(prev, newPos));
-        return newPos;
-      });
+      if (isValidCoords(newPos)) {
+        setAmbulancePos((prev) => {
+          if (isValidCoords(prev)) setBearing(calcBearing(prev, newPos));
+          return newPos;
+        });
+      }
     };
 
     const onStatus = (data) => {
@@ -240,7 +376,7 @@ export default function LiveTrackingView({ incident, ambulance, socket, onClose 
     };
   }, [socket, calcBearing]);
 
-  const center = ambulancePos || incidentPos;
+  const center = isValidCoords(ambulancePos) ? ambulancePos : incidentPos;
 
   return (
     <div className="ltv-root" style={{ background: '#030712' }}>
@@ -248,7 +384,7 @@ export default function LiveTrackingView({ incident, ambulance, socket, onClose 
         <MapRefSetter setMap={setMapInstance} />
         
         {/* Dynamic Route line */}
-        {ambulancePos && (
+        {isValidCoords(ambulancePos) && (
           <RoutingMachine 
              start={ambulancePos} 
              end={incidentPos} 
@@ -279,17 +415,19 @@ export default function LiveTrackingView({ incident, ambulance, socket, onClose 
         <Marker position={incidentPos} icon={createCitizenIcon()} />
 
         {/* Responding Police patrol vehicle marker */}
-        {ambulancePos && (
+        {isValidCoords(ambulancePos) && (
           <AmbulanceMarker 
             position={ambulancePos} 
             bearing={bearing} 
           />
         )}
 
-        <MapFitter
-          ambulancePos={ambulancePos}
-          incidentPos={incidentPos}
-        />
+        {isValidCoords(ambulancePos) && (
+          <MapFitter
+            ambulancePos={ambulancePos}
+            incidentPos={incidentPos}
+          />
+        )}
       </PremiumMap>
 
       {/* Floating Recentering Button */}
@@ -298,9 +436,13 @@ export default function LiveTrackingView({ incident, ambulance, socket, onClose 
           className="ltv-recenter-btn" 
           title="Recenter Map"
           onClick={() => {
-            if (ambulancePos) {
-              const bounds = L.latLngBounds([ambulancePos, incidentPos]);
-              mapInstance.flyToBounds(bounds, { padding: [80, 80], maxZoom: 17, duration: 1.5 });
+            if (isValidCoords(ambulancePos)) {
+              try {
+                const bounds = L.latLngBounds([ambulancePos, incidentPos]);
+                mapInstance.flyToBounds(bounds, { padding: [80, 80], maxZoom: 17, duration: 1.5 });
+              } catch (_) {
+                mapInstance.flyTo(incidentPos, 16, { duration: 1.5 });
+              }
             } else {
               mapInstance.flyTo(incidentPos, 16, { duration: 1.5 });
             }
@@ -382,5 +524,13 @@ export default function LiveTrackingView({ incident, ambulance, socket, onClose 
         )}
       </div>
     </div>
+  );
+}
+
+export default function LiveTrackingView(props) {
+  return (
+    <LiveTrackingErrorBoundary>
+      <LiveTrackingViewRaw {...props} />
+    </LiveTrackingErrorBoundary>
   );
 }
