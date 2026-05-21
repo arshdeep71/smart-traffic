@@ -62,11 +62,22 @@ class AccidentController extends Controller
             $supabaseKey = env('SUPABASE_KEY');
             $bucketName = env('SUPABASE_BUCKET', 'evidence');
 
-            foreach ($request->file('images') as $image) {
+            \Illuminate\Support\Facades\Log::info('[SUPABASE UPLOAD] Start processing ' . count($request->file('images')) . ' images/videos.');
+            \Illuminate\Support\Facades\Log::info('[SUPABASE CONFIG] URL: ' . ($supabaseUrl ?: 'MISSING') . ' | KEY present: ' . ($supabaseKey ? 'YES' : 'NO') . ' | BUCKET: ' . $bucketName);
+
+            foreach ($request->file('images') as $index => $image) {
+                $originalName = $image->getClientOriginalName();
+                $extension = $image->getClientOriginalExtension();
+                $mimeType = $image->getMimeType();
+                $size = $image->getSize();
+                
+                \Illuminate\Support\Facades\Log::info("[SUPABASE UPLOAD] Processing File #{$index}: Name={$originalName}, Ext={$extension}, Mime={$mimeType}, Size={$size} bytes");
+
                 if ($supabaseUrl && $supabaseKey) {
                     try {
-                        $filename = 'accidents/images/' . uniqid() . '.' . $image->getClientOriginalExtension();
-                        
+                        $filename = 'accidents/images/' . uniqid() . '.' . $extension;
+                        \Illuminate\Support\Facades\Log::info("[SUPABASE UPLOAD] Attempting cloud upload to path: {$filename} in bucket: {$bucketName}");
+
                         // Upload directly to Supabase Storage API using Laravel's Http facade
                         $response = \Illuminate\Support\Facades\Http::withHeaders([
                             'Authorization' => 'Bearer ' . $supabaseKey,
@@ -74,26 +85,37 @@ class AccidentController extends Controller
                         ])->attach(
                             'file', 
                             file_get_contents($image->getRealPath()), 
-                            $image->getClientOriginalName()
+                            $originalName
                         )->post($supabaseUrl . '/storage/v1/object/' . $bucketName . '/' . $filename);
 
+                        \Illuminate\Support\Facades\Log::info("[SUPABASE UPLOAD] Response status code: " . $response->status());
+                        
                         if ($response->successful()) {
                             // Format public URL
-                            $imagePaths[] = $supabaseUrl . '/storage/v1/object/public/' . $bucketName . '/' . $filename;
+                            $publicUrl = $supabaseUrl . '/storage/v1/object/public/' . $bucketName . '/' . $filename;
+                            $imagePaths[] = $publicUrl;
+                            \Illuminate\Support\Facades\Log::info("[SUPABASE UPLOAD] Success! Saved URL: " . $publicUrl);
                         } else {
+                            \Illuminate\Support\Facades\Log::error("[SUPABASE UPLOAD] Failed with response: " . $response->body());
+                            
                             // Fallback to local
                             $path = $image->store('accidents/images', 'public');
                             $imagePaths[] = $path;
+                            \Illuminate\Support\Facades\Log::warning("[SUPABASE FALLBACK] Triggered local storage fallback. Saved local path: " . $path);
                         }
                     } catch (\Exception $e) {
+                        \Illuminate\Support\Facades\Log::error("[SUPABASE UPLOAD EXCEPTION] Exception message: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+                        
                         // Fallback on exception
                         $path = $image->store('accidents/images', 'public');
                         $imagePaths[] = $path;
+                        \Illuminate\Support\Facades\Log::warning("[SUPABASE FALLBACK] Triggered local storage fallback due to exception. Saved local path: " . $path);
                     }
                 } else {
                     // Fallback to local storage if credentials are not configured
                     $path = $image->store('accidents/images', 'public');
                     $imagePaths[] = $path;
+                    \Illuminate\Support\Facades\Log::warning("[SUPABASE CONFIG MISSING] SUPABASE_URL or SUPABASE_KEY not loaded in environment. Fallback to local path: " . $path);
                 }
             }
         }

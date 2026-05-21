@@ -46,6 +46,33 @@ const getSvgFallback = (index = 1, timestamp = "+1.0s") => {
   </svg>`;
 };
 
+const normalizeImageUrl = (img) => {
+  if (!img) return '';
+  
+  let resolved = '';
+  if (img.startsWith('data:') || img.startsWith('http://') || img.startsWith('https://')) {
+    resolved = img;
+  } else {
+    // Local storage path: needs backend API base url prepended
+    const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api').replace('/api', '');
+    resolved = `${baseUrl}/storage/${img}`;
+  }
+  
+  // Clean up any double slashes in paths like .../storage//accidents...
+  // but protect the http:// and https:// double slashes!
+  if (resolved.includes('//')) {
+    const parts = resolved.split('://');
+    if (parts.length === 2) {
+      resolved = parts[0] + '://' + parts[1].replace(/\/+/g, '/');
+    } else {
+      resolved = resolved.replace(/\/+/g, '/');
+    }
+  }
+  
+  console.log(`[IMAGE RESOLVER] Input: "${img}" | Resolved: "${resolved}"`);
+  return resolved;
+};
+
 export const PoliceDashboard = () => {
   const [searchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'complaints';
@@ -55,6 +82,7 @@ export const PoliceDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [previewPhoto, setPreviewPhoto] = useState(null);
+  const [imageLoadStates, setImageLoadStates] = useState({});
 
   // Moving Timeline Simulation States
   const [timelineStep, setTimelineStep] = useState(0); 
@@ -285,23 +313,27 @@ export const PoliceDashboard = () => {
     if (!incident) return { name: 'Anonymous Citizen', email: 'citizen@safety.gov', role: 'Citizen', time: '—', userId: '—' };
     
     const u = incident.user || incident.citizen;
+    let res = {};
     if (u) {
-      return {
+      res = {
         name: incident.reporter_name || u.name || 'Anonymous Citizen',
         email: incident.reporter_email || u.email || 'N/A',
         role: u.role || 'Citizen',
         time: new Date(incident.created_at || Date.now()).toLocaleString(),
         userId: u.id || u._id || incident.user_id || 'N/A'
       };
+    } else {
+      res = {
+        name: incident.reporter_name || 'Anonymous Citizen',
+        email: incident.reporter_email || 'citizen@safety.gov',
+        role: 'Citizen',
+        time: new Date(incident.created_at || Date.now()).toLocaleString(),
+        userId: incident.user_id || 'N/A'
+      };
     }
 
-    return {
-      name: incident.reporter_name || 'Anonymous Citizen',
-      email: incident.reporter_email || 'citizen@safety.gov',
-      role: 'Citizen',
-      time: new Date(incident.created_at || Date.now()).toLocaleString(),
-      userId: incident.user_id || 'N/A'
-    };
+    console.log("[POLICE DASHBOARD] Parsed Citizen Details for incident:", incident.title, res);
+    return res;
   };
 
   // Filters
@@ -640,40 +672,52 @@ export const PoliceDashboard = () => {
                       </div>
                     ) : (
                       (selectedIncident.images || []).filter(img => !img.endsWith('.mp4') && !img.endsWith('.mov') && !img.endsWith('.webm')).map((img, i) => {
-                        const url = (img.startsWith('data:') || img.startsWith('http://') || img.startsWith('https://')) ? img : `${(import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api').replace('/api', '')}/storage/${img}`;
+                        const url = normalizeImageUrl(img);
                         const mockTime = `+${(i + 1).toFixed(1)}s`;
                         return (
-                          <div 
-                            key={i} 
-                            onClick={(e) => {
-                              const imgEl = e.currentTarget.querySelector('img');
-                              const finalSrc = imgEl ? imgEl.src : url;
-                              setPreviewPhoto({ url: finalSrc, index: i + 1, timestamp: mockTime });
-                            }}
-                            style={{ 
-                              position: 'relative', 
-                              height: '75px', 
-                              borderRadius: '6px', 
-                              overflow: 'hidden', 
-                              border: '1px solid rgba(255,255,255,0.06)', 
-                              cursor: 'zoom-in', 
-                              background: '#040810' 
-                            }}
-                            className="card-hover-police"
-                          >
-                            <img 
-                              src={url} 
-                              style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                              onError={(e) => { 
-                                e.target.src = getSvgFallback(i + 1, mockTime); 
-                              }} 
-                              alt="Evidence Snapshot"
-                            />
-                            <span style={{ position: 'absolute', bottom: 3, right: 3, fontSize: '0.55rem', background: 'rgba(9,13,22,0.85)', color: '#10b981', padding: '1px 4px', borderRadius: '2px', fontFamily: 'monospace', fontWeight: 800 }}>
-                              {mockTime}
-                            </span>
-                            <div style={{ position: 'absolute', top: 3, left: 3, background: 'rgba(0,0,0,0.5)', borderRadius: '50%', width: 14, height: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-                              <ZoomIn size={8} />
+                          <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <div 
+                              onClick={(e) => {
+                                const imgEl = e.currentTarget.querySelector('img');
+                                const finalSrc = imgEl ? imgEl.src : url;
+                                setPreviewPhoto({ url: finalSrc, index: i + 1, timestamp: mockTime });
+                              }}
+                              style={{ 
+                                position: 'relative', 
+                                height: '75px', 
+                                borderRadius: '6px', 
+                                overflow: 'hidden', 
+                                border: '1px solid rgba(255,255,255,0.06)', 
+                                cursor: 'zoom-in', 
+                                background: '#040810' 
+                              }}
+                              className="card-hover-police"
+                            >
+                              <img 
+                                src={url} 
+                                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                                onLoad={() => {
+                                  setImageLoadStates(prev => ({ ...prev, [img]: 'success' }));
+                                }}
+                                onError={(e) => { 
+                                  setImageLoadStates(prev => ({ ...prev, [img]: 'failed' }));
+                                  e.target.src = getSvgFallback(i + 1, mockTime); 
+                                }} 
+                                alt="Evidence Snapshot"
+                              />
+                              <span style={{ position: 'absolute', bottom: 3, right: 3, fontSize: '0.55rem', background: 'rgba(9,13,22,0.85)', color: '#10b981', padding: '1px 4px', borderRadius: '2px', fontFamily: 'monospace', fontWeight: 800 }}>
+                                {mockTime}
+                              </span>
+                              <div style={{ position: 'absolute', top: 3, left: 3, background: 'rgba(0,0,0,0.5)', borderRadius: '50%', width: 14, height: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                                <ZoomIn size={8} />
+                              </div>
+                            </div>
+                            
+                            {/* Temporary Visible Debug Label */}
+                            <div style={{ fontSize: '0.52rem', color: '#888', background: 'rgba(0,0,0,0.4)', padding: '4px', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.03)', wordBreak: 'break-all', fontFamily: 'monospace', lineHeight: '1.2' }}>
+                              <div style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}><strong>Orig:</strong> {img}</div>
+                              <div style={{ textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}><strong>Res:</strong> {url}</div>
+                              <div><strong>State:</strong> <span style={{ color: imageLoadStates[img] === 'success' ? '#10b981' : (imageLoadStates[img] === 'failed' ? '#ef4444' : '#f59e0b') }}>{imageLoadStates[img] || 'loading'}</span></div>
                             </div>
                           </div>
                         );
