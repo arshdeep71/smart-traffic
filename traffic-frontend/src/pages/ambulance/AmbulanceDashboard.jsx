@@ -397,12 +397,7 @@ export const AmbulanceDashboard = () => {
       : { height: '70vh', display: 'flex', flexDirection: 'column', padding: '1rem', background: '#020617', color: '#f8fafc', overflow: 'hidden', position: 'relative', borderRadius: '16px' }
     }>
       
-      {/* ⚠️ DEMO FALLBACK NOTICE */}
-      {usingDemoFallback && (
-         <div className="pulse-alert" style={{ position: 'absolute', top: '80px', left: '50%', transform: 'translateX(-50%)', zIndex: 1000, background: '#f59e0b', color: '#020617', padding: '0.6rem 1.4rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 900, boxShadow: '0 4px 15px rgba(245, 158, 11, 0.4)', display: 'flex', alignItems: 'center', gap: '0.4rem', border: '1px solid #d97706' }}>
-           ⚠️ Using approximate/demo fallback location (LPU Block 38)
-         </div>
-      )}
+
       
       {/* 🔴 BROADCAST POPUP (UBER STYLE - MAP VISIBLE) */}
       {broadcastAlert && (

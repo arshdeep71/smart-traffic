@@ -729,11 +729,6 @@ const CitizenDashboard = () => {
             >
               🔄 Refresh GPS
             </button>
-            {usingDemoFallback && (
-              <span className="pulse-alert" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.68rem', fontWeight: 800, border: '1px solid rgba(245, 158, 11, 0.3)', display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}>
-                ⚠️ Using approximate/demo fallback location (LPU Block 38)
-              </span>
-            )}
           </div>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
