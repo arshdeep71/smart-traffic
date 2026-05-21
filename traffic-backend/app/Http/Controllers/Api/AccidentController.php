@@ -31,7 +31,7 @@ class AccidentController extends Controller
             $query->where('created_at', '<=', $request->date_to);
         }
 
-        $accidents = $query->orderByDesc('created_at')
+        $accidents = $query->with('user')->orderByDesc('created_at')
             ->paginate($request->get('per_page', 15));
 
         return response()->json([
@@ -92,7 +92,7 @@ class AccidentController extends Controller
     // GET /api/accidents/{id}
     public function show(string $id): JsonResponse
     {
-        $accident = Accident::findOrFail($id);
+        $accident = Accident::with('user')->findOrFail($id);
 
         return response()->json([
             'success' => true,

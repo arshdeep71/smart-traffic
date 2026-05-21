@@ -478,14 +478,25 @@ export default function LiveTrackingView({ incident, ambulance, socket, citizenL
 
   // ── Pre-acceptance status flow ──
   useEffect(() => {
-    if (!prevAmbulance.current && ambulance) {
+    const isPoliceActive = ['verified', 'police team notified', 'patrol unit dispatched', 'unit en route', 'officers approaching', 'investigation active'].includes(status?.toLowerCase());
+    if (isPoliceActive) {
+      setPhase("tracking");
+    } else if (!prevAmbulance.current && ambulance) {
       setPhase("accepted");
       setTimeout(() => setPhase("tracking"), 3500);
     } else if (!ambulance) {
       setPhase("searching");
     }
     prevAmbulance.current = ambulance;
-  }, [ambulance]);
+  }, [ambulance, status]);
+
+  // Set initial coordinates for active police dispatch to avoid map delay
+  useEffect(() => {
+    const isPoliceActive = ['verified', 'police team notified', 'patrol unit dispatched', 'unit en route', 'officers approaching', 'investigation active'].includes(status?.toLowerCase());
+    if (isPoliceActive && !ambulancePos) {
+      setAmbulancePos([31.2592, 75.6980]);
+    }
+  }, [status, ambulancePos]);
 
   // Sync initial ambulance position from props when assignment comes in
   useEffect(() => {

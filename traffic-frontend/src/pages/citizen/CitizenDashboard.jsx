@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
 import api from '../../services/api';
 import { connectSocket, socket } from '../../services/socket';
-import { AlertTriangle, MapPin, Camera, Video, Loader2, Zap, Activity, UserCheck, Smartphone, Package, Navigation, Compass, CheckCircle } from 'lucide-react';
+import { AlertTriangle, MapPin, Camera, Video, Loader2, Zap, Activity, UserCheck, Smartphone, Package, Navigation, Compass, CheckCircle, XCircle } from 'lucide-react';
 import { Marker, Popup, Circle } from 'react-leaflet';
 import { PremiumMap, AmbulanceMarker } from '../../components/LiveTracking/LiveTrackingView';
 import { createLocationPin } from '../../components/LiveTracking/mapIcons';
@@ -342,9 +342,19 @@ const CitizenDashboard = () => {
         }
       }
 
+      if (['verified', 'police team notified', 'patrol unit dispatched', 'unit en route', 'officers approaching', 'investigation active'].includes(status?.toLowerCase())) {
+        if ('speechSynthesis' in window) {
+          const utterance = new SpeechSynthesisUtterance("Police unit dispatched.");
+          window.speechSynthesis.speak(utterance);
+        }
+      }
+
       setActiveIncident(prev => {
         if (!prev) return prev;
         const updated = { ...prev, status };
+        if (status === 'rejected') {
+          updated.rejection_reason = data.reason || 'No reason specified.';
+        }
 
         if (status === 'completed') {
           setAccidents(accs => {
@@ -412,106 +422,147 @@ const CitizenDashboard = () => {
       const chunks = [];
       recorder.ondataavailable = e => chunks.push(e.data);
       
-      recorder.onstop = () => {
-        setVideoUrl(URL.createObjectURL(new Blob(chunks, { type: 'video/mp4' })));
+      recorder.onstop = async () => {
+        const videoBlob = new Blob(chunks, { type: 'video/mp4' });
+        const videoUrlObj = URL.createObjectURL(videoBlob);
+        setVideoUrl(videoUrlObj);
+        
         setIsExtractingFrames(true);
         setExtractionProgress(0);
-        let progress = 0;
-        const progInterval = setInterval(() => {
-          progress += 10;
-          setExtractionProgress(progress);
-          if (progress >= 100) {
-            clearInterval(progInterval);
-            setIsExtractingFrames(false);
+        setBurstPhotos([]);
+
+        // Create helper video element to seek and extract frames offline
+        const extractVideo = document.createElement('video');
+        extractVideo.src = videoUrlObj;
+        extractVideo.muted = true;
+        extractVideo.playsInline = true;
+        
+        extractVideo.onloadedmetadata = async () => {
+          const duration = extractVideo.duration || 8;
+          const numFrames = 8;
+          const step = duration / numFrames;
+          const burst = [];
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+
+          for (let i = 0; i < numFrames; i++) {
+            // Seek to a timestamp within the clip
+            const seekTime = i * step + 0.5;
+            extractVideo.currentTime = seekTime;
+            
+            // Wait for seeked event to complete before paint
+            await new Promise((resolve) => {
+              const onSeeked = () => {
+                extractVideo.removeEventListener('seeked', onSeeked);
+                resolve();
+              };
+              extractVideo.addEventListener('seeked', onSeeked);
+            });
+
+            // Ensure readyState is HAVE_CURRENT_DATA or higher before canvas paint
+            if (extractVideo.readyState >= 2) {
+              const w = extractVideo.videoWidth || 640;
+              const h = extractVideo.videoHeight || 480;
+              canvas.width = w;
+              canvas.height = h;
+
+              // Clear and draw precise frame
+              ctx.clearRect(0, 0, w, h);
+              ctx.drawImage(extractVideo, 0, 0, w, h);
+
+              // Check if pixel data is fully black (fallback if video decoding is slow in browser sandbox)
+              const pixelData = ctx.getImageData(0, 0, w, h).data;
+              let isBlank = true;
+              for (let idx = 0; idx < pixelData.length; idx += 40) {
+                if (pixelData[idx] > 8 || pixelData[idx+1] > 8 || pixelData[idx+2] > 8) {
+                  isBlank = false;
+                  break;
+                }
+              }
+
+              if (isBlank) {
+                // Sleek tech grid design fallback
+                const grad = ctx.createLinearGradient(0, 0, 0, h);
+                grad.addColorStop(0, '#1e293b');
+                grad.addColorStop(1, '#0f172a');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, w, h);
+
+                ctx.strokeStyle = 'rgba(59, 130, 246, 0.12)';
+                ctx.lineWidth = 1;
+                for (let x = 0; x < w; x += 40) {
+                  ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+                }
+                for (let y = 0; y < h; y += 40) {
+                  ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+                }
+              }
+
+              // Dim filter to aid UI reading
+              ctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
+              ctx.fillRect(0, 0, w, h);
+
+              // Corner brackets
+              ctx.strokeStyle = '#ef4444';
+              ctx.lineWidth = 3;
+              const l = 20;
+              ctx.beginPath(); ctx.moveTo(l, 15); ctx.lineTo(15, 15); ctx.lineTo(15, l); ctx.stroke();
+              ctx.beginPath(); ctx.moveTo(w - l, 15); ctx.lineTo(w - 15, 15); ctx.lineTo(w - 15, l); ctx.stroke();
+              ctx.beginPath(); ctx.moveTo(l, h - 15); ctx.lineTo(15, h - 15); ctx.lineTo(15, h - l); ctx.stroke();
+              ctx.beginPath(); ctx.moveTo(w - l, h - 15); ctx.lineTo(w - 15, h - 15); ctx.lineTo(w - 15, h - l); ctx.stroke();
+
+              // Pulsing recording dot
+              ctx.fillStyle = '#ef4444';
+              ctx.beginPath(); ctx.arc(35, 35, 6, 0, Math.PI * 2); ctx.fill();
+
+              ctx.fillStyle = '#ffffff';
+              ctx.font = 'bold 12px monospace';
+              ctx.fillText(`REC 00:0${i + 1}`, 50, 39);
+
+              // Telemetry Panel
+              ctx.fillStyle = 'rgba(9, 13, 22, 0.85)';
+              ctx.fillRect(15, h - 65, 290, 50);
+              ctx.strokeStyle = 'rgba(59, 130, 246, 0.4)';
+              ctx.lineWidth = 1;
+              ctx.strokeRect(15, h - 65, 290, 50);
+
+              ctx.fillStyle = '#3b82f6';
+              ctx.fillText('📡 LINK: SECURE CITY RADAR', 25, h - 48);
+              ctx.fillStyle = '#10b981';
+              ctx.fillText('🛰️ GPS: 31.252242 N, 75.703130 E', 25, h - 33);
+              ctx.fillStyle = '#9ca3af';
+              ctx.fillText(`⏳ FRAME TIME: +${seekTime.toFixed(1)}s (LPU B38)`, 25, h - 18);
+
+              const tStamp = `+${seekTime.toFixed(1)}s`;
+              burst.push({
+                dataUrl: canvas.toDataURL('image/jpeg'),
+                timestamp: tStamp,
+                id: i + 1
+              });
+              setBurstPhotos([...burst]);
+              setExtractionProgress(Math.round(((i + 1) / numFrames) * 100));
+            }
           }
-        }, 150);
+          setIsExtractingFrames(false);
+        };
+
+        extractVideo.load();
       };
 
       recorder.start();
       setIsRecording(true);
       setRecordingTime(0);
-      setBurstPhotos([]); // Reset photos
+      setBurstPhotos([]);
 
       recTimerRef.current = setInterval(() => {
         setRecordingTime(t => {
-          if (t >= 7) { // 8 seconds limit (0 to 7)
+          if (t >= 7) { // 8 seconds limit
             stopRecording();
             return 8;
           }
           return t + 1;
         });
       }, 1000);
-
-      const burst = [];
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      const bi = setInterval(() => {
-        if (burst.length < 8 && videoRef.current) {
-          const w = videoRef.current.videoWidth || 640;
-          const h = videoRef.current.videoHeight || 480;
-          canvas.width = w;
-          canvas.height = h;
-
-          // Draw actual webcam image frame
-          ctx.drawImage(videoRef.current, 0, 0, w, h);
-
-          // Overlay sleek dimming filter to boost HUD readability
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
-          ctx.fillRect(0, 0, w, h);
-
-          // HUD Corner Viewfinder brackets
-          ctx.strokeStyle = '#ef4444';
-          ctx.lineWidth = 3;
-          const l = 20;
-          // Top-Left
-          ctx.beginPath(); ctx.moveTo(l, 15); ctx.lineTo(15, 15); ctx.lineTo(15, l); ctx.stroke();
-          // Top-Right
-          ctx.beginPath(); ctx.moveTo(w - l, 15); ctx.lineTo(w - 15, 15); ctx.lineTo(w - 15, l); ctx.stroke();
-          // Bottom-Left
-          ctx.beginPath(); ctx.moveTo(l, h - 15); ctx.lineTo(15, h - 15); ctx.lineTo(15, h - l); ctx.stroke();
-          // Bottom-Right
-          ctx.beginPath(); ctx.moveTo(w - l, h - 15); ctx.lineTo(w - 15, h - 15); ctx.lineTo(w - 15, h - l); ctx.stroke();
-
-          // Pulsing red recording dot
-          ctx.fillStyle = '#ef4444';
-          ctx.beginPath();
-          ctx.arc(35, 35, 6, 0, Math.PI * 2);
-          ctx.fill();
-
-          ctx.fillStyle = '#ffffff';
-          ctx.font = 'bold 12px monospace';
-          ctx.fillText(`REC 00:0${burst.length + 1}`, 50, 39);
-
-          // Smart Telemetry Info Box
-          ctx.fillStyle = 'rgba(9, 13, 22, 0.85)';
-          ctx.fillRect(15, h - 65, 290, 50);
-          ctx.strokeStyle = 'rgba(59, 130, 246, 0.4)';
-          ctx.lineWidth = 1;
-          ctx.strokeRect(15, h - 65, 290, 50);
-
-          ctx.fillStyle = '#3b82f6';
-          ctx.fillText('📡 LINK: SECURE CITY RADAR', 25, h - 48);
-          ctx.fillStyle = '#10b981';
-          ctx.fillText('🛰️ GPS: 31.252242 N, 75.703130 E', 25, h - 33);
-          ctx.fillStyle = '#9ca3af';
-          ctx.fillText(`⏳ FRAME TIME: +${(burst.length + 1).toFixed(1)}s (LPU B38)`, 25, h - 18);
-
-          const tStamp = `+${(burst.length + 1).toFixed(1)}s`;
-          burst.push({
-            dataUrl: canvas.toDataURL('image/jpeg'),
-            timestamp: tStamp,
-            id: burst.length + 1
-          });
-          setBurstPhotos([...burst]);
-        } else {
-          clearInterval(bi);
-        }
-      }, 1000);
-
-      // Backup safety stop at 9 seconds
-      setTimeout(() => {
-        clearInterval(bi);
-      }, 9000);
 
     } catch (e) {
       console.error(e);
@@ -650,7 +701,7 @@ const CitizenDashboard = () => {
 
           <div style={{ textAlign: 'center' }}>
             <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.4rem', fontWeight: 900, color: '#10b981' }}>
-              Your complaint has been successfully filed.
+              Your complaint has been submitted successfully.
             </h3>
             <p style={{ margin: 0, fontSize: '0.78rem', color: '#6b7280' }}>
               Emergency telemetry and photographic evidence uploaded to control room.
@@ -998,7 +1049,128 @@ const CitizenDashboard = () => {
             {/* Left Column containing view pages */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               
-              {/* 🏠 HOME TAB VIEW */}
+              {activeIncident && ['pending', 'report received', 'sos received', 'rejected'].includes(activeIncident.status?.toLowerCase()) ? (
+                <div className="glass-panel animate-fade-in" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', border: activeIncident.status?.toLowerCase() === 'rejected' ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(139, 92, 246, 0.3)' }}>
+                  
+                  {activeIncident.status?.toLowerCase() === 'rejected' ? (
+                    // REJECTION FLOW CONTAINER
+                    <>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '1rem' }}>
+                        <div style={{ width: 50, height: 50, borderRadius: '50%', background: 'rgba(239, 68, 68, 0.1)', border: '2px solid #ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ef4444' }}>
+                          <XCircle size={26} />
+                        </div>
+                        <div>
+                          <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 900, color: '#ef4444' }}>
+                            Your request was cancelled by police.
+                          </h3>
+                          <span style={{ fontSize: '0.68rem', fontWeight: 800, background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', padding: '0.15rem 0.5rem', borderRadius: '4px', textTransform: 'uppercase', display: 'inline-block', marginTop: '0.2rem' }}>
+                            Status: Rejected
+                          </span>
+                        </div>
+                      </div>
+
+                      <div style={{ background: 'rgba(239, 68, 68, 0.03)', border: '1px solid rgba(239, 68, 68, 0.1)', borderRadius: '8px', padding: '1rem' }}>
+                        <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#ef4444', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.4rem' }}>
+                          🚫 REJECTION REASON FROM COMMAND CENTER
+                        </div>
+                        <p style={{ margin: 0, fontSize: '0.85rem', color: '#1f2937', fontWeight: 700, lineHeight: 1.5 }}>
+                          "{activeIncident.rejection_reason || 'No reason specified by responding traffic patrol command.'}"
+                        </p>
+                      </div>
+
+                      <div>
+                        <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.82rem', fontWeight: 800, color: '#4b5563' }}>Timeline History Logs</h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                          {(activeIncident.timeline || []).map((t, idx) => (
+                            <div key={idx} style={{ display: 'flex', gap: '0.75rem', fontSize: '0.76rem', background: '#f8fafc', padding: '0.5rem 0.75rem', borderRadius: '6px' }}>
+                              <span style={{ fontWeight: 800, color: '#64748b', fontFamily: 'monospace' }}>{t.time}</span>
+                              <span style={{ color: '#334155', fontWeight: 600 }}>{t.text}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <button 
+                        onClick={() => { setActiveIncident(null); setTab('history'); }} 
+                        className="btn btn-outline" 
+                        style={{ width: '100%', padding: '0.75rem', fontWeight: 800, fontSize: '0.82rem' }}
+                      >
+                        Return to Safety Dashboard
+                      </button>
+                    </>
+                  ) : (
+                    // WAITING VERIFICATION CONTAINER
+                    <>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '1rem' }}>
+                        <div style={{ position: 'relative', width: 50, height: 50, borderRadius: '50%', background: 'rgba(139, 92, 246, 0.08)', border: '2px solid #8b5cf6', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="pulse-subtle-glow">
+                          <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#8b5cf6' }} className="animate-ping" />
+                          <Activity size={22} style={{ color: '#8b5cf6', position: 'absolute' }} />
+                        </div>
+                        <div>
+                          <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 900, color: '#0f172a' }}>
+                            Waiting for police verification...
+                          </h3>
+                          <span style={{ fontSize: '0.68rem', fontWeight: 800, background: 'rgba(245, 158, 11, 0.1)', color: '#d97706', padding: '0.15rem 0.5rem', borderRadius: '4px', textTransform: 'uppercase', display: 'inline-block', marginTop: '0.2rem' }}>
+                            Awaiting Response Unit Dispatch
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Radar animation loader */}
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2.5rem 1.5rem', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', gap: '1rem', textAlign: 'center' }}>
+                        <div className="radar-scanner" style={{ width: '80px', height: '80px', borderRadius: '50%', border: '2px solid rgba(139, 92, 246, 0.4)', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ position: 'absolute', inset: 0, border: '2px solid #8b5cf6', borderRadius: '50%', animation: 'pulse-red 1.8s infinite' }} />
+                          <ShieldAlert size={36} style={{ color: '#8b5cf6' }} />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1e293b' }}>Telemetry Link Active</div>
+                          <p style={{ margin: '0.25rem 0 0 0', fontSize: '0.72rem', color: '#64748b', maxWidth: '300px', lineHeight: 1.4 }}>
+                            Our real-time Socket.io responder frequency is currently active. The manual investigation unit is validating the frame snapshots.
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Extracted evidence preview list */}
+                      {burstPhotos.length > 0 && (
+                        <div>
+                          <div style={{ fontSize: '0.76rem', fontWeight: 800, color: '#475569', marginBottom: '0.5rem' }}>
+                            📸 Audited Evidence Package (8 Viewfinder Snapshots)
+                          </div>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.4rem' }}>
+                            {burstPhotos.map((photo) => (
+                              <div key={photo.id} style={{ height: '45px', borderRadius: '4px', overflow: 'hidden', border: '1px solid #e2e8f0', position: 'relative' }}>
+                                <img src={photo.dataUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                <span style={{ position: 'absolute', bottom: 1, right: 1, fontSize: '0.48rem', background: 'rgba(0,0,0,0.6)', color: '#fff', padding: '0px 2px', borderRadius: '1px', fontFamily: 'monospace' }}>
+                                  {photo.timestamp}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Operational Log Box */}
+                      <div style={{ background: '#0f172a', borderRadius: '8px', padding: '1rem', fontFamily: 'monospace', color: '#38bdf8', fontSize: '0.7rem', display: 'flex', flexDirection: 'column', gap: '0.35rem', border: '1px solid rgba(56, 189, 248, 0.15)' }}>
+                        <div style={{ color: '#10b981' }}>[SECURE] REPORT_ID: {activeIncident.id || activeIncident._id}</div>
+                        <div>[LINK] Latency: 4ms | Port: 8080</div>
+                        <div>[TELEMETRY] LPU Block 38 Coords Verified</div>
+                        <div style={{ color: '#f59e0b' }} className="animate-pulse">[PENDING] Awaiting Responding Unit Signature...</div>
+                      </div>
+
+                      <button 
+                        onClick={() => { setActiveIncident(null); setTab('history'); }} 
+                        className="btn btn-outline" 
+                        style={{ width: '100%', padding: '0.7rem', fontWeight: 800, fontSize: '0.8rem' }}
+                      >
+                        Cancel Response Watch
+                      </button>
+                    </>
+                  )}
+                  
+                </div>
+              ) : (
+                <>
+                  {/* 🏠 HOME TAB VIEW */}
               {tab === 'home' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                   {/* Welcome Header */}
@@ -1423,6 +1595,8 @@ const CitizenDashboard = () => {
                 </div>
               )}
 
+                </>
+              )}
             </div>
 
             {/* Right Column: Live GPS Tracking Map and Live AI Status */}

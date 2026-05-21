@@ -214,44 +214,59 @@ export const PoliceDashboard = () => {
     }
   };
 
-  // Helper function to resolve real citizen identities dynamically or eagerly
-  const getCitizenDetails = (incident) => {
-    if (!incident) return { name: 'Anonymous citizen', email: 'citizen@safety.gov', role: 'Citizen', time: '—' };
-    
-    if (incident.user?.name) {
-      return {
-        name: incident.user.name,
-        email: incident.user.email || 'citizen@safety.gov',
-        role: incident.user.role || 'Citizen',
-        time: new Date(incident.created_at).toLocaleString()
-      };
+  const handleRejectPrompt = async (incidentId) => {
+    const reason = prompt("Please enter the reason for rejecting this emergency incident report:");
+    if (reason === null) return; // User cancelled
+    if (!reason.trim()) {
+      alert("A rejection reason is required.");
+      return;
     }
-    if (incident.citizen?.name) {
+    
+    setUpdatingStatus(true);
+    try {
+      const res = await api.post(`/accidents/${incidentId}/reject`, { reason });
+      const updatedIncident = res.data?.data;
+      if (updatedIncident) {
+        setAccidents(prev => prev.map(a => (a.id === updatedIncident.id || a._id === updatedIncident._id) ? updatedIncident : a));
+        setSelectedIncident(updatedIncident);
+        
+        // Broadcast manual rejection update to the citizen in real time
+        if (socketRef.current) {
+          socketRef.current.emit('emergency-status-updated', {
+            emergencyId: incidentId,
+            status: 'rejected',
+            reason: reason
+          });
+        }
+        alert('Emergency report has been rejected and the reporter has been notified.');
+      }
+    } catch (e) {
+      alert('Rejection failed.');
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
+  const getCitizenDetails = (incident) => {
+    if (!incident) return { name: 'Anonymous Citizen', email: 'citizen@safety.gov', role: 'Citizen', time: '—', userId: '—' };
+    
+    const u = incident.user || incident.citizen;
+    if (u) {
       return {
-        name: incident.citizen.name,
-        email: incident.citizen.email || 'citizen@safety.gov',
-        role: 'Citizen',
-        time: new Date(incident.created_at).toLocaleString()
+        name: u.name || 'Anonymous Citizen',
+        email: u.email || 'N/A',
+        role: u.role || 'Citizen',
+        time: new Date(incident.created_at || Date.now()).toLocaleString(),
+        userId: u.id || u._id || incident.user_id || 'N/A'
       };
     }
 
-    // Dynamic hash mapper for reliable, authentic presentation names
-    const idStr = String(incident.id || incident._id || '');
-    const sum = idStr.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    
-    const reporters = [
-      { name: "Pritpal Sandhu", email: "pritpal.sandhu@lpu.in", role: "Citizen (Verified)" },
-      { name: "Arshdeep Singh", email: "arshdeep.singh@lpu.in", role: "Citizen (Verified)" },
-      { name: "Sukhpreet Kaur", email: "sukhpreet.k@safety.org", role: "Resident Reporter" },
-      { name: "Gurpreet Singh", email: "gurpreet.s@citynet.in", role: "Emergency First Responder" }
-    ];
-    
-    const selected = reporters[sum % reporters.length];
     return {
-      name: selected.name,
-      email: selected.email,
-      role: selected.role,
-      time: new Date(incident.created_at || Date.now()).toLocaleString()
+      name: 'Anonymous Citizen',
+      email: 'citizen@safety.gov',
+      role: 'Citizen',
+      time: new Date(incident.created_at || Date.now()).toLocaleString(),
+      userId: incident.user_id || 'N/A'
     };
   };
 
@@ -446,14 +461,14 @@ export const PoliceDashboard = () => {
                   <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#3b82f6', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                     <ShieldCheck size={12} /> SECURE AUDITED CITIZEN IDENTITY
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.78rem' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1.25fr 0.75fr', gap: '1rem', fontSize: '0.78rem' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                       <span style={{ color: '#9ca3af' }}>Reporter Name: <strong style={{ color: '#fff' }}>{getCitizenDetails(selectedIncident).name}</strong></span>
                       <span style={{ color: '#9ca3af' }}>Contact Email: <span style={{ color: '#3b82f6', textDecoration: 'underline' }}>{getCitizenDetails(selectedIncident).email}</span></span>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                       <span style={{ color: '#9ca3af' }}>Secured Role: <span style={{ color: '#fff', fontWeight: 700 }}>{getCitizenDetails(selectedIncident).role}</span></span>
-                      <span style={{ color: '#9ca3af' }}>Filed Time: <span style={{ color: '#fff' }}>{getCitizenDetails(selectedIncident).time}</span></span>
+                      <span style={{ color: '#9ca3af' }}>User UID: <span style={{ color: '#10b981', fontFamily: 'monospace', fontSize: '0.7rem' }}>{getCitizenDetails(selectedIncident).userId}</span></span>
                     </div>
                   </div>
                 </div>
@@ -531,10 +546,10 @@ export const PoliceDashboard = () => {
                     <MapPin size={16} style={{ color: '#3b82f6' }} /> Live Response Grid Map (LPU Block 38)
                   </div>
                   <div style={{ width: '100%', height: 'calc(100% - 25px)', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <PremiumMap center={[selectedIncident.location?.coordinates?.[1] || 31.25224, selectedIncident.location?.coordinates?.[0] || 75.70313]} zoom={15}>
+                    <PremiumMap center={[selectedIncident.location?.coordinates?.[1] || 31.2522427094373, selectedIncident.location?.coordinates?.[0] || 75.70313062579577]} zoom={15}>
                       {/* Incident / Citizen Marker */}
                       <Marker 
-                        position={[selectedIncident.location?.coordinates?.[1] || 31.25224, selectedIncident.location?.coordinates?.[0] || 75.70313]} 
+                        position={[selectedIncident.location?.coordinates?.[1] || 31.2522427094373, selectedIncident.location?.coordinates?.[0] || 75.70313062579577]} 
                         icon={createLocationPin(selectedIncident.title)}
                       >
                         <Popup className="uber-popup">
@@ -638,7 +653,7 @@ export const PoliceDashboard = () => {
                   </button>
                 )}
 
-                {selectedIncident.status?.toLowerCase() !== 'resolved' && (
+                {selectedIncident.status?.toLowerCase() !== 'resolved' && selectedIncident.status?.toLowerCase() !== 'rejected' && (
                   <button 
                     onClick={() => startPoliceDispatch(selectedIncident.id || selectedIncident._id)}
                     disabled={updatingStatus || timelineStep > 0}
@@ -663,7 +678,7 @@ export const PoliceDashboard = () => {
                   </button>
                 )}
 
-                {selectedIncident.status?.toLowerCase() !== 'resolved' && (
+                {selectedIncident.status?.toLowerCase() !== 'resolved' && selectedIncident.status?.toLowerCase() !== 'rejected' && (
                   <button 
                     onClick={() => handleResolve(selectedIncident.id || selectedIncident._id)}
                     disabled={updatingStatus}
@@ -671,6 +686,17 @@ export const PoliceDashboard = () => {
                     style={{ flex: 1, padding: '0.75rem', fontSize: '0.8rem', fontWeight: 800, background: '#ef4444', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}
                   >
                     Mark Incident as Resolved
+                  </button>
+                )}
+
+                {selectedIncident.status?.toLowerCase() !== 'resolved' && selectedIncident.status?.toLowerCase() !== 'rejected' && (
+                  <button 
+                    onClick={() => handleRejectPrompt(selectedIncident.id || selectedIncident._id)}
+                    disabled={updatingStatus}
+                    className="btn btn-outline"
+                    style={{ flex: 1, borderColor: '#ef4444', color: '#ef4444', padding: '0.75rem', fontSize: '0.8rem', fontWeight: 800, background: 'transparent', border: '1px solid #ef4444', borderRadius: 8, cursor: 'pointer' }}
+                  >
+                    Reject Incident Report
                   </button>
                 )}
 
