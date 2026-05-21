@@ -55,7 +55,7 @@ class AccidentController extends Controller
             'trust_score'      => 'nullable|numeric|between:0,100',
         ]);
 
-        // Handle image uploads (Supabase Storage with automatic Local Storage fallback)
+        // Handle image uploads (Supabase Storage only - NO fallback allowed!)
         $imagePaths = [];
         if ($request->hasFile('images')) {
             $supabaseUrl = env('SUPABASE_URL');
@@ -65,71 +65,61 @@ class AccidentController extends Controller
             \Illuminate\Support\Facades\Log::info('[SUPABASE UPLOAD] Start processing ' . count($request->file('images')) . ' images/videos.');
             \Illuminate\Support\Facades\Log::info('[SUPABASE CONFIG] URL: ' . ($supabaseUrl ?: 'MISSING') . ' | KEY present: ' . ($supabaseKey ? 'YES' : 'NO') . ' | BUCKET: ' . $bucketName);
 
+            if (!$supabaseUrl || !$supabaseKey) {
+                \Illuminate\Support\Facades\Log::error("[SUPABASE CONFIG MISSING] SUPABASE_URL or SUPABASE_KEY not loaded in environment. Upload aborted.");
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Cloud storage credentials are not configured on the server. Upload aborted.'
+                ], 500);
+            }
+
             foreach ($request->file('images') as $index => $image) {
                 $originalName = $image->getClientOriginalName();
-                $extension = $image->getClientOriginalExtension();
+                $extension = strtolower($image->getClientOriginalExtension());
                 $mimeType = $image->getMimeType();
                 $size = $image->getSize();
                 
                 \Illuminate\Support\Facades\Log::info("[SUPABASE UPLOAD] Processing File #{$index}: Name={$originalName}, Ext={$extension}, Mime={$mimeType}, Size={$size} bytes");
 
-                if ($supabaseUrl && $supabaseKey) {
-                    try {
-                        $filename = 'accidents/images/' . uniqid() . '.' . $extension;
-                        \Illuminate\Support\Facades\Log::info("[SUPABASE UPLOAD] Attempting cloud upload to path: {$filename} in bucket: {$bucketName}");
+                try {
+                    $filename = 'accidents/images/' . uniqid() . '.' . $extension;
+                    \Illuminate\Support\Facades\Log::info("[SUPABASE UPLOAD] Attempting cloud upload to path: {$filename} in bucket: {$bucketName}");
 
-                        // Upload directly to Supabase Storage API using Laravel's Http facade with raw body
-                        $fileContents = file_get_contents($image->getRealPath());
-                        $fileSize = strlen($fileContents);
-                        
-                        \Illuminate\Support\Facades\Log::info("[SUPABASE UPLOAD] Uploading raw body: Name={$originalName}, Size={$fileSize} bytes, Mime={$mimeType}");
-
-                        $response = \Illuminate\Support\Facades\Http::withHeaders([
-                            'Authorization' => 'Bearer ' . $supabaseKey,
-                            'apikey'        => $supabaseKey,
-                            'Content-Type'  => $mimeType,
-                        ])->withBody(
-                            $fileContents,
-                            $mimeType
-                        )->post($supabaseUrl . '/storage/v1/object/' . $bucketName . '/' . $filename);
-
-                        \Illuminate\Support\Facades\Log::info("[SUPABASE UPLOAD] Response status code: " . $response->status() . " | Body: " . $response->body());
-                        
-                        if ($response->successful()) {
-                            // Format public URL
-                            $publicUrl = $supabaseUrl . '/storage/v1/object/public/' . $bucketName . '/' . $filename;
-                            $imagePaths[] = $publicUrl;
-                            \Illuminate\Support\Facades\Log::info("[SUPABASE UPLOAD] Success! Saved URL: " . $publicUrl);
-                        } else {
-                            \Illuminate\Support\Facades\Log::error("[SUPABASE UPLOAD] Failed with response: " . $response->body());
-                            
-                            // Fallback to local
-                            $path = $image->store('accidents/images', 'public');
-                            $imagePaths[] = $path;
-                            
-                            $fullPath = storage_path('app/public/' . $path);
-                            $savedSize = file_exists($fullPath) ? filesize($fullPath) : 0;
-                            \Illuminate\Support\Facades\Log::warning("[SUPABASE FALLBACK] Triggered local storage fallback. Saved local path: " . $path . " | Size: " . $savedSize . " bytes");
-                        }
-                    } catch (\Exception $e) {
-                        \Illuminate\Support\Facades\Log::error("[SUPABASE UPLOAD EXCEPTION] Exception message: " . $e->getMessage() . "\n" . $e->getTraceAsString());
-                        
-                        // Fallback on exception
-                        $path = $image->store('accidents/images', 'public');
-                        $imagePaths[] = $path;
-                        
-                        $fullPath = storage_path('app/public/' . $path);
-                        $savedSize = file_exists($fullPath) ? filesize($fullPath) : 0;
-                        \Illuminate\Support\Facades\Log::warning("[SUPABASE FALLBACK] Triggered local storage fallback due to exception. Saved local path: " . $path . " | Size: " . $savedSize . " bytes");
-                    }
-                } else {
-                    // Fallback to local storage if credentials are not configured
-                    $path = $image->store('accidents/images', 'public');
-                    $imagePaths[] = $path;
+                    // Upload directly to Supabase Storage API using Laravel's Http facade with raw body
+                    $fileContents = file_get_contents($image->getRealPath());
+                    $fileSize = strlen($fileContents);
                     
-                    $fullPath = storage_path('app/public/' . $path);
-                    $savedSize = file_exists($fullPath) ? filesize($fullPath) : 0;
-                    \Illuminate\Support\Facades\Log::warning("[SUPABASE CONFIG MISSING] SUPABASE_URL or SUPABASE_KEY not loaded in environment. Fallback to local path: " . $path . " | Size: " . $savedSize . " bytes");
+                    \Illuminate\Support\Facades\Log::info("[SUPABASE UPLOAD] Uploading raw body: Name={$originalName}, Size={$fileSize} bytes, Mime={$mimeType}");
+
+                    $response = \Illuminate\Support\Facades\Http::withHeaders([
+                        'Authorization' => 'Bearer ' . $supabaseKey,
+                        'apikey'        => $supabaseKey,
+                        'Content-Type'  => $mimeType,
+                    ])->withBody(
+                        $fileContents,
+                        $mimeType
+                    )->post($supabaseUrl . '/storage/v1/object/' . $bucketName . '/' . $filename);
+
+                    \Illuminate\Support\Facades\Log::info("[SUPABASE UPLOAD] Response status code: " . $response->status() . " | Body: " . $response->body());
+                    
+                    if ($response->successful()) {
+                        // Format public URL
+                        $publicUrl = $supabaseUrl . '/storage/v1/object/public/' . $bucketName . '/' . $filename;
+                        $imagePaths[] = $publicUrl;
+                        \Illuminate\Support\Facades\Log::info("[SUPABASE UPLOAD] Success! Saved URL: " . $publicUrl);
+                    } else {
+                        \Illuminate\Support\Facades\Log::error("[SUPABASE UPLOAD] Failed with response: " . $response->body());
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Secure cloud storage upload failed for file: ' . $originalName . '. Details: ' . $response->body()
+                        ], 500);
+                    }
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error("[SUPABASE UPLOAD EXCEPTION] Exception message: " . $e->getMessage() . "\n" . $e->getTraceAsString());
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Secure cloud storage upload encountered an exception: ' . $e->getMessage()
+                    ], 500);
                 }
             }
         }

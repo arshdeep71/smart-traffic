@@ -125,17 +125,15 @@ const getSvgFallback = (index = 1, timestamp = "+1.0s") => {
 const normalizeImageUrl = (img) => {
   if (!img) return '';
   
-  let resolved = '';
-  if (img.startsWith('data:') || img.startsWith('http://') || img.startsWith('https://')) {
-    resolved = img;
-  } else {
-    // Local storage path: needs backend API base url prepended
-    const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api').replace('/api', '');
-    resolved = `${baseUrl}/storage/${img}`;
+  // Prioritize absolute URLs (like Supabase storage CDN)
+  if (img.startsWith('http://') || img.startsWith('https://') || img.startsWith('data:')) {
+    console.log(`[IMAGE RESOLVER] Prioritized absolute URL: "${img}"`);
+    return img;
   }
   
-  // Clean up any double slashes in paths like .../storage//accidents...
-  // but protect the http:// and https:// double slashes!
+  // Fallback ONLY if it's a relative legacy path
+  const baseUrl = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api').replace('/api', '');
+  let resolved = `${baseUrl}/storage/${img}`;
   if (resolved.includes('//')) {
     const parts = resolved.split('://');
     if (parts.length === 2) {
@@ -145,7 +143,7 @@ const normalizeImageUrl = (img) => {
     }
   }
   
-  console.log(`[IMAGE RESOLVER] Input: "${img}" | Resolved: "${resolved}"`);
+  console.log(`[IMAGE RESOLVER] Resolved relative path fallback: "${img}" -> "${resolved}"`);
   return resolved;
 };
 
@@ -675,35 +673,57 @@ export const PoliceDashboard = () => {
     
     const u = incident.user || incident.citizen;
     
-    // 1. Prioritize direct reporter fields from MongoDB first!
-    let name = incident.reporter_name;
-    let email = incident.reporter_email;
+    // 1. Direct MongoDB reporter values
+    let reporterName = incident.reporter_name;
+    let reporterEmail = incident.reporter_email;
     
-    // 2. Bypasses seed defaults ('Citizen Priya' / 'citizen@traffic.local') if other info is available
-    if (!name || name === 'Citizen Priya') {
-      if (u && u.name && u.name !== 'Citizen Priya') {
-        name = u.name;
-      }
+    // 2. Auth user values
+    let authName = u?.name;
+    let authEmail = u?.email;
+    
+    // Initialize our target variables
+    let finalName = '';
+    let finalEmail = '';
+
+    // Step A: Determine Name
+    if (reporterName && reporterName.trim() !== '') {
+      // Dynamic reporter name takes highest priority
+      finalName = reporterName;
+    } else if (authName && authName.trim() !== '' && authName !== 'Citizen Priya') {
+      // Non-seeded auth user name takes second priority
+      finalName = authName;
+    } else if (reporterName && reporterName === 'Citizen Priya') {
+      // Seeded reporter name third
+      finalName = reporterName;
+    } else {
+      // Seeded auth user name or absolute fallback
+      finalName = authName || 'Anonymous Citizen';
     }
-    if (!email || email === 'citizen@traffic.local') {
-      if (u && u.email && u.email !== 'citizen@traffic.local') {
-        email = u.email;
-      }
+
+    // Step B: Determine Email
+    if (reporterEmail && reporterEmail.trim() !== '') {
+      // Dynamic reporter email takes highest priority
+      finalEmail = reporterEmail;
+    } else if (authEmail && authEmail.trim() !== '' && authEmail !== 'citizen@traffic.local') {
+      // Non-seeded auth user email takes second priority
+      finalEmail = authEmail;
+    } else if (reporterEmail && reporterEmail === 'citizen@traffic.local') {
+      // Seeded reporter email third
+      finalEmail = reporterEmail;
+    } else {
+      // Seeded auth user email or absolute fallback
+      finalEmail = authEmail || 'citizen@safety.gov';
     }
-    
-    // 3. Absolute fallbacks
-    if (!name) name = u?.name || 'Anonymous Citizen';
-    if (!email) email = u?.email || 'citizen@safety.gov';
-    
+
     const res = {
-      name,
-      email,
+      name: finalName,
+      email: finalEmail,
       role: u?.role || 'Citizen',
       time: new Date(incident.created_at || Date.now()).toLocaleString(),
       userId: u?.id || u?._id || incident.user_id || 'N/A'
     };
 
-    console.log("[POLICE DASHBOARD] Parsed Citizen Details for incident:", incident.title, res);
+    console.log("[POLICE DASHBOARD] Parsed Citizen Details with priority structure:", incident.title, res);
     return res;
   };
 

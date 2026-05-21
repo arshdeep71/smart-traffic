@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
+import { supabase } from '../../lib/supabase';
 import api from '../../services/api';
 import { connectSocket, socket } from '../../services/socket';
 import { AlertTriangle, MapPin, Camera, Video, Loader2, Zap, Activity, UserCheck, Smartphone, Package, Navigation, Compass, CheckCircle, XCircle, Shield, ShieldAlert } from 'lucide-react';
@@ -661,15 +662,16 @@ const CitizenDashboard = () => {
       const data = new FormData();
       ['title', 'description', 'category', 'severity'].forEach(k => data.append(k, formData[k]));
       data.append('latitude', formData.location.lat); data.append('longitude', formData.location.lng);
-      if (user) {
-        const nameVal = user.name || user.fullName || 'Citizen User';
-        const emailVal = user.email || '';
-        console.log("[OUTGOING PAYLOAD REPORT] Dynamic Reporter Details:", { nameVal, emailVal, userContext: user });
-        data.append('reporter_name', nameVal);
-        data.append('reporter_email', emailVal);
-      } else {
-        console.warn("[OUTGOING PAYLOAD REPORT] Warning: No user session found in context!");
-      }
+      // Ensure reporter name & email come dynamically from current authenticated user session/context
+      const { data: { session } } = await supabase.auth.getSession();
+      const directUser = session?.user;
+      
+      const nameVal = directUser?.user_metadata?.full_name || user?.name || user?.fullName || 'Citizen User';
+      const emailVal = directUser?.email || user?.email || '';
+
+      console.log("[OUTGOING PAYLOAD REPORT] Dynamic Authenticated Citizen Identity Details:", { nameVal, emailVal, directUser, contextUser: user });
+      data.append('reporter_name', nameVal);
+      data.append('reporter_email', emailVal);
       if (videoUrl) { const b = await (await fetch(videoUrl)).blob(); data.append('images[]', b, `ev_${Date.now()}.mp4`); }
       for (let i = 0; i < burstPhotos.length; i++) { 
         const b = await (await fetch(burstPhotos[i].dataUrl)).blob(); 
