@@ -28,10 +28,15 @@ const Layout = () => {
 
     const items = [];
     if (user.role !== 'citizen') {
-      items.push({ path: dashPath, label: 'Dashboard', icon: <LayoutDashboard size={18} /> });
+      if (user.role === 'traffic_police') {
+        items.push({ path: '/police', label: 'Accident Complaints', icon: <AlertTriangle size={18} /> });
+        items.push({ path: '/police?tab=history', label: 'Accident History', icon: <Clock size={18} /> });
+      } else {
+        items.push({ path: dashPath, label: 'Dashboard', icon: <LayoutDashboard size={18} /> });
+      }
     }
 
-    if (['admin', 'super_admin', 'traffic_police'].includes(user.role)) {
+    if (['admin', 'super_admin'].includes(user.role)) {
       items.push({ path: '/map', label: 'Live Map', icon: <Map size={18} /> });
       items.push({ path: '/accidents', label: 'Accidents', icon: <AlertTriangle size={18} /> });
     }
