@@ -112,6 +112,8 @@ class AccidentController extends Controller
             'witness_count'    => $validated['witness_count'] ?? 0,
             'vehicle_involved' => $validated['vehicle_involved'] ?? null,
             'trust_score'      => $validated['trust_score'] ?? 0,
+            'reporter_name'    => $request->input('reporter_name'),
+            'reporter_email'   => $request->input('reporter_email'),
         ]);
 
         AuditLog::record('accident_reported', 'accident', $accident->id);

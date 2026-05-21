@@ -610,6 +610,10 @@ const CitizenDashboard = () => {
       const data = new FormData();
       ['title', 'description', 'category', 'severity'].forEach(k => data.append(k, formData[k]));
       data.append('latitude', formData.location.lat); data.append('longitude', formData.location.lng);
+      if (user) {
+        data.append('reporter_name', user.name || '');
+        data.append('reporter_email', user.email || '');
+      }
       if (videoUrl) { const b = await (await fetch(videoUrl)).blob(); data.append('images[]', b, `ev_${Date.now()}.mp4`); }
       for (let i = 0; i < burstPhotos.length; i++) { 
         const b = await (await fetch(burstPhotos[i].dataUrl)).blob(); 

@@ -287,8 +287,8 @@ export const PoliceDashboard = () => {
     const u = incident.user || incident.citizen;
     if (u) {
       return {
-        name: u.name || 'Anonymous Citizen',
-        email: u.email || 'N/A',
+        name: incident.reporter_name || u.name || 'Anonymous Citizen',
+        email: incident.reporter_email || u.email || 'N/A',
         role: u.role || 'Citizen',
         time: new Date(incident.created_at || Date.now()).toLocaleString(),
         userId: u.id || u._id || incident.user_id || 'N/A'
@@ -296,8 +296,8 @@ export const PoliceDashboard = () => {
     }
 
     return {
-      name: 'Anonymous Citizen',
-      email: 'citizen@safety.gov',
+      name: incident.reporter_name || 'Anonymous Citizen',
+      email: incident.reporter_email || 'citizen@safety.gov',
       role: 'Citizen',
       time: new Date(incident.created_at || Date.now()).toLocaleString(),
       userId: incident.user_id || 'N/A'
