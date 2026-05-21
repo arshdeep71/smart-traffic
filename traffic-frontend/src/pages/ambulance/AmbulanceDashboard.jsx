@@ -64,35 +64,91 @@ export const AmbulanceDashboard = () => {
     } catch(e) {}
   };
 
-  const handleLocationFailure = async () => {
-    // Priority B: Last successful cached coordinates
-    const cLat = localStorage.getItem('driver_lat');
-    const cLng = localStorage.getItem('driver_lng');
-    const cAcc = localStorage.getItem('driver_accuracy');
-    if (cLat && cLng) {
-      console.log("[GPS Driver] Falling back to cached coordinates.");
-      setLocation([parseFloat(cLat), parseFloat(cLng)]);
-      setGpsAccuracy(parseFloat(cAcc || '15'));
-      setUsingDemoFallback(false);
-      setLocationPermissionState('granted');
-      return;
+  const handleLocationFailure = async (force = false) => {
+    // Priority B: Last successful cached coordinates (only if not forced)
+    if (!force) {
+      const cLat = localStorage.getItem('driver_lat');
+      const cLng = localStorage.getItem('driver_lng');
+      const cAcc = localStorage.getItem('driver_accuracy');
+      if (cLat && cLng) {
+        console.log(`[GPS Source: Cached LocalStorage] lat=${cLat}, lng=${cLng}`);
+        setLocation([parseFloat(cLat), parseFloat(cLng)]);
+        setGpsAccuracy(parseFloat(cAcc || '15'));
+        setUsingDemoFallback(false);
+        setLocationPermissionState('granted');
+        return;
+      }
     }
 
     // Priority C & D: IP Location & LPU Block 38 Fallback
-    console.log("[GPS Driver] Geolocation failed. Resolving starting location via IP/LPU fallback...");
+    console.log("[GPS Driver] No active cached coordinates or forced. Resolving starting location via IP/LPU fallback...");
     const res = await resolveStartingLocation('driver');
+    console.log(`[GPS Source: ${res.isFallback ? 'LPU Fallback' : 'IP Lookup'}] lat=${res.lat}, lng=${res.lng}`);
     setLocation([res.lat, res.lng]);
     setGpsAccuracy(res.accuracy);
     setUsingDemoFallback(res.isFallback);
     setLocationPermissionState('granted');
   };
 
+  const triggerHardRefresh = () => {
+    console.log("[GPS Driver Cache Purge] Force refresh triggered. Purging driver cached locations...");
+    localStorage.removeItem('driver_lat');
+    localStorage.removeItem('driver_lng');
+    localStorage.removeItem('driver_accuracy');
+
+    if (navigator.geolocation) {
+      console.log("[GPS Driver] Requesting fresh live browser GPS...");
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          console.log(`[GPS Source: Live Browser GPS] Hard refresh success obtained: lat=${lat}, lng=${lng}`);
+          
+          setLocation([lat, lng]);
+          setGpsAccuracy(Math.floor(pos.coords.accuracy));
+          setUsingDemoFallback(false);
+
+          localStorage.setItem('driver_lat', lat.toString());
+          localStorage.setItem('driver_lng', lng.toString());
+          localStorage.setItem('driver_accuracy', pos.coords.accuracy.toString());
+        },
+        async (err) => {
+          console.warn("[GPS Driver] Live browser GPS hard refresh failed:", err.message);
+          await handleLocationFailure(true);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    }
+  };
+
   const startRealGps = () => {
     if (!navigator.geolocation) {
-      console.warn("Geolocation is not supported by your browser.");
-      handleLocationFailure();
+      console.warn("[GPS Driver] Geolocation is not supported by your browser.");
+      handleLocationFailure(false);
       return;
     }
+
+    console.log("[GPS Driver] Requesting initial live browser GPS...");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        console.log(`[GPS Source: Live Browser GPS] Success obtained: lat=${lat}, lng=${lng}`);
+        
+        setLocation([lat, lng]);
+        setGpsAccuracy(Math.floor(pos.coords.accuracy));
+        setUsingDemoFallback(false);
+
+        localStorage.setItem('driver_lat', lat.toString());
+        localStorage.setItem('driver_lng', lng.toString());
+        localStorage.setItem('driver_accuracy', pos.coords.accuracy.toString());
+      },
+      async (err) => {
+        console.warn("[GPS Driver] Initial live browser GPS request failed:", err.message);
+        await handleLocationFailure(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
 
     console.log("[GPS Driver] Starting real-time ambulance driver GPS watch...");
     const watchId = navigator.geolocation.watchPosition(
@@ -102,7 +158,7 @@ export const AmbulanceDashboard = () => {
         const spd = pos.coords.speed ? Math.round(pos.coords.speed * 3.6) : 0; // m/s to km/h
         const hd = pos.coords.heading || 0;
         
-        console.log(`[GPS Driver] Driver GPS watch update: lat=${lat}, lng=${lng}, accuracy=${pos.coords.accuracy}m, speed=${spd} km/h`);
+        console.log(`[GPS Update: Live Watch Driver] Active GPS watch update: lat=${lat}, lng=${lng}, accuracy=${pos.coords.accuracy}m, speed=${spd} km/h`);
         setLocation([lat, lng]);
         setSpeed(spd > 0 ? spd : 0);
         setHeading(hd);
@@ -110,6 +166,7 @@ export const AmbulanceDashboard = () => {
         setLocationPermissionState('granted');
         setUsingDemoFallback(false);
 
+        console.log(`[GPS Cache Overwrite: Live Watch Driver] Overwriting old cache: lat=${localStorage.getItem('driver_lat')}, lng=${localStorage.getItem('driver_lng')} with new watch: lat=${lat}, lng=${lng}`);
         localStorage.setItem('driver_lat', lat.toString());
         localStorage.setItem('driver_lng', lng.toString());
         localStorage.setItem('driver_accuracy', pos.coords.accuracy.toString());
@@ -131,9 +188,8 @@ export const AmbulanceDashboard = () => {
       },
       async (err) => {
         console.error("[GPS Driver] Driver watchPosition error:", err.code, err.message);
-        await handleLocationFailure();
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
 
     return () => {
@@ -451,6 +507,13 @@ export const AmbulanceDashboard = () => {
       <div style={{ position: 'absolute', top: 20, left: 20, zIndex: 1000, display: 'flex', gap: '0.5rem', background: '#fff', padding: '0.4rem', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
          <button onClick={() => setActiveTab('dispatch')} style={{ background: activeTab === 'dispatch' ? '#0f172a' : 'transparent', color: activeTab === 'dispatch' ? '#fff' : '#64748b', border: 'none', padding: '0.6rem 1.2rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 800 }}>Navigation</button>
          <button onClick={() => setActiveTab('history')} style={{ background: activeTab === 'history' ? '#0f172a' : 'transparent', color: activeTab === 'history' ? '#fff' : '#64748b', border: 'none', padding: '0.6rem 1.2rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 800 }}>History</button>
+      </div>
+
+      {/* 🔄 HARD REFRESH GPS ACTION */}
+      <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 1000, display: 'flex', background: '#fff', padding: '0.4rem', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
+         <button onClick={triggerHardRefresh} style={{ background: 'transparent', border: 'none', color: '#ef4444', padding: '0.6rem 1.2rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 800, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+           🔄 Force Refresh GPS
+         </button>
       </div>
 
       {activeTab === 'history' && (

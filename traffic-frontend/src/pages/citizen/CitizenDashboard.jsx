@@ -185,49 +185,62 @@ const CitizenDashboard = () => {
 
   const requestLocation = (force = false) => {
     if (!navigator.geolocation) {
-      console.warn("Geolocation is not supported by your browser.");
-      handleLocationFailure();
+      console.warn("[GPS] Geolocation is not supported by your browser.");
+      handleLocationFailure(force);
       return;
     }
     
-    console.log("[GPS] Requesting citizen geolocation permission...");
+    if (force) {
+      console.log("[GPS Cache Purge] Hard refresh requested. Purging all cached location data.");
+      localStorage.removeItem('citizen_lat');
+      localStorage.removeItem('citizen_lng');
+      localStorage.removeItem('citizen_accuracy');
+    }
+
+    console.log("[GPS] Requesting fresh live browser GPS...");
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        console.log(`[GPS] Citizen location successfully obtained: lat=${pos.coords.latitude}, lng=${pos.coords.longitude}, accuracy=${pos.coords.accuracy}m`);
+        console.log(`[GPS Source: Live Browser GPS] Success obtained: lat=${pos.coords.latitude}, lng=${pos.coords.longitude}, accuracy=${pos.coords.accuracy}m`);
         const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy };
         setFormData(prev => ({ ...prev, location: loc }));
+        
+        console.log(`[GPS Cache Overwrite] Overwriting old cached coordinates: lat=${localStorage.getItem('citizen_lat')}, lng=${localStorage.getItem('citizen_lng')} with new live: lat=${pos.coords.latitude}, lng=${pos.coords.longitude}`);
         localStorage.setItem('citizen_lat', pos.coords.latitude.toString());
         localStorage.setItem('citizen_lng', pos.coords.longitude.toString());
         localStorage.setItem('citizen_accuracy', pos.coords.accuracy.toString());
+        
         setLocationPermissionState('granted');
         setUsingDemoFallback(false);
       },
       async (err) => {
-        console.warn(`[GPS] Geolocation permission request failed: Code ${err.code} - ${err.message}`);
-        await handleLocationFailure();
+        console.warn(`[GPS] Live browser GPS request failed: Code ${err.code} - ${err.message}`);
+        await handleLocationFailure(force);
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
 
-  const handleLocationFailure = async () => {
-    // Priority B: Last successful cached coordinates
-    const cLat = localStorage.getItem('citizen_lat');
-    const cLng = localStorage.getItem('citizen_lng');
-    const cAcc = localStorage.getItem('citizen_accuracy');
-    
-    if (cLat && cLng) {
-      console.log("[GPS] Falling back to cached localStorage coordinates.");
-      const loc = { lat: parseFloat(cLat), lng: parseFloat(cLng), accuracy: parseFloat(cAcc || '15') };
-      setFormData(prev => ({ ...prev, location: loc }));
-      setLocationPermissionState('granted');
-      setUsingDemoFallback(false);
-      return;
+  const handleLocationFailure = async (force = false) => {
+    // Priority B: Last successful cached coordinates (only if not forced)
+    if (!force) {
+      const cLat = localStorage.getItem('citizen_lat');
+      const cLng = localStorage.getItem('citizen_lng');
+      const cAcc = localStorage.getItem('citizen_accuracy');
+      
+      if (cLat && cLng) {
+        console.log(`[GPS Source: Cached LocalStorage] Falling back temporarily to cached coordinates: lat=${cLat}, lng=${cLng}`);
+        const loc = { lat: parseFloat(cLat), lng: parseFloat(cLng), accuracy: parseFloat(cAcc || '15') };
+        setFormData(prev => ({ ...prev, location: loc }));
+        setLocationPermissionState('granted');
+        setUsingDemoFallback(false);
+        return;
+      }
     }
 
     // Priority C & D: IP Location & Final LPU Fallback
-    console.log("[GPS] No cached coordinates. Resolving starting location via IP/LPU fallback...");
+    console.log("[GPS] No active cached coordinates or forced. Resolving starting location via IP/LPU fallback...");
     const res = await resolveStartingLocation('citizen');
+    console.log(`[GPS Source: ${res.isFallback ? 'LPU Fallback' : 'IP Lookup'}] lat=${res.lat}, lng=${res.lng}`);
     const loc = { lat: res.lat, lng: res.lng, accuracy: res.accuracy };
     setFormData(prev => ({ ...prev, location: loc }));
     setUsingDemoFallback(res.isFallback);
@@ -242,14 +255,8 @@ const CitizenDashboard = () => {
 
   // Hook 1: Basic Telemetry Initialization & Network Watchers
   useEffect(() => {
-    const savedLat = localStorage.getItem('citizen_lat');
-    const savedLng = localStorage.getItem('citizen_lng');
-    if (!savedLat || !savedLng) {
-      requestLocation();
-    } else {
-      setLocationPermissionState('granted');
-      setUsingDemoFallback(false);
-    }
+    // ALWAYS attempt fresh real GPS on load to prioritize live values immediately
+    requestLocation(false);
 
     window.addEventListener('online', () => setIsOffline(false));
     window.addEventListener('offline', () => setIsOffline(true));
@@ -263,15 +270,16 @@ const CitizenDashboard = () => {
 
   // Hook 2: High-accuracy Background GPS Watcher
   useEffect(() => {
-    if (locationPermissionState !== 'granted' || usingDemoFallback) return;
-    
     let watchId;
     if (navigator.geolocation) {
+      console.log("[GPS] Starting persistent background GPS watch loop...");
       watchId = navigator.geolocation.watchPosition(
         (pos) => {
-          console.log(`[GPS] Active Citizen watch update: lat=${pos.coords.latitude}, lng=${pos.coords.longitude}, accuracy=${pos.coords.accuracy}m`);
+          console.log(`[GPS Update: Live Watch] Active GPS watch update: lat=${pos.coords.latitude}, lng=${pos.coords.longitude}, accuracy=${pos.coords.accuracy}m`);
           const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy };
           setFormData(prev => ({ ...prev, location: loc }));
+          
+          console.log(`[GPS Cache Overwrite: Live Watch] Overwriting old cache: lat=${localStorage.getItem('citizen_lat')}, lng=${localStorage.getItem('citizen_lng')} with new watch: lat=${pos.coords.latitude}, lng=${pos.coords.longitude}`);
           localStorage.setItem('citizen_lat', pos.coords.latitude.toString());
           localStorage.setItem('citizen_lng', pos.coords.longitude.toString());
           localStorage.setItem('citizen_accuracy', pos.coords.accuracy.toString());
@@ -284,9 +292,12 @@ const CitizenDashboard = () => {
       );
     }
     return () => {
-      if (watchId) navigator.geolocation.clearWatch(watchId);
+      if (watchId) {
+        console.log("[GPS] Stopping persistent background GPS watch loop.");
+        navigator.geolocation.clearWatch(watchId);
+      }
     };
-  }, [locationPermissionState, usingDemoFallback]);
+  }, []);
 
   // Hook 3: Socket Event Handlers (Using locationRef to stay completely decoupled from GPS jitter)
   useEffect(() => {
