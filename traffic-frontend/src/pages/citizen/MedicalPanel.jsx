@@ -1172,8 +1172,8 @@ export const MedicalPanel = () => {
                   🚨 {selectedCondition.warningSigns}
                 </p>
               </div>
-              <div style={{ background: 'rgba(59, 130, 246, 0.03)', border: '1px solid rgba(59, 130, 246, 0.1)', padding: '0.6rem 0.8rem', borderRadius: '8px' }}>
-                <div style={{ fontSize: '0.7rem', color: '#3b82f6', fontWeight: 800 }}>DISPATCH RECOMMENDATION:</div>
+              <div style={{ background: 'rgba(234, 88, 12, 0.03)', border: '1px solid rgba(234, 88, 12, 0.1)', padding: '0.6rem 0.8rem', borderRadius: '8px' }}>
+                <div style={{ fontSize: '0.7rem', color: '#ea580c', fontWeight: 800 }}>DISPATCH RECOMMENDATION:</div>
                 <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.75rem', color: '#1e3a8a', fontWeight: 700, lineHeight: 1.3 }}>
                   {selectedCondition.recommendation}
                 </p>

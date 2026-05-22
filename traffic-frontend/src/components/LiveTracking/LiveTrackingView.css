@@ -101,7 +101,7 @@
 }
 
 .ltv-status-dot.assigned  { background: #f59e0b; animation: ltv-pulse 1.6s infinite; }
-.ltv-status-dot.enroute   { background: #3b82f6; animation: ltv-pulse 1.2s infinite; }
+.ltv-status-dot.enroute   { background: #ea580c; animation: ltv-pulse 1.2s infinite; }
 .ltv-status-dot.nearby    { background: #10b981; animation: ltv-pulse 0.9s infinite; }
 .ltv-status-dot.arrived   { background: #10b981; }
 

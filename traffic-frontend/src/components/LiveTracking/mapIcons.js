@@ -65,7 +65,7 @@ export function createPoliceIcon(bearing = 0) {
           position: absolute;
           inset: 0;
           border-radius: 50%;
-          border: 2px solid rgba(59,130,246,0.35);
+          border: 2px solid rgba(234, 88, 12,0.35);
           animation: ltv-ring-expand 2s ease-out infinite;
         "></div>
         <!-- body -->
@@ -73,12 +73,12 @@ export function createPoliceIcon(bearing = 0) {
           width: 36px;
           height: 36px;
           border-radius: 50%;
-          background: #3b82f6;
+          background: #ea580c;
           display: flex;
           align-items: center;
           justify-content: center;
           font-size: 18px;
-          box-shadow: 0 3px 14px rgba(59,130,246,0.5);
+          box-shadow: 0 3px 14px rgba(234, 88, 12,0.5);
           transform: rotate(${bearing}deg);
           position: relative;
           z-index: 1;
@@ -157,14 +157,14 @@ export function createCitizenIcon() {
           position: absolute;
           inset: 0;
           border-radius: 50%;
-          background: rgba(59, 130, 246, 0.25);
+          background: rgba(234, 88, 12, 0.25);
           animation: ltv-ring-expand 2s ease-out infinite;
         "></div>
         <div style="
           width: 14px;
           height: 14px;
           border-radius: 50%;
-          background: #3b82f6;
+          background: #ea580c;
           border: 2px solid #fff;
           box-shadow: 0 2px 6px rgba(0,0,0,0.3);
           position: relative;

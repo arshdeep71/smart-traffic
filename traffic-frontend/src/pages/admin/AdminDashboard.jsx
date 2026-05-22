@@ -124,7 +124,7 @@ const AdminDashboard = () => {
             <AlertOctagon color="var(--danger-color)" size={24}/>
           </div>
         </div>
-        <div className="glass-panel" style={{ padding: '1.5rem', borderLeft: '4px solid var(--primary-color)', background: 'rgba(59, 130, 246, 0.05)' }}>
+        <div className="glass-panel" style={{ padding: '1.5rem', borderLeft: '4px solid var(--primary-color)', background: 'rgba(234, 88, 12, 0.05)' }}>
            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
               <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>ACTIVE UNITS</div>
@@ -182,9 +182,9 @@ const AdminDashboard = () => {
         <div className="glass-panel" style={{ padding: '2rem', height: '500px', display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.8rem', letterSpacing: '1px' }}>
-                <Radio size={24} color="#3b82f6"/> LIVE CITY FLEET TRACKING
+                <Radio size={24} color="#ea580c"/> LIVE CITY FLEET TRACKING
               </h3>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(59, 130, 246, 0.1)', padding: '0.4rem 1rem', borderRadius: '20px', color: '#60a5fa', fontSize: '0.8rem', fontWeight: 800 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(234, 88, 12, 0.1)', padding: '0.4rem 1rem', borderRadius: '20px', color: '#60a5fa', fontSize: '0.8rem', fontWeight: 800 }}>
                   <span className="pulse-alert" style={{ width: 8, height: 8, background: '#60a5fa', borderRadius: '50%' }}></span> SOCKET LIVE
               </div>
           </div>

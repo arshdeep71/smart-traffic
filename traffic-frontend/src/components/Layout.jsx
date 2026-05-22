@@ -88,9 +88,9 @@ const Layout = () => {
   // Sidebar accent color per role
   const roleAccent = {
     hospital_admin: '#ef4444', hospital_driver: '#f59e0b', hospital_staff: '#8b5cf6',
-    admin: '#3b82f6', super_admin: '#6366f1', citizen: '#10b981',
+    admin: '#ea580c', super_admin: '#6366f1', citizen: '#10b981',
     traffic_police: '#f59e0b', ambulance_staff: '#ef4444',
-  }[user?.role] || '#3b82f6';
+  }[user?.role] || '#ea580c';
 
   return (
     <div className="app-container">

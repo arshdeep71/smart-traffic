@@ -40,7 +40,7 @@ const AddEmployeeModal = ({ hospitalId, onClose, onSuccess }) => {
           <div style={{ color: '#94a3b8', fontSize: '0.8rem', marginBottom: '0.4rem' }}>Login Email: <span style={{ color: '#fff', fontFamily: 'monospace', fontWeight: 700 }}>{done.login_id}</span></div>
           <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Password: <span style={{ color: '#fff', fontFamily: 'monospace', fontWeight: 700 }}>{form.password}</span></div>
         </div>
-        <button onClick={onClose} style={{ background: 'linear-gradient(135deg,#3b82f6,#2563eb)', color: '#fff', border: 'none', borderRadius: '10px', padding: '0.7rem 2rem', fontWeight: 700, cursor: 'pointer' }}>Close</button>
+        <button onClick={onClose} style={{ background: 'linear-gradient(135deg,#ea580c,#ea580c)', color: '#fff', border: 'none', borderRadius: '10px', padding: '0.7rem 2rem', fontWeight: 700, cursor: 'pointer' }}>Close</button>
       </div>
     </div>
   );
@@ -125,7 +125,7 @@ const HospitalAdminDashboard = () => {
               { label: 'DISPATCHED', value: dash?.dispatched_ambulances ?? '—', color: '#ef4444', icon: <AlertTriangle size={20} /> },
               { label: 'TOTAL STAFF', value: dash?.total_staff ?? '—', color: '#8b5cf6', icon: <Users size={20} /> },
               { label: 'ON DUTY', value: dash?.on_duty_staff ?? '—', color: '#f59e0b', icon: <Activity size={20} /> },
-              { label: 'AVG RESPONSE', value: dash?.avg_response_time ?? '—', color: '#3b82f6', icon: <Clock size={20} /> },
+              { label: 'AVG RESPONSE', value: dash?.avg_response_time ?? '—', color: '#ea580c', icon: <Clock size={20} /> },
             ].map(s => (
               <div key={s.label} style={{ background: 'rgba(255,255,255,0.04)', border: `1px solid ${s.color}20`, borderLeft: `3px solid ${s.color}`, borderRadius: '14px', padding: '1.25rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>

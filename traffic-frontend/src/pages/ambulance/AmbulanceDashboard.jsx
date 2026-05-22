@@ -541,7 +541,7 @@ export const AmbulanceDashboard = () => {
                  <h4 style={{ margin: '0 0 0.8rem 0', color: '#64748b', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Rescue Timeline</h4>
                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', borderLeft: '2px dashed #e2e8f0', paddingLeft: '1.2rem', marginLeft: '0.5rem', marginBottom: '1.5rem' }}>
                     <div style={{ position: 'relative' }}>
-                       <div style={{ position: 'absolute', left: '-1.55rem', top: '4px', width: '8px', height: '8px', borderRadius: '50%', background: '#3b82f6' }} />
+                       <div style={{ position: 'absolute', left: '-1.55rem', top: '4px', width: '8px', height: '8px', borderRadius: '50%', background: '#ea580c' }} />
                        <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0f172a' }}>Emergency Reported</div>
                        <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '1px' }}>{selectedTrip.created_at ? new Date(selectedTrip.created_at).toLocaleString() : new Date().toLocaleString()}</div>
                     </div>
@@ -551,7 +551,7 @@ export const AmbulanceDashboard = () => {
                        <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '1px' }}>{selectedTrip.reached_scene_time || "—"}</div>
                     </div>
                     <div style={{ position: 'relative' }}>
-                       <div style={{ position: 'absolute', left: '-1.55rem', top: '4px', width: '8px', height: '8px', borderRadius: '50%', background: '#3b82f6' }} />
+                       <div style={{ position: 'absolute', left: '-1.55rem', top: '4px', width: '8px', height: '8px', borderRadius: '50%', background: '#ea580c' }} />
                        <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0f172a' }}>Patient Secured / Loaded</div>
                        <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '1px' }}>{selectedTrip.pickup_time || "—"}</div>
                     </div>
@@ -648,7 +648,7 @@ export const AmbulanceDashboard = () => {
                    </button>
                  )}
                  {stage === 'arrived_scene' && (
-                   <button onClick={() => updateStage('patient_picked')} style={{ width: '100%', background: '#3b82f6', color: '#fff', border: 'none', borderRadius: '14px', padding: '1.2rem', fontSize: '1.1rem', fontWeight: 800, cursor: 'pointer' }}>
+                   <button onClick={() => updateStage('patient_picked')} style={{ width: '100%', background: '#ea580c', color: '#fff', border: 'none', borderRadius: '14px', padding: '1.2rem', fontSize: '1.1rem', fontWeight: 800, cursor: 'pointer' }}>
                      PATIENT SECURED
                    </button>
                  )}

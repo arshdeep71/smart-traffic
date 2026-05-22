@@ -27,13 +27,13 @@ export default function DriverSheet({ ambulance, incident }) {
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 300, damping: 30, delay: 0.35 }}
     >
-      <div className="ltv-sheet" style={{ background: 'linear-gradient(135deg, #090d16, #030712)', borderTop: '3px solid #3b82f6' }}>
+      <div className="ltv-sheet" style={{ background: 'linear-gradient(135deg, #090d16, #030712)', borderTop: '3px solid #ea580c' }}>
         <div className="ltv-sheet-handle" style={{ background: '#1e293b' }} />
 
         {/* Police info */}
         <div className="ltv-sheet-header">
           <div className="ltv-ambulance-badge">
-            <div className="ltv-ambulance-icon-wrap" style={{ background: 'rgba(59, 130, 246, 0.15)', border: '1px solid rgba(59, 130, 246, 0.3)' }}>🚔</div>
+            <div className="ltv-ambulance-icon-wrap" style={{ background: 'rgba(234, 88, 12, 0.15)', border: '1px solid rgba(234, 88, 12, 0.3)' }}>🚔</div>
             <div className="ltv-ambulance-meta">
               <span className="ltv-ambulance-num" style={{ color: '#fff' }}>{plateNumber}</span>
               <span className="ltv-hospital-name" style={{ color: '#94a3b8' }}>{stationName}</span>
@@ -45,7 +45,7 @@ export default function DriverSheet({ ambulance, incident }) {
             onClick={handleCall}
             title={phone ? `Call ${driverName}` : "No number available"}
             disabled={!phone}
-            style={{ opacity: phone ? 1 : 0.4, cursor: phone ? "pointer" : "default", background: 'rgba(59,130,246,0.1)', color: '#3b82f6' }}
+            style={{ opacity: phone ? 1 : 0.4, cursor: phone ? "pointer" : "default", background: 'rgba(234, 88, 12,0.1)', color: '#ea580c' }}
             aria-label="Call officer"
           >
             📞
@@ -56,7 +56,7 @@ export default function DriverSheet({ ambulance, incident }) {
 
         {/* Responder row */}
         <div className="ltv-driver-row">
-          <div className="ltv-avatar" style={{ background: '#3b82f6', color: '#fff' }}>{getInitials(driverName)}</div>
+          <div className="ltv-avatar" style={{ background: '#ea580c', color: '#fff' }}>{getInitials(driverName)}</div>
           <div className="ltv-driver-info">
             <div className="ltv-driver-name" style={{ color: '#fff' }}>{driverName}</div>
             <div className="ltv-driver-role" style={{ color: '#94a3b8' }}>Police Patrol Officer</div>

@@ -115,7 +115,7 @@ export function RoutingMachine({ start, end, onRouteCalculated }) {
     try {
       routingControl = L.Routing.control({
         waypoints: [ L.latLng(startLat, startLng), L.latLng(endLat, endLng) ],
-        lineOptions: { styles: [{ color: '#3b82f6', weight: 6, opacity: 0.85, lineCap: "round", lineJoin: "round" }] },
+        lineOptions: { styles: [{ color: '#ea580c', weight: 6, opacity: 0.85, lineCap: "round", lineJoin: "round" }] },
         createMarker: () => null, show: false, addWaypoints: false, routeWhileDragging: false, fitSelectedRoutes: false,
       }).addTo(map);
 
@@ -429,9 +429,9 @@ export function LiveTrackingViewRaw({ incident, ambulance, socket, onClose }) {
             center={[incidentPos.lat, incidentPos.lng]}
             radius={80}
             pathOptions={{
-              fillColor: '#3b82f6',
+              fillColor: '#ea580c',
               fillOpacity: 0.15,
-              color: '#3b82f6',
+              color: '#ea580c',
               weight: 2,
               dashArray: '5, 10',
               className: 'ltv-proximity-circle'
@@ -477,7 +477,7 @@ export function LiveTrackingViewRaw({ incident, ambulance, socket, onClose }) {
           }}
           style={{ background: '#1e293b', border: '1px solid rgba(255,255,255,0.1)' }}
         >
-          <Navigation size={22} color="#3b82f6" fill="rgba(59,130,246,0.1)" />
+          <Navigation size={22} color="#ea580c" fill="rgba(234, 88, 12,0.1)" />
         </div>
       )}
 
@@ -488,8 +488,8 @@ export function LiveTrackingViewRaw({ incident, ambulance, socket, onClose }) {
 
         {/* ETA card — top right */}
         {ambulance && !isArrivalMode && !isCompleted && (
-          <div className="ltv-eta-card" style={{ background: 'linear-gradient(135deg, #090d16, #030712)', border: '1px solid rgba(59, 130, 246, 0.3)', borderRadius: '16px', padding: '16px', color: '#fff', position: 'absolute', top: '80px', right: '20px', zIndex: 999 }}>
-            <div style={{ fontSize: '10px', color: '#3b82f6', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>POLICE UNIT ETA</div>
+          <div className="ltv-eta-card" style={{ background: 'linear-gradient(135deg, #090d16, #030712)', border: '1px solid rgba(234, 88, 12, 0.3)', borderRadius: '16px', padding: '16px', color: '#fff', position: 'absolute', top: '80px', right: '20px', zIndex: 999 }}>
+            <div style={{ fontSize: '10px', color: '#ea580c', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>POLICE UNIT ETA</div>
             <div style={{ fontSize: '24px', fontWeight: 900, color: '#fff', margin: '4px 0' }}>
               {eta !== null ? `${eta} min` : "Calculating..."}
             </div>
@@ -514,7 +514,7 @@ export function LiveTrackingViewRaw({ incident, ambulance, socket, onClose }) {
                 borderRadius: '24px 24px 0 0',
                 padding: '24px',
                 boxShadow: '0 -10px 40px rgba(0,0,0,0.5)',
-                borderTop: '2px solid rgba(59,130,246,0.3)',
+                borderTop: '2px solid rgba(234, 88, 12,0.3)',
                 width: '100%',
                 maxWidth: '480px',
                 margin: '0 auto',
@@ -523,7 +523,7 @@ export function LiveTrackingViewRaw({ incident, ambulance, socket, onClose }) {
             >
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
                 <div style={{ fontSize: '32px', animation: 'ltv-pulse 2s infinite' }}>🚔</div>
-                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#3b82f6', letterSpacing: '-0.02em' }}>
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: '#ea580c', letterSpacing: '-0.02em' }}>
                   Police Patrol Unit Arrived Nearby
                 </h3>
                 <p style={{ margin: 0, fontSize: '13px', color: '#94a3b8', fontWeight: 500 }}>
@@ -533,14 +533,14 @@ export function LiveTrackingViewRaw({ incident, ambulance, socket, onClose }) {
                   display: 'flex', 
                   alignItems: 'center', 
                   gap: '8px', 
-                  background: 'rgba(59,130,246,0.1)', 
+                  background: 'rgba(234, 88, 12,0.1)', 
                   padding: '6px 14px', 
                   borderRadius: '50px', 
-                  border: '1px solid rgba(59,130,246,0.2)',
+                  border: '1px solid rgba(234, 88, 12,0.2)',
                   marginTop: '6px'
                 }}>
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#3b82f6', animation: 'ltv-pulse 1s infinite' }} />
-                  <span style={{ fontSize: '11px', fontWeight: 700, color: '#3b82f6', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ea580c', animation: 'ltv-pulse 1s infinite' }} />
+                  <span style={{ fontSize: '11px', fontWeight: 700, color: '#ea580c', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Securing Incident Zone
                   </span>
                 </div>

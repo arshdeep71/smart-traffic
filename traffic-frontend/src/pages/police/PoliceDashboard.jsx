@@ -70,7 +70,7 @@ class TacticalErrorBoundary extends React.Component {
             onClick={() => this.setState({ hasError: false, error: null })}
             style={{
               padding: '0.6rem 1.25rem',
-              background: '#3b82f6',
+              background: '#ea580c',
               color: '#fff',
               border: 'none',
               borderRadius: '6px',
@@ -780,7 +780,7 @@ export const PoliceDashboard = () => {
           {/* Top header HUD */}
           <div style={{
             background: 'linear-gradient(180deg, rgba(3,7,18,0.95) 0%, rgba(3,7,18,0.7) 100%)',
-            borderBottom: '1px solid rgba(59, 130, 246, 0.3)',
+            borderBottom: '1px solid rgba(234, 88, 12, 0.3)',
             padding: '1rem 1.5rem',
             display: 'flex',
             justifyContent: 'space-between',
@@ -800,7 +800,7 @@ export const PoliceDashboard = () => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <div style={{ textAlign: 'right' }}>
                 <div style={{ fontSize: '0.58rem', fontWeight: 800, color: '#6b7280', letterSpacing: '0.05em' }}>CURRENT STATE</div>
-                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#3b82f6', textTransform: 'uppercase' }}>
+                <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#ea580c', textTransform: 'uppercase' }}>
                   {selectedIncident.status}
                 </div>
               </div>
@@ -922,7 +922,7 @@ export const PoliceDashboard = () => {
               left: '20px',
               width: '360px',
               background: 'linear-gradient(135deg, rgba(9, 13, 22, 0.95), rgba(3, 7, 18, 0.98))',
-              border: '1px solid rgba(59, 130, 246, 0.25)',
+              border: '1px solid rgba(234, 88, 12, 0.25)',
               boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
               borderRadius: '16px',
               padding: '1.5rem',
@@ -934,13 +934,13 @@ export const PoliceDashboard = () => {
               gap: '1.25rem'
             }}>
               <div>
-                <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#3b82f6', letterSpacing: '0.05em', textTransform: 'uppercase' }}>INCIDENT CLASSIFICATION</span>
+                <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#ea580c', letterSpacing: '0.05em', textTransform: 'uppercase' }}>INCIDENT CLASSIFICATION</span>
                 <h3 style={{ margin: '0.1rem 0 0 0', fontSize: '1.05rem', fontWeight: 800 }}>{selectedIncident.title}</h3>
                 <p style={{ margin: '0.35rem 0 0 0', fontSize: '0.78rem', color: '#94a3b8', lineHeight: 1.4 }}>{selectedIncident.description}</p>
               </div>
 
               <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '0.85rem' }}>
-                <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#3b82f6', letterSpacing: '0.05em', textTransform: 'uppercase' }}>REPORTER INFORMATION</span>
+                <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#ea580c', letterSpacing: '0.05em', textTransform: 'uppercase' }}>REPORTER INFORMATION</span>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', marginTop: '0.4rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem' }}>
                     <span style={{ color: '#6b7280' }}>Reporter:</span>
@@ -955,7 +955,7 @@ export const PoliceDashboard = () => {
 
               {/* Step-by-Step Tactical Controller Panel */}
               <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#3b82f6', letterSpacing: '0.05em', textTransform: 'uppercase' }}>NAVIGATION CONTROLS</span>
+                <span style={{ fontSize: '0.62rem', fontWeight: 800, color: '#ea580c', letterSpacing: '0.05em', textTransform: 'uppercase' }}>NAVIGATION CONTROLS</span>
                 
                 {selectedIncident.status?.toLowerCase().includes('en route') && (
                   <button 
@@ -985,7 +985,7 @@ export const PoliceDashboard = () => {
                     disabled={updatingStatus}
                     style={{
                       width: '100%',
-                      background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                      background: 'linear-gradient(135deg, #ea580c, #ea580c)',
                       color: '#fff',
                       border: 'none',
                       borderRadius: '8px',
@@ -993,7 +993,7 @@ export const PoliceDashboard = () => {
                       fontWeight: 800,
                       cursor: 'pointer',
                       fontSize: '0.8rem',
-                      boxShadow: '0 4px 12px rgba(59,130,246,0.3)',
+                      boxShadow: '0 4px 12px rgba(234, 88, 12,0.3)',
                       transition: 'all 0.2s'
                     }}
                   >
@@ -1030,7 +1030,7 @@ export const PoliceDashboard = () => {
                     disabled={updatingStatus}
                     style={{
                       width: '100%',
-                      background: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+                      background: 'linear-gradient(135deg, #ea580c, #c2410c)',
                       color: '#fff',
                       border: 'none',
                       borderRadius: '8px',
@@ -1038,7 +1038,7 @@ export const PoliceDashboard = () => {
                       fontWeight: 800,
                       cursor: 'pointer',
                       fontSize: '0.8rem',
-                      boxShadow: '0 4px 12px rgba(59,130,246,0.3)',
+                      boxShadow: '0 4px 12px rgba(234, 88, 12,0.3)',
                       transition: 'all 0.2s'
                     }}
                   >
@@ -1054,7 +1054,7 @@ export const PoliceDashboard = () => {
       {/* COMMAND CENTER HEADER & TELEMETRY */}
       <div className="diagnostic-header">
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#3b82f6', fontWeight: 800, fontSize: '0.72rem', letterSpacing: '0.1em' }} className="pulse-alert">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#ea580c', fontWeight: 800, fontSize: '0.72rem', letterSpacing: '0.1em' }} className="pulse-alert">
             <Radio size={14} /> SECURITY GNSS PATROL COMMS ACTIVE
           </div>
           <h2 style={{ margin: '0.2rem 0 0 0', color: '#fff', fontSize: '1.35rem', fontWeight: 900, letterSpacing: '-0.5px' }}>
@@ -1064,7 +1064,7 @@ export const PoliceDashboard = () => {
 
         <div style={{ display: 'flex', gap: '1.5rem' }} className="telemetry-diagnostics">
           {[
-            ['📟 PATROL NET', 'SECURE TRANSCODE', '#3b82f6'],
+            ['📟 PATROL NET', 'SECURE TRANSCODE', '#ea580c'],
             ['🛰️ GNSS LOCK', '31.25224 N, 75.70313 E', '#10b981'],
             ['📡 FREQUENCY', '148.950 MHz', '#8b5cf6'],
             ['🛡️ SECURITY', 'AES-256-GCM', '#f59e0b']
@@ -1087,7 +1087,7 @@ export const PoliceDashboard = () => {
           
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
             <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff' }}>
-              <ShieldAlert size={18} style={{ color: '#3b82f6' }} />
+              <ShieldAlert size={18} style={{ color: '#ea580c' }} />
               {activeTab === 'complaints' ? 'Active Emergency Queue' : 'Incident Archive'}
             </h3>
             <span className="badge badge-info" style={{ fontSize: '0.62rem', fontWeight: 800 }}>
@@ -1099,7 +1099,7 @@ export const PoliceDashboard = () => {
             
             {loading ? (
               <div style={{ textAlign: 'center', padding: '3rem', color: '#6b7280' }}>
-                <Activity size={24} className="animate-spin" style={{ color: '#3b82f6', margin: '0 auto 0.75rem auto' }} />
+                <Activity size={24} className="animate-spin" style={{ color: '#ea580c', margin: '0 auto 0.75rem auto' }} />
                 <span style={{ fontSize: '0.8rem' }}>Loading emergency systems...</span>
               </div>
             ) : (activeTab === 'complaints' ? activeComplaints : historyComplaints).length === 0 ? (
@@ -1128,8 +1128,8 @@ export const PoliceDashboard = () => {
                     className="card-hover-police"
                     style={{ 
                       padding: '1rem', 
-                      background: isSelected ? 'rgba(59,130,246,0.1)' : 'rgba(255,255,255,0.02)', 
-                      border: isSelected ? '1.5px solid #3b82f6' : '1px solid rgba(255,255,255,0.05)', 
+                      background: isSelected ? 'rgba(234, 88, 12,0.1)' : 'rgba(255,255,255,0.02)', 
+                      border: isSelected ? '1.5px solid #ea580c' : '1px solid rgba(255,255,255,0.05)', 
                       borderRadius: '10px', 
                       cursor: 'pointer',
                       transition: 'all 0.2s',
@@ -1157,7 +1157,7 @@ export const PoliceDashboard = () => {
 
                     {/* Real Citizen details integrated onto list card */}
                     <div style={{ fontSize: '0.7rem', color: '#9ca3af', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                      <User size={12} style={{ color: '#3b82f6' }} />
+                      <User size={12} style={{ color: '#ea580c' }} />
                       <span>Reporter: <strong>{citizen.name}</strong></span>
                     </div>
 
@@ -1185,7 +1185,7 @@ export const PoliceDashboard = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
               
               {/* TACTICAL HEADER & SUMMARY */}
-              <div className="glass-panel" style={{ padding: '1.5rem', background: '#090d16', border: '1px solid #3b82f6', borderRadius: '12px', boxShadow: '0 0 20px rgba(59, 130, 246, 0.15)' }}>
+              <div className="glass-panel" style={{ padding: '1.5rem', background: '#090d16', border: '1px solid #ea580c', borderRadius: '12px', boxShadow: '0 0 20px rgba(234, 88, 12, 0.15)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.75rem', marginBottom: '0.75rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     <span className="badge badge-danger pulse-alert" style={{ fontSize: '0.62rem', fontWeight: 800, textTransform: 'uppercase', background: '#ef4444', color: '#fff', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>
@@ -1208,13 +1208,13 @@ export const PoliceDashboard = () => {
                 </h3>
 
                 {/* Citizen Details Block */}
-                <div style={{ background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '8px', padding: '0.85rem', marginTop: '0.85rem' }}>
-                  <div style={{ fontSize: '0.62rem', color: '#3b82f6', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.4rem' }}>
+                <div style={{ background: 'rgba(234, 88, 12, 0.05)', border: '1px solid rgba(234, 88, 12, 0.2)', borderRadius: '8px', padding: '0.85rem', marginTop: '0.85rem' }}>
+                  <div style={{ fontSize: '0.62rem', color: '#ea580c', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.4rem' }}>
                     👤 Dynamic Citizen Identity Logs
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '0.6rem', fontSize: '0.76rem', color: '#cbd5e1' }}>
                     <div>Reporter: <strong style={{ color: '#fff' }}>{getCitizenDetails(selectedIncident).name}</strong></div>
-                    <div>Contact: <span style={{ color: '#3b82f6' }}>{getCitizenDetails(selectedIncident).email}</span></div>
+                    <div>Contact: <span style={{ color: '#ea580c' }}>{getCitizenDetails(selectedIncident).email}</span></div>
                     <div>UID: <span style={{ fontFamily: 'monospace', fontSize: '0.68rem', color: '#10b981' }}>{getCitizenDetails(selectedIncident).userId}</span></div>
                     <div>Role: <span style={{ color: '#fff', fontWeight: 700 }}>{getCitizenDetails(selectedIncident).role}</span></div>
                   </div>
@@ -1294,7 +1294,7 @@ export const PoliceDashboard = () => {
                   <button 
                     onClick={startPoliceNavigation}
                     className="btn btn-primary"
-                    style={{ flex: 1, padding: '0.8rem', fontSize: '0.85rem', fontWeight: 800, background: '#3b82f6', border: 'none', color: '#fff', borderRadius: 8, cursor: 'pointer' }}
+                    style={{ flex: 1, padding: '0.8rem', fontSize: '0.85rem', fontWeight: 800, background: '#ea580c', border: 'none', color: '#fff', borderRadius: 8, cursor: 'pointer' }}
                   >
                     🛰️ Start Active Navigation
                   </button>
@@ -1342,7 +1342,7 @@ export const PoliceDashboard = () => {
             </div>
           ) : !selectedIncident ? (
             <div className="glass-panel" style={{ padding: '3.5rem 2rem', background: '#090d16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '1.25rem', height: '100%', minHeight: '480px', textAlign: 'center' }}>
-              <div className="pulse-alert" style={{ width: '70px', height: '70px', borderRadius: '50%', background: 'rgba(59,130,246,0.05)', border: '2px solid rgba(59,130,246,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#3b82f6' }}>
+              <div className="pulse-alert" style={{ width: '70px', height: '70px', borderRadius: '50%', background: 'rgba(234, 88, 12,0.05)', border: '2px solid rgba(234, 88, 12,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ea580c' }}>
                 <ShieldAlert size={34} />
               </div>
               <div>
@@ -1381,14 +1381,14 @@ export const PoliceDashboard = () => {
                 </div>
 
                 {/* Professional Identity Section - Reporter details resolved from Supabase/Auth */}
-                <div style={{ background: 'rgba(59,130,246,0.03)', border: '1px solid rgba(59,130,246,0.1)', borderRadius: '8px', padding: '1rem', marginBottom: '1.25rem' }}>
-                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#3b82f6', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                <div style={{ background: 'rgba(234, 88, 12,0.03)', border: '1px solid rgba(234, 88, 12,0.1)', borderRadius: '8px', padding: '1rem', marginBottom: '1.25rem' }}>
+                  <div style={{ fontSize: '0.65rem', fontWeight: 800, color: '#ea580c', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.6rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                     <ShieldCheck size={12} /> SECURE AUDITED CITIZEN IDENTITY
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1.25fr 0.75fr', gap: '1rem', fontSize: '0.78rem' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                       <span style={{ color: '#9ca3af' }}>Reporter Name: <strong style={{ color: '#fff' }}>{getCitizenDetails(selectedIncident).name}</strong></span>
-                      <span style={{ color: '#9ca3af' }}>Contact Email: <span style={{ color: '#3b82f6', textDecoration: 'underline' }}>{getCitizenDetails(selectedIncident).email}</span></span>
+                      <span style={{ color: '#9ca3af' }}>Contact Email: <span style={{ color: '#ea580c', textDecoration: 'underline' }}>{getCitizenDetails(selectedIncident).email}</span></span>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                       <span style={{ color: '#9ca3af' }}>Secured Role: <span style={{ color: '#fff', fontWeight: 700 }}>{getCitizenDetails(selectedIncident).role}</span></span>
@@ -1419,17 +1419,17 @@ export const PoliceDashboard = () => {
 
                 {/* DYNAMIC TIMELINE STATUS PROGRESS UI */}
                 {selectedIncident.status?.toLowerCase() !== 'pending' && selectedIncident.status?.toLowerCase() !== 'resolved' && (
-                  <div style={{ padding: '1.25rem', background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.15)', borderRadius: '10px', marginTop: '1.25rem' }}>
+                  <div style={{ padding: '1.25rem', background: 'rgba(234, 88, 12, 0.05)', border: '1px solid rgba(234, 88, 12, 0.15)', borderRadius: '10px', marginTop: '1.25rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.72rem', color: '#60a5fa', fontWeight: 700, marginBottom: '0.6rem' }} className="pulse-alert">
                       <span>🚓 LIVE TRANSCODE TIMELINE — ACTIVE ESCALATION</span>
                       <span>{timelineStep >= 5 ? 'OFFICERS ON SCENE' : 'EN ROUTE'}</span>
                     </div>
                     
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.58rem', color: '#9ca3af', marginBottom: '0.5rem', fontWeight: 700 }}>
-                      <span style={{ color: timelineStep >= 1 ? '#3b82f6' : '#4b5563' }}>1. Alerted</span>
-                      <span style={{ color: timelineStep >= 2 ? '#3b82f6' : '#4b5563' }}>2. Dispatched</span>
-                      <span style={{ color: timelineStep >= 3 ? '#3b82f6' : '#4b5563' }}>3. En Route</span>
-                      <span style={{ color: timelineStep >= 4 ? '#3b82f6' : '#4b5563' }}>4. Approaching</span>
+                      <span style={{ color: timelineStep >= 1 ? '#ea580c' : '#4b5563' }}>1. Alerted</span>
+                      <span style={{ color: timelineStep >= 2 ? '#ea580c' : '#4b5563' }}>2. Dispatched</span>
+                      <span style={{ color: timelineStep >= 3 ? '#ea580c' : '#4b5563' }}>3. En Route</span>
+                      <span style={{ color: timelineStep >= 4 ? '#ea580c' : '#4b5563' }}>4. Approaching</span>
                       <span style={{ color: timelineStep >= 5 ? '#10b981' : '#4b5563' }}>5. Active</span>
                     </div>
 
@@ -1437,7 +1437,7 @@ export const PoliceDashboard = () => {
                       <div 
                         style={{ 
                           height: '100%', 
-                          background: timelineStep >= 5 ? 'linear-gradient(90deg, #3b82f6, #10b981)' : '#3b82f6', 
+                          background: timelineStep >= 5 ? 'linear-gradient(90deg, #ea580c, #10b981)' : '#ea580c', 
                           width: `${(timelineStep / 5) * 100}%`,
                           transition: 'width 0.8s ease-in-out'
                         }} 
@@ -1467,7 +1467,7 @@ export const PoliceDashboard = () => {
                 {/* LIVE EMBEDDED LEAFLET MAP */}
                 <div className="glass-panel" style={{ padding: '1rem', background: '#090d16', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', height: '340px' }}>
                   <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#fff', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <MapPin size={16} style={{ color: '#3b82f6' }} /> Live Response Grid Map (LPU Block 38)
+                    <MapPin size={16} style={{ color: '#ea580c' }} /> Live Response Grid Map (LPU Block 38)
                   </div>
                   <div style={{ width: '100%', height: 'calc(100% - 25px)', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
                     {(() => {
@@ -1599,8 +1599,8 @@ export const PoliceDashboard = () => {
                       padding: '0.75rem', 
                       fontSize: '0.85rem', 
                       fontWeight: 900, 
-                      background: 'linear-gradient(135deg, #1d4ed8, #2563eb)', 
-                      boxShadow: '0 0 15px rgba(37, 99, 235, 0.4)', 
+                      background: 'linear-gradient(135deg, #c2410c, #ea580c)', 
+                      boxShadow: '0 0 15px rgba(234, 88, 12, 0.4)', 
                       color: '#fff', 
                       border: 'none', 
                       borderRadius: 8, 
@@ -1711,7 +1711,7 @@ export const PoliceDashboard = () => {
           align-items: center; 
           margin-bottom: 1.5rem; 
           background: #090d16; 
-          border: 1px solid rgba(59,130,246,0.15); 
+          border: 1px solid rgba(234, 88, 12,0.15); 
           border-radius: 12px; 
           padding: 1.25rem;
         }
@@ -1720,17 +1720,17 @@ export const PoliceDashboard = () => {
         }
         .card-hover-police:hover {
           background: rgba(255, 255, 255, 0.05) !important;
-          border-color: rgba(59, 130, 246, 0.4) !important;
+          border-color: rgba(234, 88, 12, 0.4) !important;
           transform: translateY(-2px);
-          box-shadow: 0 4px 15px rgba(59, 130, 246, 0.15);
+          box-shadow: 0 4px 15px rgba(234, 88, 12, 0.15);
         }
         .zoomable-image:hover {
           transform: scale(1.05);
         }
         @keyframes pulse-ring-police {
-          0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.6); }
-          70% { box-shadow: 0 0 0 12px rgba(59, 130, 246, 0); }
-          100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+          0% { box-shadow: 0 0 0 0 rgba(234, 88, 12, 0.6); }
+          70% { box-shadow: 0 0 0 12px rgba(234, 88, 12, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(234, 88, 12, 0); }
         }
       `}</style>
     </div>

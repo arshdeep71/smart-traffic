@@ -109,7 +109,7 @@ export const AudioEvidence = ({ isRecording }) => {
           }
           {detected.map((d, i) => (
             <div key={i} className="pkg-item" style={{ marginTop: '0.4rem', fontSize: '0.78rem', fontWeight: 600, color: '#191c1e' }}>
-              <span className="check" style={{ color: '#2170e4', marginRight: '0.3rem' }}>✓</span>{d}
+              <span className="check" style={{ color: '#ea580c', marginRight: '0.3rem' }}>✓</span>{d}
             </div>
           ))}
         </div>

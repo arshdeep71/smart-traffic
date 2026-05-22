@@ -33,9 +33,9 @@ export const AutoIncidentFill = ({ formData, setFormData }) => {
         alignItems: 'center',
         justifyContent: 'center',
         gap: '0.5rem',
-        borderColor: '#2170e4',
-        color: '#2170e4',
-        background: 'rgba(33, 112, 228, 0.04)',
+        borderColor: '#ea580c',
+        color: '#ea580c',
+        background: 'rgba(234, 88, 12, 0.04)',
         padding: '0.65rem',
         borderRadius: '12px',
         fontWeight: 700,
@@ -44,12 +44,12 @@ export const AutoIncidentFill = ({ formData, setFormData }) => {
       }}
       disabled={filling}
       onMouseOver={e => {
-        e.currentTarget.style.background = 'rgba(33, 112, 228, 0.08)';
+        e.currentTarget.style.background = 'rgba(234, 88, 12, 0.08)';
         e.currentTarget.style.borderColor = '#0058be';
       }}
       onMouseOut={e => {
-        e.currentTarget.style.background = 'rgba(33, 112, 228, 0.04)';
-        e.currentTarget.style.borderColor = '#2170e4';
+        e.currentTarget.style.background = 'rgba(234, 88, 12, 0.04)';
+        e.currentTarget.style.borderColor = '#ea580c';
       }}
     >
       <Wand2 size={14} className={filling ? 'animate-spin' : ''} />
@@ -113,7 +113,7 @@ export const SmartAIIncidentAnalysis = ({ description, onSuggest }) => {
   return (
     <div className="glass-panel" style={{ padding: '1.25rem', fontFamily: 'Outfit, sans-serif' }}>
       <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', fontWeight: 800, display: 'flex', gap: '0.4rem', alignItems: 'center', color: '#191c1e' }}>
-        <Sparkles size={16} color="#2170e4" /> Smart AI Incident Analysis
+        <Sparkles size={16} color="#ea580c" /> Smart AI Incident Analysis
       </h4>
       <p style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '1rem', lineHeight: 1.45 }}>
         Analyze the current incident description to auto-classify category, suggest severity, and extract key features.
@@ -147,10 +147,10 @@ export const SmartAIIncidentAnalysis = ({ description, onSuggest }) => {
       </button>
 
       {result && (
-        <div style={{ marginTop: '1rem', background: 'rgba(33, 112, 228, 0.04)', border: '1px solid rgba(33, 112, 228, 0.12)', borderRadius: 12, padding: '0.75rem' }}>
+        <div style={{ marginTop: '1rem', background: 'rgba(234, 88, 12, 0.04)', border: '1px solid rgba(234, 88, 12, 0.12)', borderRadius: 12, padding: '0.75rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.78rem' }}>
             <span style={{ color: '#64748b' }}>Suggested Category:</span>
-            <span style={{ fontWeight: 800, color: '#2170e4' }}>{result.category}</span>
+            <span style={{ fontWeight: 800, color: '#ea580c' }}>{result.category}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.78rem' }}>
             <span style={{ color: '#64748b' }}>Suggested Severity:</span>
@@ -166,7 +166,7 @@ export const SmartAIIncidentAnalysis = ({ description, onSuggest }) => {
           </div>
           <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
             {result.highlights.map(h => (
-              <span key={h} style={{ fontSize: '0.68rem', padding: '0.2rem 0.5rem', background: 'rgba(33, 112, 228, 0.08)', color: '#2170e4', borderRadius: 6, fontWeight: 700 }}>
+              <span key={h} style={{ fontSize: '0.68rem', padding: '0.2rem 0.5rem', background: 'rgba(234, 88, 12, 0.08)', color: '#ea580c', borderRadius: 6, fontWeight: 700 }}>
                 {h}
               </span>
             ))}
@@ -200,7 +200,7 @@ export const SeveritySuggestion = ({ currentSeverity }) => {
                 gap: '0.75rem',
                 padding: '0.6rem',
                 borderRadius: 12,
-                background: isSelected ? 'rgba(33, 112, 228, 0.03)' : 'transparent',
+                background: isSelected ? 'rgba(234, 88, 12, 0.03)' : 'transparent',
                 border: isSelected ? `1px solid ${v.color}` : '1px solid transparent',
                 transition: 'all 0.2s'
               }}

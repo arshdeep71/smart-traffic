@@ -74,7 +74,7 @@ h1, h2, h3, h4, h5, h6 {
 .btn-primary:hover {
   background: var(--primary-hover);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(33, 112, 228, 0.2);
+  box-shadow: 0 4px 12px rgba(234, 88, 12, 0.2);
 }
 
 .btn-primary:active {
@@ -116,7 +116,7 @@ h1, h2, h3, h4, h5, h6 {
 .form-control:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 3px rgba(33, 112, 228, 0.15);
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
 }
 
 .form-label {
@@ -434,10 +434,10 @@ h1, h2, h3, h4, h5, h6 {
   gap: 0.35rem;
   white-space: nowrap;
 }
-.feature-tab:hover { color: #3b82f6; }
+.feature-tab:hover { color: #ea580c; }
 .feature-tab.active {
-  color: #3b82f6;
-  border-bottom-color: #3b82f6;
+  color: #ea580c;
+  border-bottom-color: #ea580c;
 }
 
 /* Check-in countdown ring */
@@ -545,13 +545,13 @@ h1, h2, h3, h4, h5, h6 {
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  background: linear-gradient(135deg, #ea580c, #c2410c);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: transform 0.2s;
-  box-shadow: 0 4px 20px rgba(59,130,246,0.4);
+  box-shadow: 0 4px 20px rgba(234, 88, 12,0.4);
 }
 .voice-orb:hover { transform: scale(1.08); }
 .voice-orb.listening {

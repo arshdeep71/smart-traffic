@@ -22,7 +22,7 @@ const AddEmployeeModal = ({ hospitalId, onClose, onSuccess }) => {
           <div style={{ color: '#94a3b8', fontSize: '0.8rem' }}>Password: <span style={{ color: '#fff', fontFamily: 'monospace', fontWeight: 700 }}>{created.admin_password || form.password}</span></div>
           <div style={{ color: '#94a3b8', fontSize: '0.8rem', marginTop: '0.5rem' }}>Employee ID: <span style={{ color: '#10b981', fontFamily: 'monospace', fontWeight: 700 }}>{created.employee_id}</span></div>
         </div>
-        <button onClick={onClose} style={{ background: 'linear-gradient(135deg,#3b82f6,#2563eb)', color: '#fff', border: 'none', borderRadius: '10px', padding: '0.7rem 2rem', fontWeight: 700, cursor: 'pointer' }}>Close</button>
+        <button onClick={onClose} style={{ background: 'linear-gradient(135deg,#ea580c,#ea580c)', color: '#fff', border: 'none', borderRadius: '10px', padding: '0.7rem 2rem', fontWeight: 700, cursor: 'pointer' }}>Close</button>
       </div>
     </div>
   );
@@ -45,7 +45,7 @@ const AddEmployeeModal = ({ hospitalId, onClose, onSuccess }) => {
           </div>
           <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
             <button type="button" onClick={onClose} style={{ flex: 1, background: 'rgba(255,255,255,0.08)', color: '#94a3b8', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '10px', padding: '0.7rem', cursor: 'pointer', fontWeight: 600 }}>Cancel</button>
-            <button type="submit" disabled={loading} style={{ flex: 2, background: 'linear-gradient(135deg,#3b82f6,#1d4ed8)', color: '#fff', border: 'none', borderRadius: '10px', padding: '0.7rem', cursor: 'pointer', fontWeight: 700 }}>{loading ? 'Creating...' : 'Create Employee'}</button>
+            <button type="submit" disabled={loading} style={{ flex: 2, background: 'linear-gradient(135deg,#ea580c,#c2410c)', color: '#fff', border: 'none', borderRadius: '10px', padding: '0.7rem', cursor: 'pointer', fontWeight: 700 }}>{loading ? 'Creating...' : 'Create Employee'}</button>
           </div>
         </form>
       </div>
@@ -122,13 +122,13 @@ const HospitalDetail = () => {
       <div style={{ color: '#94a3b8', fontSize: '0.9rem', maxWidth: '500px', textAlign: 'center' }}>{fetchError || 'Hospital data not found.'}</div>
       <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
         <button onClick={() => navigate('/hospitals')} style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: '#94a3b8', padding: '0.6rem 1.2rem', borderRadius: '8px', cursor: 'pointer' }}>← Back to Hospitals</button>
-        <button onClick={fetchData} style={{ background: 'linear-gradient(135deg,#3b82f6,#2563eb)', border: 'none', color: '#fff', padding: '0.6rem 1.2rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>Retry</button>
+        <button onClick={fetchData} style={{ background: 'linear-gradient(135deg,#ea580c,#ea580c)', border: 'none', color: '#fff', padding: '0.6rem 1.2rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>Retry</button>
       </div>
     </div>
   );
 
   const panelStyle = { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '1.5rem' };
-  const tabBtnStyle = (t) => ({ background: tab === t ? 'rgba(59,130,246,0.2)' : 'transparent', border: tab === t ? '1px solid rgba(59,130,246,0.4)' : '1px solid transparent', color: tab === t ? '#60a5fa' : '#64748b', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem', transition: 'all 0.2s' });
+  const tabBtnStyle = (t) => ({ background: tab === t ? 'rgba(234, 88, 12,0.2)' : 'transparent', border: tab === t ? '1px solid rgba(234, 88, 12,0.4)' : '1px solid transparent', color: tab === t ? '#60a5fa' : '#64748b', padding: '0.5rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.85rem', transition: 'all 0.2s' });
 
   return (
     <div className="fade-in" style={{ background: 'linear-gradient(135deg,#050b14,#0a1628)', minHeight: '100vh', padding: '2rem', color: '#e2e8f0' }}>

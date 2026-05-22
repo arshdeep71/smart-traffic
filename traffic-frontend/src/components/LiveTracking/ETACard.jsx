@@ -4,7 +4,7 @@ import "./LiveTrackingView.css";
 
 const STATUS_COLORS = {
   assigned: "#f59e0b",
-  enroute:  "#3b82f6",
+  enroute:  "#ea580c",
   nearby:   "#10b981",
   arrived:  "#10b981",
 };

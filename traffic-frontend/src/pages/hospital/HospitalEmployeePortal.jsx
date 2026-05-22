@@ -65,7 +65,7 @@ const HospitalEmployeePortal = () => {
 
         {/* Hospital Info */}
         <div style={panelStyle}>
-          <h3 style={{ color: '#fff', fontWeight: 700, marginBottom: '1rem', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Building2 size={18} color="#3b82f6" /> Assigned Hospital</h3>
+          <h3 style={{ color: '#fff', fontWeight: 700, marginBottom: '1rem', fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Building2 size={18} color="#ea580c" /> Assigned Hospital</h3>
           {[['Hospital', hospital?.name], ['Code', hospital?.code], ['City', hospital?.city], ['Emergency', hospital?.emergency_contact]].map(([k, v]) => (
             <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem' }}>
               <span style={{ color: '#64748b' }}>{k}</span><span style={{ color: '#e2e8f0', fontWeight: 500 }}>{v || '—'}</span>

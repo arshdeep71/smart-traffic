@@ -26,7 +26,7 @@ const createCustomIcon = (color, emoji) => {
 
 const accidentIcon = createCustomIcon('#ef4444', '💥');
 const ambulanceIcon = createCustomIcon('#10b981', '🚑');
-const policeIcon = createCustomIcon('#3b82f6', '🚓');
+const policeIcon = createCustomIcon('#ea580c', '🚓');
 const signalGreenIcon = createCustomIcon('#10b981', '🚦');
 const signalRedIcon = createCustomIcon('#ef4444', '🚦');
 
@@ -175,8 +175,8 @@ const SmartMap = () => {
                center={[h.lat, h.lng]} 
                radius={h.radius} 
                pathOptions={{ 
-                 color: h.intensity > 0.7 ? '#ef4444' : (h.intensity > 0.4 ? '#f59e0b' : '#3b82f6'), 
-                 fillColor: h.intensity > 0.7 ? '#ef4444' : (h.intensity > 0.4 ? '#f59e0b' : '#3b82f6'), 
+                 color: h.intensity > 0.7 ? '#ef4444' : (h.intensity > 0.4 ? '#f59e0b' : '#ea580c'), 
+                 fillColor: h.intensity > 0.7 ? '#ef4444' : (h.intensity > 0.4 ? '#f59e0b' : '#ea580c'), 
                  fillOpacity: 0.3,
                  stroke: false
                }} 
@@ -252,7 +252,7 @@ const SmartMap = () => {
                 <Marker position={[lat, lng]} opacity={0}>
                   <Popup className="uber-popup">
                     <div style={{ minWidth: '180px', padding: '0.5rem' }}>
-                      <h3 style={{ color: isPolice ? '#3b82f6' : '#10b981', margin: '0 0 0.5rem 0', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.3rem' }}>
+                      <h3 style={{ color: isPolice ? '#ea580c' : '#10b981', margin: '0 0 0.5rem 0', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.3rem' }}>
                         {unit.type.toUpperCase()} DISPATCH
                       </h3>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.3rem' }}>
@@ -289,7 +289,7 @@ const SmartMap = () => {
            <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.85rem', color: '#cbd5e1', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
              <li>AI Predictive Routing: <span style={{ color: '#10b981' }}>Enabled</span></li>
              <li>Green Corridor Sync: <span style={{ color: '#10b981' }}>Active</span></li>
-             <li>Anomaly Detection: <span style={{ color: '#3b82f6' }}>Scanning...</span></li>
+             <li>Anomaly Detection: <span style={{ color: '#ea580c' }}>Scanning...</span></li>
              <li>City Threat Level: <span style={{ color: '#f59e0b' }}>Elevated</span></li>
            </ul>
         </div>

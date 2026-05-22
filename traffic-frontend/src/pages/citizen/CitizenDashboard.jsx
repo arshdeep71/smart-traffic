@@ -25,7 +25,7 @@ const EvidencePackage = ({ video, photos, lat, lng }) => {
   return (
     <div className="glass-panel" style={{ padding: '1rem' }}>
       <h4 style={{ margin: '0 0 0.6rem 0', fontSize: '0.82rem', display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-        <Package size={14} color="#2170e4" /> Multi-Evidence Package
+        <Package size={14} color="#ea580c" /> Multi-Evidence Package
       </h4>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
         {items.map((it, i) => (
@@ -597,7 +597,7 @@ const CitizenDashboard = () => {
                 ctx.fillStyle = grad;
                 ctx.fillRect(0, 0, w, h);
 
-                ctx.strokeStyle = 'rgba(59, 130, 246, 0.12)';
+                ctx.strokeStyle = 'rgba(234, 88, 12, 0.12)';
                 ctx.lineWidth = 1;
                 for (let x = 0; x < w; x += 40) {
                   ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
@@ -631,11 +631,11 @@ const CitizenDashboard = () => {
               // Telemetry Panel
               ctx.fillStyle = 'rgba(9, 13, 22, 0.85)';
               ctx.fillRect(15, h - 65, 290, 50);
-              ctx.strokeStyle = 'rgba(59, 130, 246, 0.4)';
+              ctx.strokeStyle = 'rgba(234, 88, 12, 0.4)';
               ctx.lineWidth = 1;
               ctx.strokeRect(15, h - 65, 290, 50);
 
-              ctx.fillStyle = '#3b82f6';
+              ctx.fillStyle = '#ea580c';
               ctx.fillText('📡 LINK: SECURE CITY RADAR', 25, h - 48);
               ctx.fillStyle = '#10b981';
               ctx.fillText('🛰️ GPS: 31.252242 N, 75.703130 E', 25, h - 33);
@@ -778,14 +778,14 @@ const CitizenDashboard = () => {
 
     return (
       <div style={{ position: 'fixed', inset: 0, zIndex: 100001, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(15, 23, 42, 0.75)', backdropFilter: 'blur(4px)' }}>
-        <div className="glass-panel pop-in" style={{ width: '420px', padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '1.25rem', boxShadow: '0 20px 50px rgba(0,0,0,0.15)', border: '1px solid rgba(33, 112, 228, 0.2)' }}>
-          <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'linear-gradient(135deg, #2170e4, #0058be)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '1.8rem', boxShadow: '0 8px 20px rgba(33, 112, 228, 0.25)' }}>
+        <div className="glass-panel pop-in" style={{ width: '420px', padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '1.25rem', boxShadow: '0 20px 50px rgba(0,0,0,0.15)', border: '1px solid rgba(234, 88, 12, 0.2)' }}>
+          <div style={{ width: 60, height: 60, borderRadius: '50%', background: 'linear-gradient(135deg, #ea580c, #0058be)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '1.8rem', boxShadow: '0 8px 20px rgba(234, 88, 12, 0.25)' }}>
             🧭
           </div>
           
           <div>
             <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem', fontWeight: 900, color: '#191c1e' }}>Welcome to SmartTraffic</h3>
-            <p style={{ margin: 0, fontSize: '0.72rem', color: '#2170e4', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Emergency Response System</p>
+            <p style={{ margin: 0, fontSize: '0.72rem', color: '#ea580c', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Emergency Response System</p>
           </div>
 
           <p style={{ margin: 0, fontSize: '0.82rem', color: '#4b5563', lineHeight: 1.5 }}>
@@ -811,7 +811,7 @@ const CitizenDashboard = () => {
                 setTourActive(true);
               }}
               className="btn" 
-              style={{ flex: 1, background: 'linear-gradient(135deg, #2170e4, #0058be)', color: '#fff', border: 'none', padding: '0.6rem', fontSize: '0.85rem', fontWeight: 800, cursor: 'pointer', borderRadius: 12 }}
+              style={{ flex: 1, background: 'linear-gradient(135deg, #ea580c, #0058be)', color: '#fff', border: 'none', padding: '0.6rem', fontSize: '0.85rem', fontWeight: 800, cursor: 'pointer', borderRadius: 12 }}
             >
               Start Tour
             </button>
@@ -883,13 +883,13 @@ const CitizenDashboard = () => {
             </div>
           </div>
 
-          <div style={{ padding: '0.75rem', background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.1)', borderRadius: '8px' }}>
+          <div style={{ padding: '0.75rem', background: 'rgba(234, 88, 12, 0.05)', border: '1px solid rgba(234, 88, 12, 0.1)', borderRadius: '8px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.65rem', color: '#60a5fa', fontWeight: 700, marginBottom: '0.3rem' }} className="pulse-alert">
               <span>📡 ACTIVE DISPATCH FREQUENCY...</span>
               <span>CONNECTED</span>
             </div>
             <div style={{ height: '3px', background: '#1e293b', borderRadius: '2px', overflow: 'hidden' }}>
-              <div style={{ height: '100%', background: 'linear-gradient(90deg, #3b82f6, #60a5fa)', width: '60%' }}></div>
+              <div style={{ height: '100%', background: 'linear-gradient(90deg, #ea580c, #60a5fa)', width: '60%' }}></div>
             </div>
           </div>
 
@@ -1174,8 +1174,8 @@ const CitizenDashboard = () => {
               maxWidth: '520px',
               width: '100%',
               background: 'linear-gradient(135deg, #090d16, #030712)',
-              border: '1px solid rgba(59, 130, 246, 0.3)',
-              boxShadow: '0 0 40px rgba(59, 130, 246, 0.15)',
+              border: '1px solid rgba(234, 88, 12, 0.3)',
+              boxShadow: '0 0 40px rgba(234, 88, 12, 0.15)',
               borderRadius: '24px',
               padding: '2.5rem 2rem',
               display: 'flex',
@@ -1188,17 +1188,17 @@ const CitizenDashboard = () => {
             }}
           >
             {/* Pulsing Tactical Radar Scanner */}
-            <div className="radar-scanner" style={{ width: '100px', height: '100px', borderRadius: '50%', border: '2px solid rgba(59, 130, 246, 0.3)', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ position: 'absolute', inset: 0, border: '2px solid #3b82f6', borderRadius: '50%', animation: 'pulse-blue 2s infinite' }} />
+            <div className="radar-scanner" style={{ width: '100px', height: '100px', borderRadius: '50%', border: '2px solid rgba(234, 88, 12, 0.3)', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ position: 'absolute', inset: 0, border: '2px solid #ea580c', borderRadius: '50%', animation: 'pulse-orange 2s infinite' }} />
               <div style={{
                 width: '12px',
                 height: '12px',
-                background: '#3b82f6',
+                background: '#ea580c',
                 borderRadius: '50%',
-                boxShadow: '0 0 20px #3b82f6',
-                animation: 'pulse-glow 1.5s infinite'
+                boxShadow: '0 0 20px #ea580c',
+                animation: 'pulse-glow-orange 1.5s infinite'
               }} />
-              <Shield size={36} style={{ color: '#3b82f6', opacity: 0.8, position: 'absolute' }} />
+              <Shield size={36} style={{ color: '#ea580c', opacity: 0.8, position: 'absolute' }} />
             </div>
 
             <div>
@@ -1221,7 +1221,7 @@ const CitizenDashboard = () => {
               flexDirection: 'column',
               gap: '0.5rem',
               fontSize: '0.72rem',
-              color: '#3b82f6',
+              color: '#ea580c',
               textAlign: 'left'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -1248,7 +1248,7 @@ const CitizenDashboard = () => {
                 initial={{ left: '-30%' }}
                 animate={{ left: '100%' }}
                 transition={{ repeat: Infinity, duration: 1.8, ease: 'linear' }}
-                style={{ width: '30%', height: '100%', background: 'linear-gradient(90deg, transparent, #3b82f6, transparent)', position: 'absolute' }}
+                style={{ width: '30%', height: '100%', background: 'linear-gradient(90deg, transparent, #ea580c, transparent)', position: 'absolute' }}
               />
             </div>
 
@@ -1338,7 +1338,7 @@ const CitizenDashboard = () => {
 
             <div style={{ fontSize: '1.2rem', color: '#cbd5e1', fontWeight: 700, marginTop: '1rem' }}>
               Closing session in:{' '}
-              <span style={{ fontSize: '2.5rem', color: '#3b82f6', fontWeight: 900, display: 'inline-block', minWidth: '40px' }} className="animate-pulse">
+              <span style={{ fontSize: '2.5rem', color: '#ea580c', fontWeight: 900, display: 'inline-block', minWidth: '40px' }} className="animate-pulse">
                 {resolutionCountdown}
               </span>
             </div>
@@ -1487,9 +1487,9 @@ const CitizenDashboard = () => {
                     // WAITING VERIFICATION CONTAINER
                     <>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '1rem' }}>
-                        <div style={{ position: 'relative', width: 50, height: 50, borderRadius: '50%', background: 'rgba(33, 112, 228, 0.08)', border: '2px solid #2170e4', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="pulse-subtle-glow">
-                          <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#2170e4' }} className="animate-ping" />
-                          <Activity size={22} style={{ color: '#2170e4', position: 'absolute' }} />
+                        <div style={{ position: 'relative', width: 50, height: 50, borderRadius: '50%', background: 'rgba(234, 88, 12, 0.08)', border: '2px solid #ea580c', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="pulse-subtle-glow">
+                          <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ea580c' }} className="animate-ping" />
+                          <Activity size={22} style={{ color: '#ea580c', position: 'absolute' }} />
                         </div>
                         <div>
                           <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 900, color: '#0f172a' }}>
@@ -1503,9 +1503,9 @@ const CitizenDashboard = () => {
 
                       {/* Radar animation loader */}
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2.5rem 1.5rem', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0', gap: '1rem', textAlign: 'center' }}>
-                        <div className="radar-scanner" style={{ width: '80px', height: '80px', borderRadius: '50%', border: '2px solid rgba(33, 112, 228, 0.4)', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <span style={{ position: 'absolute', inset: 0, border: '2px solid #2170e4', borderRadius: '50%', animation: 'pulse-red 1.8s infinite' }} />
-                          <ShieldAlert size={36} style={{ color: '#2170e4' }} />
+                        <div className="radar-scanner" style={{ width: '80px', height: '80px', borderRadius: '50%', border: '2px solid rgba(234, 88, 12, 0.4)', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ position: 'absolute', inset: 0, border: '2px solid #ea580c', borderRadius: '50%', animation: 'pulse-orange 1.8s infinite' }} />
+                          <ShieldAlert size={36} style={{ color: '#ea580c' }} />
                         </div>
                         <div>
                           <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#1e293b' }}>Telemetry Link Active</div>
@@ -1696,7 +1696,7 @@ const CitizenDashboard = () => {
                       <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', marginTop: '0.2rem' }}>Hospitals Live</div>
                     </div>
                     <div className="glass-panel" style={{ padding: '1rem', textAlign: 'center', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.01)' }}>
-                      <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#3b82f6', letterSpacing: '-0.5px' }}>12</div>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#ea580c', letterSpacing: '-0.5px' }}>12</div>
                       <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', marginTop: '0.2rem' }}>Ambulances</div>
                     </div>
                     <div className="glass-panel" style={{ padding: '1rem', textAlign: 'center', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.01)' }}>
@@ -1761,7 +1761,7 @@ const CitizenDashboard = () => {
                         const isPending = acc.status?.toLowerCase() === 'pending' || acc.status?.toLowerCase() === 'sos received';
 
                         return (
-                          <div key={acc._id || acc.id || i} onClick={() => { setActiveIncident(acc); setAssignedAmbulance(null); setRouteInfo({ distance: '—', time: '—' }); localStorage.setItem('tracked_incident_id', acc._id || acc.id); window.scrollTo(0, 0); }} className="glass-panel" style={{ padding: '1.25rem', cursor: 'pointer', borderLeft: isCompleted ? '4px solid #10b981' : isPending ? '4px solid #f59e0b' : '4px solid #3b82f6', transition: 'transform 0.2s, box-shadow 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.01)'; e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.06)'; }} onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none'; }}>
+                          <div key={acc._id || acc.id || i} onClick={() => { setActiveIncident(acc); setAssignedAmbulance(null); setRouteInfo({ distance: '—', time: '—' }); localStorage.setItem('tracked_incident_id', acc._id || acc.id); window.scrollTo(0, 0); }} className="glass-panel" style={{ padding: '1.25rem', cursor: 'pointer', borderLeft: isCompleted ? '4px solid #10b981' : isPending ? '4px solid #f59e0b' : '4px solid #ea580c', transition: 'transform 0.2s, box-shadow 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.01)'; e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.06)'; }} onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none'; }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.8rem' }}>
                               <div>
                                 <div style={{ fontWeight: 800, fontSize: '1rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -1769,7 +1769,7 @@ const CitizenDashboard = () => {
                                 </div>
                                 <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.3rem' }}>{acc.created_at ? new Date(acc.created_at).toLocaleString() : new Date().toLocaleString()}</div>
                               </div>
-                              <span style={{ padding: '0.3rem 0.6rem', borderRadius: '50px', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', background: isCompleted ? '#d1fae5' : isPending ? '#fef3c7' : '#dbeafe', color: isCompleted ? '#059669' : isPending ? '#d97706' : '#2563eb' }}>
+                              <span style={{ padding: '0.3rem 0.6rem', borderRadius: '50px', fontSize: '0.7rem', fontWeight: 800, textTransform: 'uppercase', background: isCompleted ? '#d1fae5' : isPending ? '#fef3c7' : '#dbeafe', color: isCompleted ? '#059669' : isPending ? '#d97706' : '#ea580c' }}>
                                 {isCompleted ? 'COMPLETED' : acc.status}
                               </span>
                             </div>
@@ -1823,13 +1823,13 @@ const CitizenDashboard = () => {
 
                         {/* 🎥 EXTRACTION PROGRESS EFFECT */}
                         {isExtractingFrames && (
-                          <div style={{ padding: '1rem', background: 'rgba(59, 130, 246, 0.05)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '8px', marginTop: '0.5rem' }}>
+                          <div style={{ padding: '1rem', background: 'rgba(234, 88, 12, 0.05)', border: '1px solid rgba(234, 88, 12, 0.2)', borderRadius: '8px', marginTop: '0.5rem' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', fontSize: '0.75rem' }}>
-                              <span style={{ color: '#3b82f6', fontWeight: 700 }} className="pulse-alert">🎥 Processing Evidence...</span>
-                              <span style={{ color: '#3b82f6', fontWeight: 800 }}>{extractionProgress}%</span>
+                              <span style={{ color: '#ea580c', fontWeight: 700 }} className="pulse-alert">🎥 Processing Evidence...</span>
+                              <span style={{ color: '#ea580c', fontWeight: 800 }}>{extractionProgress}%</span>
                             </div>
                             <div style={{ height: '6px', background: '#f3f4f6', borderRadius: '3px', overflow: 'hidden' }}>
-                              <div style={{ width: `${extractionProgress}%`, height: '100%', background: '#3b82f6', transition: 'width 0.15s ease-out' }}></div>
+                              <div style={{ width: `${extractionProgress}%`, height: '100%', background: '#ea580c', transition: 'width 0.15s ease-out' }}></div>
                             </div>
                             <div style={{ fontSize: '0.65rem', color: '#6b7280', marginTop: '0.4rem', textAlign: 'center' }}>
                               Extracting multiple image frames from recorded clip...
@@ -2003,7 +2003,7 @@ const CitizenDashboard = () => {
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <span style={{ fontSize: '0.78rem', color: '#6b7280' }}>GPS Accuracy Radius</span>
-                          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#3b82f6' }}>± {formData.location.accuracy} meters</span>
+                          <span style={{ fontSize: '0.78rem', fontWeight: 700, color: '#ea580c' }}>± {formData.location.accuracy} meters</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <span style={{ fontSize: '0.78rem', color: '#6b7280' }}>Telemetry Socket Status</span>
@@ -2055,7 +2055,7 @@ const CitizenDashboard = () => {
                   <Marker position={[formData.location.lat, formData.location.lng]} icon={createLocationPin()}>
                     <Popup className="uber-popup"><div style={{ padding: '0.5rem' }}>You Are Here</div></Popup>
                   </Marker>
-                  <Circle center={[formData.location.lat, formData.location.lng]} radius={formData.location.accuracy} pathOptions={{ color: '#3b82f6', fillOpacity: 0.1 }} />
+                  <Circle center={[formData.location.lat, formData.location.lng]} radius={formData.location.accuracy} pathOptions={{ color: '#ea580c', fillOpacity: 0.1 }} />
 
                   {/* LIVE AMBULANCE MARKER */}
                   {ambLocation && (
@@ -2107,6 +2107,8 @@ const CitizenDashboard = () => {
         .uber-popup .leaflet-popup-tip { background: white; }
         .leaflet-popup-close-button { display: none !important; }
         @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+        @keyframes pulse-orange { 0% { box-shadow: 0 0 0 0 rgba(234, 88, 12, 0.4); } 70% { box-shadow: 0 0 0 20px rgba(234, 88, 12, 0); } 100% { box-shadow: 0 0 0 0 rgba(234, 88, 12, 0); } }
+        @keyframes pulse-glow-orange { 0% { box-shadow: 0 0 10px rgba(234, 88, 12, 0.6); } 50% { box-shadow: 0 0 25px rgba(234, 88, 12, 0.9); } 100% { box-shadow: 0 0 10px rgba(234, 88, 12, 0.6); } }
       `}</style>
     </div>
   );

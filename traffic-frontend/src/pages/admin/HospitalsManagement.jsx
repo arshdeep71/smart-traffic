@@ -86,7 +86,7 @@ const CreateHospitalModal = ({ onClose, onSuccess }) => {
             </div>
           </div>
         </div>
-        <button onClick={onClose} style={{ background: 'linear-gradient(135deg, #3b82f6, #2563eb)', color: '#fff', border: 'none', borderRadius: '10px', padding: '0.8rem 2rem', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem' }}>
+        <button onClick={onClose} style={{ background: 'linear-gradient(135deg, #ea580c, #ea580c)', color: '#fff', border: 'none', borderRadius: '10px', padding: '0.8rem 2rem', fontWeight: 700, cursor: 'pointer', fontSize: '0.9rem' }}>
           Close & Continue
         </button>
       </div>
@@ -152,7 +152,7 @@ const CreateHospitalModal = ({ onClose, onSuccess }) => {
               <label style={labelStyle}>Hospital Email *</label>
               <input name="email" type="email" value={form.email} onChange={handleChange} style={inputStyle} placeholder="hospital@domain.com" required />
             </div>
-            <div style={{ gridColumn: '1/-1', background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.2)', borderRadius: '12px', padding: '1.25rem' }}>
+            <div style={{ gridColumn: '1/-1', background: 'rgba(234, 88, 12,0.08)', border: '1px solid rgba(234, 88, 12,0.2)', borderRadius: '12px', padding: '1.25rem' }}>
               <div style={{ color: '#60a5fa', fontSize: '0.75rem', fontWeight: 700, marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Hospital Admin Account</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
@@ -174,7 +174,7 @@ const CreateHospitalModal = ({ onClose, onSuccess }) => {
           </div>}
           <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
             <button type="button" onClick={onClose} style={{ flex: 1, background: 'rgba(255,255,255,0.08)', color: '#94a3b8', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '10px', padding: '0.8rem', cursor: 'pointer', fontWeight: 600 }}>Cancel</button>
-            <button type="submit" disabled={loading} style={{ flex: 2, background: loading ? 'rgba(59,130,246,0.5)' : 'linear-gradient(135deg, #3b82f6, #1d4ed8)', color: '#fff', border: 'none', borderRadius: '10px', padding: '0.8rem', cursor: loading ? 'not-allowed' : 'pointer', fontWeight: 700, fontSize: '0.95rem', transition: 'all 0.2s' }}>
+            <button type="submit" disabled={loading} style={{ flex: 2, background: loading ? 'rgba(234, 88, 12,0.5)' : 'linear-gradient(135deg, #ea580c, #c2410c)', color: '#fff', border: 'none', borderRadius: '10px', padding: '0.8rem', cursor: loading ? 'not-allowed' : 'pointer', fontWeight: 700, fontSize: '0.95rem', transition: 'all 0.2s' }}>
               {loading ? '⏳ Creating Hospital...' : '+ Create Hospital & Admin Account'}
             </button>
           </div>
@@ -269,7 +269,7 @@ const HospitalsManagement = () => {
       {overview && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '2.5rem' }}>
           {[
-            { label: 'TOTAL HOSPITALS', value: overview.total_hospitals, color: '#3b82f6', icon: <Building2 size={20} /> },
+            { label: 'TOTAL HOSPITALS', value: overview.total_hospitals, color: '#ea580c', icon: <Building2 size={20} /> },
             { label: 'ACTIVE HOSPITALS', value: overview.active_hospitals, color: '#10b981', icon: <CheckCircle size={20} /> },
             { label: 'TOTAL AMBULANCES', value: overview.total_ambulances, color: '#f59e0b', icon: <Truck size={20} /> },
             { label: 'AVAILABLE UNITS', value: overview.available_ambulances, color: '#10b981', icon: <Activity size={20} /> },
@@ -319,7 +319,7 @@ const HospitalsManagement = () => {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '1.5rem' }}>
           {filtered.map((hospital) => (
             <div key={hospital._id} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '1.75rem', transition: 'all 0.3s ease', cursor: 'pointer' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(59,130,246,0.4)'; e.currentTarget.style.background = 'rgba(59,130,246,0.05)'; }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(234, 88, 12,0.4)'; e.currentTarget.style.background = 'rgba(234, 88, 12,0.05)'; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
             >
               {/* Hospital Header */}
@@ -357,7 +357,7 @@ const HospitalsManagement = () => {
               </div>
 
               {/* Admin Credentials */}
-              <div style={{ background: 'rgba(59,130,246,0.08)', border: '1px solid rgba(59,130,246,0.18)', borderRadius: '10px', padding: '0.75rem', marginBottom: '1rem' }}>
+              <div style={{ background: 'rgba(234, 88, 12,0.08)', border: '1px solid rgba(234, 88, 12,0.18)', borderRadius: '10px', padding: '0.75rem', marginBottom: '1rem' }}>
                 <div style={{ fontSize: '0.65rem', color: '#60a5fa', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>🔑 Admin Credentials</div>
                 {/* Login ID — stacked so full email is always visible */}
                 <div style={{ marginBottom: '0.4rem' }}>
@@ -372,7 +372,7 @@ const HospitalsManagement = () => {
 
               {/* Actions */}
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button onClick={() => navigate(`/hospitals/${hospital.id || hospital._id}`)} style={{ flex: 1, background: 'linear-gradient(135deg, #3b82f6, #2563eb)', color: '#fff', border: 'none', borderRadius: '8px', padding: '0.55rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
+                <button onClick={() => navigate(`/hospitals/${hospital.id || hospital._id}`)} style={{ flex: 1, background: 'linear-gradient(135deg, #ea580c, #ea580c)', color: '#fff', border: 'none', borderRadius: '8px', padding: '0.55rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
                   <Eye size={15} /> View Details
                 </button>
                 <button onClick={() => handleSuspend(hospital.id || hospital._id, hospital.status)} style={{ background: hospital.status === 'active' ? 'rgba(245,158,11,0.15)' : 'rgba(16,185,129,0.15)', border: `1px solid ${hospital.status === 'active' ? 'rgba(245,158,11,0.3)' : 'rgba(16,185,129,0.3)'}`, color: hospital.status === 'active' ? '#f59e0b' : '#10b981', borderRadius: '8px', padding: '0.55rem 0.75rem', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}>

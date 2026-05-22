@@ -254,7 +254,7 @@ const IncidentAnalysis = () => {
                    )}
                 </div>
                 {statusMessage && (
-                  <div style={{ padding: '0.5rem 0.75rem', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '6px', fontSize: '0.72rem', color: '#2563eb', fontWeight: 700, textAlign: 'center' }} className="pulse-alert">
+                  <div style={{ padding: '0.5rem 0.75rem', background: 'rgba(234, 88, 12, 0.1)', border: '1px solid rgba(234, 88, 12, 0.2)', borderRadius: '6px', fontSize: '0.72rem', color: '#ea580c', fontWeight: 700, textAlign: 'center' }} className="pulse-alert">
                     {statusMessage}
                   </div>
                 )}
@@ -262,7 +262,7 @@ const IncidentAnalysis = () => {
 
              {/* Workflow Step Indicators */}
              <div style={{ display: 'flex', justifyContent: 'space-between', background: 'rgba(0,0,0,0.02)', padding: '0.75rem', borderRadius: '8px', fontSize: '0.65rem', fontWeight: 700 }}>
-                <div style={{ color: incident.status === 'pending' || incident.status === 'verified' || incident.status === 'dispatched' || incident.status === 'police_notified' ? '#3b82f6' : '#9ca3af', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.2rem' }}>
+                <div style={{ color: incident.status === 'pending' || incident.status === 'verified' || incident.status === 'dispatched' || incident.status === 'police_notified' ? '#ea580c' : '#9ca3af', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.2rem' }}>
                    <span>📥 RECEIVED</span>
                    <span style={{ fontSize: '0.5rem' }}>✓</span>
                 </div>
@@ -291,7 +291,7 @@ const IncidentAnalysis = () => {
                   onClick={handleNotifyPolice}
                   disabled={updatingStatus || incident.status === 'pending' || incident.status === 'police_notified'}
                   className="btn btn-outline"
-                  style={{ width: '100%', borderColor: '#3b82f6', color: '#2563eb', padding: '0.7rem', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                  style={{ width: '100%', borderColor: '#ea580c', color: '#ea580c', padding: '0.7rem', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
                 >
                   <Shield size={16} /> Notify Police Unit
                 </button>
