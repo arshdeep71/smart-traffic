@@ -493,7 +493,9 @@ const CitizenDashboard = () => {
         return ['pending', 'report received', 'sos received', 'police assigned', 'officer en route', 'officer nearby', 'officer reached scene', 'investigation active', 'police team notified', 'patrol unit dispatched', 'unit en route', 'officers approaching'].includes(s);
       });
       if (active) {
-        setActiveIncident(active);
+        // Do not auto-set activeIncident on page boot/mount so the tracking map doesn't hijack the screen.
+        // The user can click 'Live Track 🗺️' from their active emergency banner on the home dashboard to track manually.
+        // setActiveIncident(active);
         const s = active.status?.toLowerCase() || '';
         const isPolice = s.includes('police') || s.includes('officer') || s.includes('patrol') || s.includes('investigation');
         setAssignedAmbulance({
