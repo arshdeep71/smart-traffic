@@ -51,35 +51,36 @@ const Login = () => {
       
       {/* Top Header Bar */}
       <header style={{
-        height: '70px',
+        height: '75px',
         borderBottom: '1px solid #f1f5f9',
         display: 'flex',
         alignItems: 'center',
-        padding: '0 3rem',
-        background: '#ffffff'
+        padding: '0 4rem',
+        background: '#ffffff',
+        zIndex: 50
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <div style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: '28px',
-            height: '28px',
+            width: '30px',
+            height: '30px',
             border: '2px solid #0f172a',
             transform: 'rotate(45deg)',
             marginRight: '8px'
           }}>
             <span style={{ 
               transform: 'rotate(-45deg)', 
-              fontWeight: 900, 
-              fontSize: '0.62rem', 
+              fontWeight: 950, 
+              fontSize: '0.68rem', 
               color: '#0f172a', 
               letterSpacing: '-0.5px' 
             }}>TMI</span>
           </div>
           <span style={{ 
-            fontWeight: 800, 
-            fontSize: '0.9rem', 
+            fontWeight: 900, 
+            fontSize: '1rem', 
             letterSpacing: '0.08em', 
             color: '#0f172a',
             textTransform: 'uppercase'
@@ -120,113 +121,87 @@ const Login = () => {
           </a>
         </aside>
 
-        {/* Center Panel Container */}
+        {/* Split Container: Form (Left) & Services Collage (Right) */}
         <main style={{ 
           flex: 1, 
           display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          padding: '2rem 1rem'
+          width: '100%',
+          maxWidth: '1440px',
+          margin: '0 auto',
+          padding: '2rem 4rem 2rem 8rem',
+          boxSizing: 'border-box',
+          alignItems: 'center',
+          gap: '5rem',
+          position: 'relative'
         }}>
           
-          <div style={{
-            width: '100%',
-            maxWidth: '520px',
-            background: '#fafafa',
-            border: '1px solid #f1f5f9',
-            padding: '4rem 3.5rem',
-            borderRadius: '4px'
-          }}>
-            
-            <h2 style={{
-              fontSize: '1.8rem',
-              fontWeight: 900,
-              color: '#0f172a',
-              letterSpacing: '0.06em',
-              marginBottom: '3rem',
-              textTransform: 'uppercase'
+          {/* Left Column: Sign In Card */}
+          <div style={{ flex: 1.1, display: 'flex', justifyContent: 'flex-start' }}>
+            <div style={{
+              width: '100%',
+              maxWidth: '450px',
+              background: '#fafafa',
+              border: '1px solid #f1f5f9',
+              padding: '3.5rem 3rem',
+              borderRadius: '4px',
+              boxShadow: '0px 1px 3px rgba(0, 0, 0, 0.02), 0px 10px 30px rgba(0, 0, 0, 0.03)'
             }}>
-              Sign In
-            </h2>
-
-            {error && (
-              <div style={{
-                background: '#fef2f2',
-                border: '1px solid #fee2e2',
-                color: '#ef4444',
-                padding: '0.85rem',
-                borderRadius: '4px',
-                marginBottom: '2rem',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                textAlign: 'center'
-              }}>
-                {error}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit}>
               
-              {/* Email Address */}
-              <div style={{ marginBottom: '2.5rem', position: 'relative' }}>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.82rem',
-                  fontWeight: 600,
-                  color: '#64748b',
-                  marginBottom: '0.25rem',
-                  fontFamily: "'Inter', sans-serif"
-                }}>
-                  Email
-                </label>
-                <input 
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  onFocus={() => setEmailFocused(true)}
-                  onBlur={() => setEmailFocused(false)}
-                  style={{
-                    width: '100%',
-                    border: 'none',
-                    borderBottom: emailFocused ? '2px solid #ea580c' : '1px solid #cbd5e1',
-                    background: 'transparent',
-                    padding: '0.6rem 0',
-                    fontSize: '1rem',
-                    color: '#0f172a',
-                    outline: 'none',
-                    transition: 'border-color 0.2s',
-                    fontFamily: "'Inter', sans-serif"
-                  }}
-                  required
-                />
-              </div>
+              <h2 style={{
+                fontSize: '1.6rem',
+                fontWeight: 900,
+                color: '#0f172a',
+                letterSpacing: '0.06em',
+                marginBottom: '2.5rem',
+                textTransform: 'uppercase',
+                textAlign: 'left'
+              }}>
+                Sign In
+              </h2>
 
-              {/* Password */}
-              <div style={{ marginBottom: '3.5rem', position: 'relative' }}>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.82rem',
+              {error && (
+                <div style={{
+                  background: '#fef2f2',
+                  border: '1px solid #fee2e2',
+                  color: '#ef4444',
+                  padding: '0.85rem',
+                  borderRadius: '4px',
+                  marginBottom: '2rem',
+                  fontSize: '0.85rem',
                   fontWeight: 600,
-                  color: '#64748b',
-                  marginBottom: '0.25rem',
-                  fontFamily: "'Inter', sans-serif"
+                  textAlign: 'left'
                 }}>
-                  Password
-                </label>
-                <div style={{ position: 'relative' }}>
+                  {error}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit}>
+                
+                {/* Email Address */}
+                <div style={{ marginBottom: '2.25rem', position: 'relative', textAlign: 'left' }}>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    color: '#64748b',
+                    marginBottom: '0.25rem',
+                    fontFamily: "'Inter', sans-serif"
+                  }}>
+                    Email Address
+                  </label>
                   <input 
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    onFocus={() => setPasswordFocused(true)}
-                    onBlur={() => setPasswordFocused(false)}
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onFocus={() => setEmailFocused(true)}
+                    onBlur={() => setEmailFocused(false)}
                     style={{
                       width: '100%',
                       border: 'none',
-                      borderBottom: passwordFocused ? '2px solid #ea580c' : '1px solid #cbd5e1',
+                      borderBottom: emailFocused ? '2px solid #ea580c' : '1px solid #cbd5e1',
                       background: 'transparent',
-                      padding: '0.6rem 2.5rem 0.6rem 0',
-                      fontSize: '1rem',
+                      padding: '0.5rem 0',
+                      fontSize: '0.95rem',
                       color: '#0f172a',
                       outline: 'none',
                       transition: 'border-color 0.2s',
@@ -234,123 +209,311 @@ const Login = () => {
                     }}
                     required
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    style={{
-                      position: 'absolute',
-                      right: 0,
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      background: 'transparent',
-                      border: 'none',
-                      color: '#94a3b8',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '0.25rem'
-                    }}
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
                 </div>
+
+                {/* Password */}
+                <div style={{ marginBottom: '3rem', position: 'relative', textAlign: 'left' }}>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    color: '#64748b',
+                    marginBottom: '0.25rem',
+                    fontFamily: "'Inter', sans-serif"
+                  }}>
+                    Password
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <input 
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      onFocus={() => setPasswordFocused(true)}
+                      onBlur={() => setPasswordFocused(false)}
+                      style={{
+                        width: '100%',
+                        border: 'none',
+                        borderBottom: passwordFocused ? '2px solid #ea580c' : '1px solid #cbd5e1',
+                        background: 'transparent',
+                        padding: '0.5rem 2rem 0.5rem 0',
+                        fontSize: '0.95rem',
+                        color: '#0f172a',
+                        outline: 'none',
+                        transition: 'border-color 0.2s',
+                        fontFamily: "'Inter', sans-serif"
+                      }}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      style={{
+                        position: 'absolute',
+                        right: 0,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        background: 'transparent',
+                        border: 'none',
+                        color: '#94a3b8',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '0.25rem'
+                      }}
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Submit CTA Button */}
+                <button 
+                  type="submit" 
+                  disabled={loading}
+                  style={{
+                    width: '100%',
+                    background: '#ea580c',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: '4px',
+                    padding: '0.85rem',
+                    fontSize: '0.85rem',
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.06em',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseOver={e => { if (!loading) e.currentTarget.style.background = '#c2410c'; }}
+                  onMouseOut={e => { if (!loading) e.currentTarget.style.background = '#ea580c'; }}
+                >
+                  {loading ? 'Sign In...' : 'Sign In →'}
+                </button>
+
+              </form>
+
+              {/* Forgot Password Link */}
+              <div style={{ marginTop: '2rem', textAlign: 'left' }}>
+                <a 
+                  href="#forgot" 
+                  style={{ 
+                    color: '#ea580c', 
+                    textDecoration: 'none', 
+                    fontSize: '0.85rem', 
+                    fontWeight: 700 
+                  }}
+                  onMouseOver={e => e.currentTarget.style.textDecoration = 'underline'}
+                  onMouseOut={e => e.currentTarget.style.textDecoration = 'none'}
+                >
+                  Forgot Your Password?
+                </a>
               </div>
 
-              {/* Submit CTA Button */}
-              <button 
-                type="submit" 
-                disabled={loading}
-                style={{
-                  background: '#ea580c',
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: '4px',
-                  padding: '0.85rem 2.2rem',
-                  fontSize: '0.88rem',
-                  fontWeight: 800,
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.06em',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.65rem',
-                  transition: 'all 0.2s',
-                  boxShadow: '0 2px 4px rgba(234, 88, 12, 0.15)'
-                }}
-                onMouseOver={e => e.currentTarget.style.background = '#c2410c'}
-                onMouseOut={e => e.currentTarget.style.background = '#ea580c'}
-              >
-                {loading ? 'Sign In...' : 'Sign In →'}
-              </button>
+              {/* Citizen Portal Link */}
+              <div style={{ 
+                marginTop: '2.5rem', 
+                borderTop: '1px solid #e2e8f0', 
+                paddingTop: '2rem', 
+                textAlign: 'left' 
+              }}>
+                <p style={{ 
+                  color: '#64748b', 
+                  fontSize: '0.78rem', 
+                  fontWeight: 600, 
+                  marginBottom: '1rem',
+                  fontFamily: "'Inter', sans-serif"
+                }}>
+                  Resident or Citizen reporting an emergency?
+                </p>
+                <button
+                  type="button"
+                  onClick={() => navigate('/citizen-login')}
+                  style={{
+                    width: '100%',
+                    background: 'transparent',
+                    border: '1px solid #10b981',
+                    color: '#10b981',
+                    borderRadius: '4px',
+                    padding: '0.8rem',
+                    fontSize: '0.8rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.04em',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseOver={e => {
+                    e.currentTarget.style.background = '#10b981';
+                    e.currentTarget.style.color = '#ffffff';
+                  }}
+                  onMouseOut={e => {
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.color = '#10b981';
+                  }}
+                >
+                  🛡️ Enter Citizen Emergency Portal
+                </button>
+              </div>
 
-            </form>
+            </div>
+          </div>
 
-            {/* Forgot Password Link */}
-            <div style={{ marginTop: '2rem' }}>
-              <a 
-                href="#forgot" 
-                style={{ 
-                  color: '#ea580c', 
-                  textDecoration: 'none', 
-                  fontSize: '0.85rem', 
-                  fontWeight: 700 
-                }}
-                onMouseOver={e => e.currentTarget.style.textDecoration = 'underline'}
-                onMouseOut={e => e.currentTarget.style.textDecoration = 'none'}
-              >
-                Forgot Your Password?
-              </a>
+          {/* Right Column: Visual Services Collage (Hidden on Mobile/Tablets) */}
+          <div style={{
+            flex: 1.4,
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '1.5rem',
+            padding: '2rem',
+            height: '100%',
+            alignContent: 'center',
+            boxSizing: 'border-box'
+          }}>
+            
+            {/* Card 1: Equipment Rentals */}
+            <div style={{
+              position: 'relative',
+              borderRadius: '24px',
+              overflow: 'hidden',
+              height: '260px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+              transition: 'transform 0.3s'
+            }}
+            onMouseOver={e => e.currentTarget.style.transform = 'translateY(-4px)'}
+            onMouseOut={e => e.currentTarget.style.transform = 'none'}
+            >
+              <img 
+                src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=600&q=80" 
+                alt="Equipment Rentals" 
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0) 50%)' }} />
+              <div style={{
+                position: 'absolute',
+                bottom: '1.25rem',
+                left: '1.25rem',
+                background: '#ffffff',
+                padding: '0.6rem 1.2rem',
+                borderRadius: '50px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+              }}>
+                <span style={{ fontSize: '1rem' }}>🚧</span>
+                <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Equipment Rentals</span>
+              </div>
             </div>
 
-            {/* Citizen Portal Link */}
-            <div style={{ 
-              marginTop: '3rem', 
-              borderTop: '1px solid #e2e8f0', 
-              paddingTop: '2rem', 
-              textAlign: 'center' 
-            }}>
-              <p style={{ 
-                color: '#64748b', 
-                fontSize: '0.78rem', 
-                fontWeight: 600, 
-                marginBottom: '1rem',
-                fontFamily: "'Inter', sans-serif"
+            {/* Card 2: Permits */}
+            <div style={{
+              position: 'relative',
+              borderRadius: '24px',
+              overflow: 'hidden',
+              height: '190px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+              transition: 'transform 0.3s'
+            }}
+            onMouseOver={e => e.currentTarget.style.transform = 'translateY(-4px)'}
+            onMouseOut={e => e.currentTarget.style.transform = 'none'}
+            >
+              <img 
+                src="https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=600&q=80" 
+                alt="Permits" 
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0) 50%)' }} />
+              <div style={{
+                position: 'absolute',
+                bottom: '1.25rem',
+                left: '1.25rem',
+                background: '#ffffff',
+                padding: '0.6rem 1.2rem',
+                borderRadius: '50px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
               }}>
-                Resident or Citizen reporting an emergency?
-              </p>
-              <button
-                type="button"
-                onClick={() => navigate('/citizen-login')}
-                style={{
-                  width: '100%',
-                  background: 'transparent',
-                  border: '1px solid #10b981',
-                  color: '#10b981',
-                  borderRadius: '4px',
-                  padding: '0.8rem',
-                  fontSize: '0.8rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.04em',
-                  transition: 'all 0.2s'
-                }}
-                onMouseOver={e => {
-                  e.currentTarget.style.background = '#10b981';
-                  e.currentTarget.style.color = '#ffffff';
-                }}
-                onMouseOut={e => {
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.color = '#10b981';
-                }}
-              >
-                🛡️ Enter Citizen Emergency Portal
-              </button>
+                <span style={{ fontSize: '1rem' }}>📄</span>
+                <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Permits</span>
+              </div>
+            </div>
+
+            {/* Card 3: Engineering */}
+            <div style={{
+              position: 'relative',
+              borderRadius: '24px',
+              overflow: 'hidden',
+              height: '240px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+              transition: 'transform 0.3s'
+            }}
+            onMouseOver={e => e.currentTarget.style.transform = 'translateY(-4px)'}
+            onMouseOut={e => e.currentTarget.style.transform = 'none'}
+            >
+              <img 
+                src="https://images.unsplash.com/photo-1503387762-592dedb80260?auto=format&fit=crop&w=600&q=80" 
+                alt="Engineering" 
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0) 50%)' }} />
+              <div style={{
+                position: 'absolute',
+                bottom: '1.25rem',
+                left: '1.25rem',
+                background: '#ffffff',
+                padding: '0.6rem 1.2rem',
+                borderRadius: '50px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+              }}>
+                <span style={{ fontSize: '1rem' }}>✏️</span>
+                <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Engineering</span>
+              </div>
+            </div>
+
+            {/* Card 4: Custom Signs */}
+            <div style={{
+              position: 'relative',
+              borderRadius: '24px',
+              overflow: 'hidden',
+              height: '310px',
+              marginTop: '-70px',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+              transition: 'transform 0.3s'
+            }}
+            onMouseOver={e => e.currentTarget.style.transform = 'translateY(-4px)'}
+            onMouseOut={e => e.currentTarget.style.transform = 'none'}
+            >
+              <img 
+                src="https://images.unsplash.com/photo-1569003339405-ea396a5a8a90?auto=format&fit=crop&w=600&q=80" 
+                alt="Custom Signs" 
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
+              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0) 50%)' }} />
+              <div style={{
+                position: 'absolute',
+                bottom: '1.25rem',
+                left: '1.25rem',
+                background: '#ffffff',
+                padding: '0.6rem 1.2rem',
+                borderRadius: '50px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+              }}>
+                <span style={{ fontSize: '1rem' }}>🪧</span>
+                <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Custom Signs</span>
+              </div>
             </div>
 
           </div>
