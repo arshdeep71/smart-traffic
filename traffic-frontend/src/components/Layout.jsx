@@ -132,7 +132,7 @@ const Layout = () => {
               style: {
                 display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.75rem 1rem',
                 color: isActive(item.path) ? '#ffffff' : '#64748b',
-                background: isActive(item.path) ? '#0f172a' : 'transparent',
+                background: isActive(item.path) ? 'var(--primary-color)' : 'transparent',
                 borderRadius: '10px', textDecoration: 'none', fontWeight: 600, fontSize: '0.875rem',
                 transition: 'all 0.2s ease'
               }
