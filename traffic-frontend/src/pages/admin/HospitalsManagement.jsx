@@ -241,25 +241,25 @@ const HospitalsManagement = () => {
   const typeIcon = { general: '🏥', trauma: '🚑', specialty: '🔬', clinic: '💊' };
 
   return (
-    <div className="fade-in" style={{ background: 'linear-gradient(135deg, #050b14 0%, #0a1628 100%)', minHeight: '100vh', padding: '2rem', color: '#e2e8f0' }}>
+    <div className="fade-in" style={{ background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)', minHeight: '100vh', padding: '2.5rem', color: '#0f172a' }}>
       {showCreate && <CreateHospitalModal onClose={() => setShowCreate(false)} onSuccess={() => { setShowCreate(false); fetchData(); }} />}
 
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2.5rem' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
-            <div style={{ width: '40px', height: '40px', background: 'linear-gradient(135deg, #ef4444, #dc2626)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: '40px', height: '40px', background: 'linear-gradient(135deg, #ef4444, #dc2626)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(239,68,68,0.25)' }}>
               <Building2 size={22} color="#fff" />
             </div>
-            <h2 style={{ fontSize: '1.8rem', fontWeight: 900, background: 'linear-gradient(135deg, #fff, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', margin: 0 }}>Hospital Management</h2>
+            <h2 style={{ fontSize: '2rem', fontWeight: 900, color: '#0f172a', margin: 0, letterSpacing: '-0.5px' }}>Hospital Management</h2>
           </div>
-          <p style={{ color: '#64748b', fontSize: '0.9rem' }}>Centralized hospital ecosystem oversight & control</p>
+          <p style={{ color: '#475569', fontSize: '0.95rem', fontWeight: 500, margin: 0 }}>Centralized hospital ecosystem oversight & control</p>
         </div>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          <button onClick={fetchData} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#94a3b8', padding: '0.6rem 1rem', borderRadius: '10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
+          <button onClick={fetchData} style={{ background: '#ffffff', border: '1px solid #cbd5e1', color: '#475569', padding: '0.65rem 1.25rem', borderRadius: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: 600, boxShadow: '0 2px 4px rgba(0,0,0,0.04)', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'} onMouseLeave={e => e.currentTarget.style.background = '#ffffff'}>
             <RefreshCw size={16} /> Refresh
           </button>
-          <button onClick={() => setShowCreate(true)} style={{ background: 'linear-gradient(135deg, #ef4444, #dc2626)', color: '#fff', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', boxShadow: '0 0 30px rgba(239,68,68,0.3)' }}>
+          <button onClick={() => setShowCreate(true)} style={{ background: 'linear-gradient(135deg, #ea580c, #c2410c)', color: '#fff', border: 'none', padding: '0.75rem 1.5rem', borderRadius: '12px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', boxShadow: '0 4px 15px rgba(234, 88, 12, 0.3)', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.filter = 'brightness(1.08)'} onMouseLeave={e => e.currentTarget.style.filter = 'none'}>
             <Plus size={18} /> Register Hospital
           </button>
         </div>
@@ -276,13 +276,13 @@ const HospitalsManagement = () => {
             { label: 'DISPATCHED', value: overview.dispatched_ambulances, color: '#ef4444', icon: <AlertTriangle size={20} /> },
             { label: 'HOSPITAL STAFF', value: overview.total_hospital_staff, color: '#8b5cf6', icon: <Users size={20} /> },
           ].map((stat) => (
-            <div key={stat.label} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '1.25rem', borderLeft: `3px solid ${stat.color}` }}>
+            <div key={stat.label} style={{ background: 'rgba(255, 255, 255, 0.7)', border: '1px solid rgba(15, 23, 42, 0.06)', borderRadius: '16px', padding: '1.25rem', borderLeft: `4px solid ${stat.color}`, backdropFilter: 'blur(10px)', boxShadow: '0 4px 20px rgba(0,0,0,0.02)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
-                  <div style={{ fontSize: '0.65rem', color: '#64748b', fontWeight: 700, letterSpacing: '0.08em', marginBottom: '0.5rem' }}>{stat.label}</div>
+                  <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 800, letterSpacing: '0.08em', marginBottom: '0.5rem' }}>{stat.label}</div>
                   <div style={{ fontSize: '2rem', fontWeight: 900, color: stat.color }}>{stat.value ?? '—'}</div>
                 </div>
-                <div style={{ color: stat.color, opacity: 0.7 }}>{stat.icon}</div>
+                <div style={{ color: stat.color, opacity: 0.8 }}>{stat.icon}</div>
               </div>
             </div>
           ))}
@@ -292,20 +292,20 @@ const HospitalsManagement = () => {
       {/* Search */}
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', alignItems: 'center' }}>
         <div style={{ flex: 1, position: 'relative' }}>
-          <Search size={16} style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+          <Search size={16} style={{ position: 'absolute', left: '0.9rem', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
           <input
             value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Search hospitals by name, city, code..."
-            style={{ width: '100%', paddingLeft: '2.5rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#e2e8f0', padding: '0.7rem 0.8rem 0.7rem 2.5rem', borderRadius: '10px', fontSize: '0.875rem' }}
+            style={{ width: '100%', paddingLeft: '2.75rem', background: 'rgba(255, 255, 255, 0.85)', border: '1px solid rgba(15, 23, 42, 0.1)', color: '#0f172a', padding: '0.8rem 1rem 0.8rem 2.75rem', borderRadius: '14px', fontSize: '0.9rem', outline: 'none', transition: 'all 0.2s', boxShadow: '0 4px 15px rgba(0,0,0,0.02)' }}
           />
         </div>
       </div>
 
       {/* API Error Banner */}
       {listError && (
-        <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '12px', padding: '1rem 1.5rem', marginBottom: '1.5rem', color: '#fca5a5', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '12px', padding: '1rem 1.5rem', marginBottom: '1.5rem', color: '#b91c1c', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <AlertTriangle size={18} style={{ flexShrink: 0 }} />
-          <div><strong>API Error:</strong> {listError} — <button onClick={fetchData} style={{ background: 'none', border: 'none', color: '#60a5fa', cursor: 'pointer', textDecoration: 'underline', padding: 0, fontSize: 'inherit' }}>Retry</button></div>
+          <div><strong>API Error:</strong> {listError} — <button onClick={fetchData} style={{ background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', textDecoration: 'underline', padding: 0, fontSize: 'inherit' }}>Retry</button></div>
         </div>
       )}
 
@@ -318,27 +318,27 @@ const HospitalsManagement = () => {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '1.5rem' }}>
           {filtered.map((hospital) => (
-            <div key={hospital._id} style={{ background: 'rgba(9, 13, 22, 0.65)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '20px', padding: '1.8rem', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', cursor: 'pointer', backdropFilter: 'blur(12px)', boxShadow: '0 10px 30px rgba(0,0,0,0.3)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = '#ea580c'; e.currentTarget.style.boxShadow = '0 15px 35px rgba(234, 88, 12, 0.18)'; e.currentTarget.style.transform = 'translateY(-5px)'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.3)'; e.currentTarget.style.transform = 'translateY(0)'; }}
+            <div key={hospital._id} style={{ background: 'rgba(255, 255, 255, 0.6)', border: '1px solid rgba(15, 23, 42, 0.06)', borderRadius: '24px', padding: '1.8rem', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', cursor: 'pointer', backdropFilter: 'blur(16px)', boxShadow: '0 10px 30px rgba(15, 23, 42, 0.03)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = '#ea580c'; e.currentTarget.style.boxShadow = '0 15px 35px rgba(234, 88, 12, 0.12)'; e.currentTarget.style.transform = 'translateY(-5px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(15, 23, 42, 0.06)'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(15, 23, 42, 0.03)'; e.currentTarget.style.transform = 'translateY(0)'; }}
             >
               <div>
                 {/* Hospital Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
                   <div style={{ display: 'flex', gap: '0.9rem', alignItems: 'flex-start' }}>
-                    <div style={{ fontSize: '2.2rem', lineHeight: 1, filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))' }}>{typeIcon[hospital.hospital_type] || '🏥'}</div>
+                    <div style={{ fontSize: '2.2rem', lineHeight: 1, filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.15))' }}>{typeIcon[hospital.hospital_type] || '🏥'}</div>
                     <div>
-                      <div style={{ color: '#fff', fontWeight: 900, fontSize: '1.15rem', lineHeight: 1.3, marginBottom: '0.25rem', letterSpacing: '-0.3px' }}>{hospital.name}</div>
+                      <div style={{ color: '#0f172a', fontWeight: 900, fontSize: '1.15rem', lineHeight: 1.3, marginBottom: '0.25rem', letterSpacing: '-0.3px' }}>{hospital.name}</div>
                       <div style={{ color: '#ea580c', fontSize: '0.75rem', fontFamily: 'monospace', fontWeight: 700, letterSpacing: '0.5px' }}>{hospital.code}</div>
                     </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.3rem 0.8rem', borderRadius: '50px', background: `${statusColor(hospital.status)}12`, border: `1px solid ${statusColor(hospital.status)}30`, fontSize: '0.7rem', fontWeight: 800, color: statusColor(hospital.status), letterSpacing: '0.5px' }}>
-                    <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: statusColor(hospital.status), animation: hospital.status === 'active' ? 'pulse-alert 2s infinite' : 'none' }}></span> {hospital.status?.toUpperCase()}
+                    <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: statusColor(hospital.status) }}></span> {hospital.status?.toUpperCase()}
                   </div>
                 </div>
 
                 {/* Location */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#94a3b8', fontSize: '0.85rem', marginBottom: '1.25rem', fontWeight: 500 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#475569', fontSize: '0.85rem', marginBottom: '1.25rem', fontWeight: 500 }}>
                   <MapPin size={14} color="#64748b" />
                   {hospital.city}, {hospital.state}
                 </div>
@@ -346,11 +346,11 @@ const HospitalsManagement = () => {
                 {/* Stats Row */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.8rem', marginBottom: '1.5rem' }}>
                   {[
-                    { label: 'STAFF', value: hospital.staff_count ?? 0, color: '#a78bfa', bg: 'rgba(167, 139, 250, 0.06)', border: 'rgba(167, 139, 250, 0.15)' },
-                    { label: 'AMBULANCES', value: hospital.ambulance_count ?? 0, color: '#fbbf24', bg: 'rgba(251, 191, 36, 0.06)', border: 'rgba(251, 191, 36, 0.15)' },
-                    { label: 'AVAILABLE', value: hospital.available_ambulances ?? 0, color: '#34d399', bg: 'rgba(52, 211, 153, 0.06)', border: 'rgba(52, 211, 153, 0.15)' },
+                    { label: 'STAFF', value: hospital.staff_count ?? 0, color: '#6d28d9', bg: 'rgba(139, 92, 246, 0.08)', border: 'rgba(139, 92, 246, 0.18)' },
+                    { label: 'AMBULANCES', value: hospital.ambulance_count ?? 0, color: '#b45309', bg: 'rgba(245, 158, 11, 0.08)', border: 'rgba(245, 158, 11, 0.18)' },
+                    { label: 'AVAILABLE', value: hospital.available_ambulances ?? 0, color: '#047857', bg: 'rgba(16, 185, 129, 0.08)', border: 'rgba(16, 185, 129, 0.18)' },
                   ].map(s => (
-                    <div key={s.label} style={{ background: s.bg, border: `1px solid ${s.border}`, borderRadius: '12px', padding: '0.75rem 0.5rem', textAlign: 'center', boxShadow: 'inset 0 4px 10px rgba(0,0,0,0.2)' }}>
+                    <div key={s.label} style={{ background: s.bg, border: `1px solid ${s.border}`, borderRadius: '12px', padding: '0.75rem 0.5rem', textAlign: 'center', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}>
                       <div style={{ fontSize: '1.55rem', fontWeight: 900, color: s.color, lineHeight: 1.1, marginBottom: '0.2rem' }}>{s.value}</div>
                       <div style={{ fontSize: '0.6rem', color: '#64748b', fontWeight: 800, letterSpacing: '0.08em' }}>{s.label}</div>
                     </div>
@@ -358,31 +358,31 @@ const HospitalsManagement = () => {
                 </div>
 
                 {/* Admin Credentials */}
-                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.1rem', marginBottom: '1.5rem', boxShadow: '0 4px 15px rgba(0, 0, 0, 0.05)' }}>
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.1rem', marginBottom: '1.5rem', boxShadow: '0 4px 15px rgba(0, 0, 0, 0.03)' }}>
                   <div style={{ fontSize: '0.75rem', color: '#0f172a', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                     <span style={{ fontSize: '1rem' }}>🔑</span> Admin Credentials
                   </div>
                   {/* Login ID */}
                   <div style={{ marginBottom: '0.75rem' }}>
                     <div style={{ color: '#64748b', fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.5px', marginBottom: '0.25rem' }}>LOGIN EMAIL</div>
-                    <div style={{ color: '#0f172a', fontFamily: 'monospace', fontSize: '0.8rem', fontWeight: 700, wordBreak: 'break-all', background: '#ffffff', padding: '0.45rem 0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>{hospital.admin_login_id}</div>
+                    <div style={{ color: '#0f172a', fontFamily: 'monospace', fontSize: '0.8rem', fontWeight: 700, wordBreak: 'break-all', background: '#ffffff', padding: '0.45rem 0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>{hospital.admin_login_id}</div>
                   </div>
                   <div>
                     <div style={{ color: '#64748b', fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.5px', marginBottom: '0.25rem' }}>PASSWORD</div>
-                    <div style={{ color: '#0f172a', fontFamily: 'monospace', fontSize: '0.8rem', fontWeight: 700, background: '#ffffff', padding: '0.45rem 0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>{hospital.admin_password_hint || 'Password@123'}</div>
+                    <div style={{ color: '#0f172a', fontFamily: 'monospace', fontSize: '0.8rem', fontWeight: 700, background: '#ffffff', padding: '0.45rem 0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', boxShadow: '0 1px 2px rgba(0,0,0,0.04)' }}>{hospital.admin_password_hint || 'Password@123'}</div>
                   </div>
                 </div>
               </div>
 
               {/* Actions */}
               <div style={{ display: 'flex', gap: '0.6rem', marginTop: 'auto' }}>
-                <button onClick={() => navigate(`/hospitals/${hospital.id || hospital._id}`)} style={{ flex: 1, background: 'linear-gradient(135deg, #ea580c, #c2410c)', color: '#fff', border: 'none', borderRadius: '10px', padding: '0.7rem', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', boxShadow: '0 4px 12px rgba(234, 88, 12, 0.25)', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.filter = 'brightness(1.1)'} onMouseLeave={e => e.currentTarget.style.filter = 'none'}>
+                <button onClick={() => navigate(`/hospitals/${hospital.id || hospital._id}`)} style={{ flex: 1, background: 'linear-gradient(135deg, #ea580c, #c2410c)', color: '#fff', border: 'none', borderRadius: '10px', padding: '0.7rem', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', boxShadow: '0 4px 12px rgba(234, 88, 12, 0.25)', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.filter = 'brightness(1.08)'} onMouseLeave={e => e.currentTarget.style.filter = 'none'}>
                   <Eye size={15} /> View Details
                 </button>
-                <button onClick={() => handleSuspend(hospital.id || hospital._id, hospital.status)} style={{ background: hospital.status === 'active' ? 'rgba(245,158,11,0.06)' : 'rgba(16,185,129,0.06)', border: `1px solid ${hospital.status === 'active' ? 'rgba(245,158,11,0.25)' : 'rgba(16,185,129,0.25)'}`, color: hospital.status === 'active' ? '#f59e0b' : '#10b981', borderRadius: '10px', padding: '0.7rem 0.9rem', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 700, transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = hospital.status === 'active' ? 'rgba(245,158,11,0.12)' : 'rgba(16,185,129,0.12)'} onMouseLeave={e => e.currentTarget.style.background = hospital.status === 'active' ? 'rgba(245,158,11,0.06)' : 'rgba(16,185,129,0.06)'}>
+                <button onClick={() => handleSuspend(hospital.id || hospital._id, hospital.status)} style={{ background: hospital.status === 'active' ? 'rgba(245,158,11,0.08)' : 'rgba(16,185,129,0.08)', border: `1px solid ${hospital.status === 'active' ? 'rgba(245,158,11,0.25)' : 'rgba(16,185,129,0.25)'}`, color: hospital.status === 'active' ? '#b45309' : '#047857', borderRadius: '10px', padding: '0.7rem 0.9rem', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 700, transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = hospital.status === 'active' ? 'rgba(245,158,11,0.12)' : 'rgba(16,185,129,0.12)'} onMouseLeave={e => e.currentTarget.style.background = hospital.status === 'active' ? 'rgba(245,158,11,0.08)' : 'rgba(16,185,129,0.08)'}>
                   {hospital.status === 'active' ? 'Suspend' : 'Activate'}
                 </button>
-                <button onClick={() => handleDelete(hospital.id || hospital._id)} style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.25)', color: '#ef4444', borderRadius: '10px', padding: '0.7rem 0.9rem', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.15)'} onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.06)'}>
+                <button onClick={() => handleDelete(hospital.id || hospital._id)} style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#ef4444', borderRadius: '10px', padding: '0.7rem 0.9rem', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.15)'} onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.08)'}>
                   <Trash2 size={15} />
                 </button>
               </div>
