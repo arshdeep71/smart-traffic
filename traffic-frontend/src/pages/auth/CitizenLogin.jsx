@@ -683,16 +683,19 @@ const CitizenLogin = () => {
         </nav>
 
         {/* Right Portal Redirect */}
-        <div style={{ display: 'flex', gap: '1rem' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
           <button 
-            onClick={() => navigate('/login')}
+            onClick={() => {
+              setAuthMode('signin');
+              document.getElementById('auth-card-anchor')?.scrollIntoView({ behavior: 'smooth' });
+            }}
             style={{
               background: '#ea580c',
               color: '#ffffff',
               border: 'none',
               borderRadius: '50px',
-              padding: '0.65rem 1.6rem',
-              fontSize: '0.78rem',
+              padding: '0.6rem 1.35rem',
+              fontSize: '0.75rem',
               fontWeight: 800,
               cursor: 'pointer',
               textTransform: 'uppercase',
@@ -702,7 +705,55 @@ const CitizenLogin = () => {
             onMouseOver={e => e.currentTarget.style.background = '#c2410c'}
             onMouseOut={e => e.currentTarget.style.background = '#ea580c'}
           >
-            Officer & Staff Portal
+            Client Portal
+          </button>
+          
+          <button 
+            onClick={() => navigate('/login')}
+            style={{
+              background: '#0f172a',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '50px',
+              padding: '0.6rem 1.35rem',
+              fontSize: '0.75rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              transition: 'background 0.2s'
+            }}
+            onMouseOver={e => e.currentTarget.style.background = '#1e293b'}
+            onMouseOut={e => e.currentTarget.style.background = '#0f172a'}
+          >
+            Portal Login
+          </button>
+
+          <button 
+            onClick={() => navigate('/login?admin=true')}
+            style={{
+              background: 'transparent',
+              color: '#64748b',
+              border: '1px solid #cbd5e1',
+              borderRadius: '50px',
+              padding: '0.55rem 1.15rem',
+              fontSize: '0.75rem',
+              fontWeight: 800,
+              cursor: 'pointer',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              transition: 'all 0.2s'
+            }}
+            onMouseOver={e => {
+              e.currentTarget.style.borderColor = '#0f172a';
+              e.currentTarget.style.color = '#0f172a';
+            }}
+            onMouseOut={e => {
+              e.currentTarget.style.borderColor = '#cbd5e1';
+              e.currentTarget.style.color = '#64748b';
+            }}
+          >
+            Administrative Login
           </button>
         </div>
       </header>
@@ -1238,6 +1289,221 @@ const CitizenLogin = () => {
         </div>
 
       </div>
+
+      {/* ─── GATEWAY PORTAL HUB DASHBOARD ─── */}
+      <section style={{ 
+        background: '#ffffff', 
+        padding: '2rem 4rem 6rem', 
+        borderTop: '1px solid #f1f5f9',
+        boxSizing: 'border-box'
+      }}>
+        <div style={{ maxWidth: '1440px', margin: '0 auto', width: '100%' }}>
+          
+          <div style={{ textAlign: 'left', marginBottom: '3.5rem' }}>
+            <h2 style={{ fontSize: '2.2rem', fontWeight: 900, textTransform: 'uppercase', color: '#0f172a', letterSpacing: '0.04em', margin: 0 }}>
+              Gateway Portal Hub
+            </h2>
+            <p style={{ color: '#64748b', fontSize: '1rem', marginTop: '0.5rem', fontFamily: "'Inter', sans-serif" }}>
+              Select an access gateway below to log into your designated emergency coordination system.
+            </p>
+          </div>
+
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
+            gap: '2.5rem' 
+          }}>
+            
+            {/* Gateway 1: Client Portal */}
+            <div className="glass-panel" style={{ 
+              padding: '3rem 2.5rem', 
+              background: '#fafafa', 
+              border: '1px solid #f1f5f9', 
+              borderRadius: '4px',
+              textAlign: 'left',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              transition: 'all 0.2s'
+            }}>
+              <div>
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  width: '50px', 
+                  height: '50px', 
+                  borderRadius: '50%', 
+                  background: 'rgba(234, 88, 12, 0.08)', 
+                  color: '#ea580c', 
+                  marginBottom: '2rem' 
+                }}>
+                  <Shield size={24} />
+                </div>
+                <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0f172a', textTransform: 'uppercase', marginBottom: '0.8rem', letterSpacing: '0.02em' }}>
+                  Client Portal
+                </h3>
+                <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '2.5rem', fontFamily: "'Inter', sans-serif", minHeight: '75px' }}>
+                  Emergency reporting gateway for residents and citizens. Report live issues with instant auto-filled AI analysis, trigger silent ambient SOS dispatches, and track responding emergency units in real-time.
+                </p>
+              </div>
+              <button 
+                onClick={() => {
+                  setAuthMode('signin');
+                  document.getElementById('auth-card-anchor')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                style={{
+                  background: '#ea580c',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '4px',
+                  padding: '0.85rem 1.8rem',
+                  fontSize: '0.8rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  width: 'fit-content',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  transition: 'background 0.2s'
+                }}
+                onMouseOver={e => e.currentTarget.style.background = '#c2410c'}
+                onMouseOut={e => e.currentTarget.style.background = '#ea580c'}
+              >
+                Access Client Portal →
+              </button>
+            </div>
+
+            {/* Gateway 2: Portal Login */}
+            <div className="glass-panel" style={{ 
+              padding: '3rem 2.5rem', 
+              background: '#fafafa', 
+              border: '1px solid #f1f5f9', 
+              borderRadius: '4px',
+              textAlign: 'left',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              transition: 'all 0.2s'
+            }}>
+              <div>
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  width: '50px', 
+                  height: '50px', 
+                  borderRadius: '50%', 
+                  background: 'rgba(15, 23, 42, 0.06)', 
+                  color: '#0f172a', 
+                  marginBottom: '2rem' 
+                }}>
+                  <Activity size={24} />
+                </div>
+                <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0f172a', textTransform: 'uppercase', marginBottom: '0.8rem', letterSpacing: '0.02em' }}>
+                  Portal Login
+                </h3>
+                <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '2.5rem', fontFamily: "'Inter', sans-serif", minHeight: '75px' }}>
+                  Responder staff interface for designated city service personnel. Dedicated pipelines for traffic police patrolling units, ambulance emergency drivers, and medical staff response operators.
+                </p>
+              </div>
+              <button 
+                onClick={() => navigate('/login')}
+                style={{
+                  background: '#0f172a',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '4px',
+                  padding: '0.85rem 1.8rem',
+                  fontSize: '0.8rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  width: 'fit-content',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  transition: 'background 0.2s'
+                }}
+                onMouseOver={e => e.currentTarget.style.background = '#1e293b'}
+                onMouseOut={e => e.currentTarget.style.background = '#0f172a'}
+              >
+                Enter Portal Login →
+              </button>
+            </div>
+
+            {/* Gateway 3: Administrative Login */}
+            <div className="glass-panel" style={{ 
+              padding: '3rem 2.5rem', 
+              background: '#fafafa', 
+              border: '1px solid #f1f5f9', 
+              borderRadius: '4px',
+              textAlign: 'left',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              transition: 'all 0.2s'
+            }}>
+              <div>
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  width: '50px', 
+                  height: '50px', 
+                  borderRadius: '50%', 
+                  background: 'rgba(100, 116, 139, 0.08)', 
+                  color: '#64748b', 
+                  marginBottom: '2rem' 
+                }}>
+                  <MapPin size={24} />
+                </div>
+                <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0f172a', textTransform: 'uppercase', marginBottom: '0.8rem', letterSpacing: '0.02em' }}>
+                  Administrative Login
+                </h3>
+                <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '2.5rem', fontFamily: "'Inter', sans-serif", minHeight: '75px' }}>
+                  System administration and oversight panel. Audit real-time responder dispatches, supervise incident mapping queues, configure dispatch algorithms, manage hospitals databases, and policy logs.
+                </p>
+              </div>
+              <button 
+                onClick={() => navigate('/login?admin=true')}
+                style={{
+                  background: 'transparent',
+                  color: '#64748b',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '4px',
+                  padding: '0.8rem 1.8rem',
+                  fontSize: '0.8rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  width: 'fit-content',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  transition: 'all 0.2s'
+                }}
+                onMouseOver={e => {
+                  e.currentTarget.style.borderColor = '#0f172a';
+                  e.currentTarget.style.color = '#0f172a';
+                }}
+                onMouseOut={e => {
+                  e.currentTarget.style.borderColor = '#cbd5e1';
+                  e.currentTarget.style.color = '#64748b';
+                }}
+              >
+                Access Admin Login →
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
 
       {/* ─── SERVICES & FEATURE GRID ─── */}
       <section id="services" style={{ background: '#fafafa', padding: '6rem 4rem', borderTop: '1px solid #f1f5f9' }}>
