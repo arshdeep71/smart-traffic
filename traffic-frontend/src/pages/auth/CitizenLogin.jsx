@@ -42,12 +42,10 @@ const CitizenLogin = () => {
   const { user, setUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  // 1. Detect if page is opened via a Supabase magic link / signup verification hash redirect or with an auth error
+  // Parse URL search parameters for errors sent back by Supabase server
   useEffect(() => {
     const hash = window.location.hash;
     const search = window.location.search;
-    
-    // Parse URL search parameters for errors sent back by Supabase server
     const params = new URLSearchParams(search);
     const serverError = params.get('error_description') || params.get('error');
     if (serverError) {
@@ -438,7 +436,6 @@ const CitizenLogin = () => {
           boxSizing: 'border-box',
           textAlign: 'center'
         }}>
-          {/* Secured Citizen Badge */}
           <div style={{ display: 'inline-flex', padding: '1rem', background: 'rgba(234, 88, 12, 0.08)', borderRadius: '50%', border: '1px solid rgba(234, 88, 12, 0.15)', marginBottom: '1.5rem' }}>
             <UserCheck size={36} style={{ color: '#ea580c' }} />
           </div>
@@ -666,23 +663,11 @@ const CitizenLogin = () => {
             color: '#0f172a',
             textTransform: 'uppercase'
           }}>
-            Traffic Management International
+            SmartTraffic
           </span>
         </div>
 
-        {/* Center navigation links */}
-        <nav style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
-          <a href="#services" style={{ textDecoration: 'none', color: '#0f172a', fontWeight: 700, fontSize: '0.8rem', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Services</a>
-          <a href="#products" style={{ textDecoration: 'none', color: '#0f172a', fontWeight: 700, fontSize: '0.8rem', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Products</a>
-          <a href="#locations" style={{ textDecoration: 'none', color: '#0f172a', fontWeight: 700, fontSize: '0.8rem', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Locations</a>
-          <a href="#careers" style={{ textDecoration: 'none', color: '#0f172a', fontWeight: 700, fontSize: '0.8rem', letterSpacing: '0.04em', textTransform: 'uppercase', position: 'relative' }}>
-            Careers
-            <span style={{ position: 'absolute', top: '-12px', right: '-16px', background: '#fee2e2', color: '#ef4444', fontSize: '0.52rem', fontWeight: 800, padding: '0.05rem 0.25rem', borderRadius: '4px', letterSpacing: '0.02em' }}>HIRING</span>
-          </a>
-          <a href="#contact" style={{ textDecoration: 'none', color: '#0f172a', fontWeight: 700, fontSize: '0.8rem', letterSpacing: '0.04em', textTransform: 'uppercase' }}>Contact</a>
-        </nav>
-
-        {/* Right Portal Redirect */}
+        {/* Right Portal Redirect Selector */}
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
           <button 
             onClick={() => {
@@ -771,7 +756,7 @@ const CitizenLogin = () => {
         alignItems: 'center'
       }}>
         
-        {/* Left Side: Bold Marketing Pitch */}
+        {/* Left Side: Real Platform Emergency Pitch */}
         <div style={{ flex: 1.2, textAlign: 'left' }}>
           <h1 style={{ 
             fontSize: '3.6rem', 
@@ -781,8 +766,8 @@ const CitizenLogin = () => {
             letterSpacing: '-1.5px',
             margin: 0
           }}>
-            We never take shortcuts. <br/>
-            <span style={{ color: '#ea580c' }}>Quality service</span> is always our priority!
+            Smart City Emergency <br/>
+            <span style={{ color: '#ea580c' }}>Response Platform</span>
           </h1>
           
           <p style={{ 
@@ -793,12 +778,14 @@ const CitizenLogin = () => {
             maxWidth: '560px',
             fontFamily: "'Inter', sans-serif"
           }}>
-            We understand that you may need assistance. SmartTraffic provides highly robust, real-time emergency coordination, silent SOS alerts, AI incident analyses, and dynamic responder dispatches.
+            Civic Sentinel provides high-priority, real-time emergency response coordination, intelligent ambulance routing, silent background SOS alerts, and live multi-portal responder dispatches.
           </p>
 
           <div style={{ display: 'flex', gap: '1.25rem', marginTop: '3rem' }}>
-            <a 
-              href="#services"
+            <button 
+              onClick={() => {
+                document.getElementById('gateway-hub-anchor')?.scrollIntoView({ behavior: 'smooth' });
+              }}
               style={{
                 background: '#ea580c',
                 color: '#ffffff',
@@ -810,17 +797,14 @@ const CitizenLogin = () => {
                 cursor: 'pointer',
                 textTransform: 'uppercase',
                 letterSpacing: '0.06em',
-                textDecoration: 'none',
-                display: 'inline-flex',
-                alignItems: 'center',
                 boxShadow: '0 4px 6px rgba(234,88,12,0.15)',
                 transition: 'background 0.2s'
               }}
               onMouseOver={e => e.currentTarget.style.background = '#c2410c'}
               onMouseOut={e => e.currentTarget.style.background = '#ea580c'}
             >
-              Explore Services
-            </a>
+              Explore Gateways
+            </button>
             <button 
               onClick={() => {
                 setAuthMode('signup');
@@ -853,7 +837,7 @@ const CitizenLogin = () => {
                 e.currentTarget.style.color = '#ea580c';
               }}
             >
-              Report Incident Now →
+              Access Client Portal →
             </button>
           </div>
         </div>
@@ -1291,9 +1275,9 @@ const CitizenLogin = () => {
       </div>
 
       {/* ─── GATEWAY PORTAL HUB DASHBOARD ─── */}
-      <section style={{ 
+      <section id="gateway-hub-anchor" style={{ 
         background: '#ffffff', 
-        padding: '2rem 4rem 6rem', 
+        padding: '5rem 4rem 6rem', 
         borderTop: '1px solid #f1f5f9',
         boxSizing: 'border-box'
       }}>
@@ -1344,7 +1328,7 @@ const CitizenLogin = () => {
                   Client Portal
                 </h3>
                 <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '2.5rem', fontFamily: "'Inter', sans-serif", minHeight: '75px' }}>
-                  Emergency reporting gateway for residents and citizens. Report live issues with instant auto-filled AI analysis, trigger silent ambient SOS dispatches, and track responding emergency units in real-time.
+                  Emergency reporting gateway for residents and citizens. Report live issues with instant auto-filled AI analysis, trigger silent SOS dispatches, and track responding emergency units in real-time.
                 </p>
               </div>
               <button 
@@ -1505,174 +1489,39 @@ const CitizenLogin = () => {
         </div>
       </section>
 
-      {/* ─── SERVICES & FEATURE GRID ─── */}
-      <section id="services" style={{ background: '#fafafa', padding: '6rem 4rem', borderTop: '1px solid #f1f5f9' }}>
-        <div style={{ maxWidth: '1440px', margin: '0 auto', width: '100%' }}>
-          <h2 style={{ fontSize: '2.2rem', fontWeight: 900, textTransform: 'uppercase', color: '#0f172a', letterSpacing: '0.04em', marginBottom: '4rem', textAlign: 'left' }}>
-            Integrated Portals & Emergency Services
-          </h2>
-
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
-            gap: '2rem' 
-          }}>
-            
-            {/* Service 1 */}
-            <div className="glass-panel" style={{ padding: '2.5rem', background: '#ffffff', borderRadius: '4px', textAlign: 'left' }}>
-              <div style={{ color: '#ea580c', marginBottom: '1.5rem' }}><Shield size={32} /></div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', marginBottom: '0.75rem' }}>Citizen Portal</h3>
-              <p style={{ color: '#64748b', fontSize: '0.88rem', lineHeight: 1.5, fontFamily: "'Inter', sans-serif" }}>
-                Empowering residents with rapid AI-guided incident analysis, silent SOS emergency taps, and real-time incident tracking maps.
-              </p>
-            </div>
-
-            {/* Service 2 */}
-            <div className="glass-panel" style={{ padding: '2.5rem', background: '#ffffff', borderRadius: '4px', textAlign: 'left' }}>
-              <div style={{ color: '#ea580c', marginBottom: '1.5rem' }}><Activity size={32} /></div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', marginBottom: '0.75rem' }}>Hospital & Dispatch</h3>
-              <p style={{ color: '#64748b', fontSize: '0.88rem', lineHeight: 1.5, fontFamily: "'Inter', sans-serif" }}>
-                Seamless hospital coordination and rapid dispatch system. Map telemetry tracking ambulance units from origin directly to targets.
-              </p>
-            </div>
-
-            {/* Service 3 */}
-            <div className="glass-panel" style={{ padding: '2.5rem', background: '#ffffff', borderRadius: '4px', textAlign: 'left' }}>
-              <div style={{ color: '#ea580c', marginBottom: '1.5rem' }}><MapPin size={32} /></div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', marginBottom: '0.75rem' }}>Police Command</h3>
-              <p style={{ color: '#64748b', fontSize: '0.88rem', lineHeight: 1.5, fontFamily: "'Inter', sans-serif" }}>
-                Intelligent police portal supporting active complaint queues, real-time tactical Leaflet map synchronization, and route simulations.
-              </p>
-            </div>
-
-            {/* Service 4 */}
-            <div className="glass-panel" style={{ padding: '2.5rem', background: '#ffffff', borderRadius: '4px', textAlign: 'left' }}>
-              <div style={{ color: '#ea580c', marginBottom: '1.5rem' }}><Volume2 size={32} /></div>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0f172a', textTransform: 'uppercase', marginBottom: '0.75rem' }}>Silent SOS & Telemetry</h3>
-              <p style={{ color: '#64748b', fontSize: '0.88rem', lineHeight: 1.5, fontFamily: "'Inter', sans-serif" }}>
-                Secure, quiet dispatch triggering using rapid click algorithms. Streams background audio telemetry directly to responders.
-              </p>
-            </div>
-
-          </div>
-        </div>
-      </section>
-
       {/* ─── FOOTER SECTION ─── */}
-      <footer id="contact" style={{ background: '#ffffff', padding: '6rem 4rem 4rem', borderTop: '1px solid #f1f5f9' }}>
+      <footer style={{ background: '#ffffff', padding: '4rem', borderTop: '1px solid #f1f5f9' }}>
         <div style={{ 
           maxWidth: '1440px', 
           margin: '0 auto', 
           width: '100%',
           display: 'flex',
-          flexDirection: 'column',
-          gap: '4rem'
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          fontSize: '0.8rem',
+          color: '#64748b'
         }}>
-          
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '3rem'
-          }}>
-            
-            {/* Col 1 */}
-            <div style={{ minWidth: '220px', textAlign: 'left' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.5rem' }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: '24px',
-                  height: '24px',
-                  border: '2px solid #0f172a',
-                  transform: 'rotate(45deg)',
-                  marginRight: '6px'
-                }}>
-                  <span style={{ transform: 'rotate(-45deg)', fontWeight: 950, fontSize: '0.52rem', color: '#0f172a' }}>TMI</span>
-                </div>
-                <span style={{ fontWeight: 900, fontSize: '0.82rem', letterSpacing: '0.08em', color: '#0f172a', textTransform: 'uppercase' }}>SmartTraffic</span>
-              </div>
-              <p style={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.5, maxWidth: '200px', marginBottom: '1.5rem', fontFamily: "'Inter', sans-serif" }}>
-                High-priority intelligent emergency routing and response portal.
-              </p>
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <a href="#linkedin" style={{ color: '#cbd5e1', display: 'flex' }}>
-                  <svg style={{ width: 16, height: 16 }} viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.32 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.79M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77z"/></svg>
-                </a>
-                <a href="#twitter" style={{ color: '#cbd5e1', display: 'flex' }}>
-                  <svg style={{ width: 16, height: 16 }} viewBox="0 0 24 24" fill="currentColor"><path d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98C8.28 9.09 5.11 7.38 3 4.79c-.37.63-.58 1.37-.58 2.15 0 1.48.75 2.78 1.9 3.55-.7 0-1.36-.2-1.94-.53v.05c0 2.05 1.46 3.76 3.4 4.15-.36.1-.73.15-1.12.15-.27 0-.54-.03-.8-.08.54 1.68 2.1 2.9 3.95 2.94-1.44 1.13-3.26 1.8-5.23 1.8-.34 0-.67-.02-1-.06C2.62 21.02 4.88 22 7.31 22 14.86 22 19 15.75 19 10.33v-.53c.8-.57 1.49-1.3 2.04-2.13z"/></svg>
-                </a>
-                <a href="#instagram" style={{ color: '#cbd5e1', display: 'flex' }}>
-                  <svg style={{ width: 16, height: 16 }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-                </a>
-              </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '20px',
+              height: '20px',
+              border: '1.5px solid #0f172a',
+              transform: 'rotate(45deg)',
+              marginRight: '4px'
+            }}>
+              <span style={{ transform: 'rotate(-45deg)', fontWeight: 950, fontSize: '0.45rem', color: '#0f172a' }}>TMI</span>
             </div>
-
-            {/* Col 2 */}
-            <div style={{ minWidth: '150px', textAlign: 'left' }}>
-              <h4 style={{ fontSize: '0.82rem', fontWeight: 800, textTransform: 'uppercase', color: '#0f172a', letterSpacing: '0.05em', marginBottom: '1.5rem' }}>SERVICES</h4>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.82rem', fontFamily: "'Inter', sans-serif" }}>
-                <li><a href="#traffic" style={{ textDecoration: 'none', color: '#64748b' }}>Traffic Control</a></li>
-                <li><a href="#equipment" style={{ textDecoration: 'none', color: '#64748b' }}>Equipment Rentals</a></li>
-                <li><a href="#engineering" style={{ textDecoration: 'none', color: '#64748b' }}>Engineering</a></li>
-                <li><a href="#infrastructure" style={{ textDecoration: 'none', color: '#64748b' }}>Infrastructure</a></li>
-                <li><a href="#permits" style={{ textDecoration: 'none', color: '#64748b' }}>Permits</a></li>
-              </ul>
-            </div>
-
-            {/* Col 3 */}
-            <div style={{ minWidth: '150px', textAlign: 'left' }}>
-              <h4 style={{ fontSize: '0.82rem', fontWeight: 800, textTransform: 'uppercase', color: '#0f172a', letterSpacing: '0.05em', marginBottom: '1.5rem' }}>PRODUCTS</h4>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.82rem', fontFamily: "'Inter', sans-serif" }}>
-                <li><a href="#valtir" style={{ textDecoration: 'none', color: '#64748b' }}>Valtir Absorption</a></li>
-                <li><a href="#workzone" style={{ textDecoration: 'none', color: '#64748b' }}>Work Zone Equipment</a></li>
-                <li><a href="#delineation" style={{ textDecoration: 'none', color: '#64748b' }}>Traffic Delineation</a></li>
-                <li><a href="#signs" style={{ textDecoration: 'none', color: '#64748b' }}>Signs & Hardware</a></li>
-              </ul>
-            </div>
-
-            {/* Col 4 */}
-            <div style={{ minWidth: '150px', textAlign: 'left' }}>
-              <h4 style={{ fontSize: '0.82rem', fontWeight: 800, textTransform: 'uppercase', color: '#0f172a', letterSpacing: '0.05em', marginBottom: '1.5rem' }}>LOCATIONS</h4>
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.82rem', fontFamily: "'Inter', sans-serif" }}>
-                <li><a href="#hq" style={{ textDecoration: 'none', color: '#64748b' }}>Headquarters</a></li>
-                <li><a href="#socal" style={{ textDecoration: 'none', color: '#64748b' }}>Southern California</a></li>
-                <li><a href="#bayarea" style={{ textDecoration: 'none', color: '#64748b' }}>Bay Area</a></li>
-                <li><a href="#northwest" style={{ textDecoration: 'none', color: '#64748b' }}>Pacific Northwest</a></li>
-              </ul>
-            </div>
-
-            {/* Col 5 */}
-            <div style={{ minWidth: '220px', textAlign: 'left' }}>
-              <h4 style={{ fontSize: '0.82rem', fontWeight: 800, textTransform: 'uppercase', color: '#0f172a', letterSpacing: '0.05em', marginBottom: '1.5rem' }}>CONTACT US</h4>
-              <p style={{ fontSize: '0.82rem', color: '#0f172a', fontWeight: 800, margin: 0 }}>Headquarters</p>
-              <p style={{ fontSize: '0.8rem', color: '#64748b', lineHeight: 1.5, marginTop: '0.5rem', fontFamily: "'Inter', sans-serif" }}>
-                4900 Airport Plaza Dr, Ste 300<br/>
-                Long Beach, CA 90815
-              </p>
-              <p style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '1rem', fontFamily: "'Inter', sans-serif" }}>
-                Phone: (866) 790-2698
-              </p>
-            </div>
-
+            <span>© {new Date().getFullYear()} Civic Sentinel Platform. Secured by TMI.</span>
           </div>
 
-          <div style={{ 
-            borderTop: '1px solid #f1f5f9', 
-            paddingTop: '2rem', 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            fontSize: '0.75rem', 
-            color: '#94a3b8' 
-          }}>
-            <span>© {new Date().getFullYear()} Traffic Management Inc. All rights reserved.</span>
-            <div style={{ display: 'flex', gap: '1.5rem' }}>
-              <a href="#privacy" style={{ color: '#94a3b8', textDecoration: 'none' }}>Privacy Policy</a>
-              <a href="#tos" style={{ color: '#94a3b8', textDecoration: 'none' }}>Terms of Service</a>
-            </div>
+          <div style={{ display: 'flex', gap: '2rem' }}>
+            <a href="#privacy" style={{ color: '#64748b', textDecoration: 'none' }}>Privacy Policy</a>
+            <a href="#tos" style={{ color: '#64748b', textDecoration: 'none' }}>Terms of Service</a>
+            <a href="#status" style={{ color: '#64748b', textDecoration: 'none' }}>System Status</a>
           </div>
-
         </div>
       </footer>
 
