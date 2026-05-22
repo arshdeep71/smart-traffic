@@ -95,19 +95,19 @@ const Layout = () => {
   return (
     <div className="app-container">
       {/* Sidebar */}
-      <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`} style={{ borderRight: 'none', background: '#000' }}>
-        <div style={{ padding: '1.5rem 1.5rem 1rem', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`} style={{ borderRight: '1px solid rgba(15, 23, 42, 0.08)', background: 'rgba(255, 255, 255, 0.75)', backdropFilter: 'blur(20px)' }}>
+        <div style={{ padding: '1.5rem 1.5rem 1rem', borderBottom: '1px solid rgba(15, 23, 42, 0.06)' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-            <h2 style={{ fontSize: '1.1rem', fontWeight: 900, color: '#fff', letterSpacing: '-0.5px', margin: 0 }}>SmartTraffic</h2>
-            <button style={{ background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer' }} onClick={() => setSidebarOpen(false)}><X size={18} /></button>
+            <h2 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#191c1e', letterSpacing: '-0.5px', margin: 0 }}>SmartTraffic</h2>
+            <button style={{ background: 'transparent', border: 'none', color: '#191c1e', cursor: 'pointer' }} onClick={() => setSidebarOpen(false)}><X size={18} /></button>
           </div>
           {/* Role badge */}
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.2rem 0.6rem', borderRadius: '6px', background: `${roleAccent}20`, border: `1px solid ${roleAccent}40`, fontSize: '0.65rem', fontWeight: 700, color: roleAccent, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.2rem 0.6rem', borderRadius: '6px', background: `${roleAccent}15`, border: `1px solid ${roleAccent}25`, fontSize: '0.65rem', fontWeight: 800, color: roleAccent, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
             <span>●</span> {roleLabel}
           </div>
         </div>
 
-        <nav style={{ flex: 1, padding: '0.8rem 0.8rem', display: 'flex', flexDirection: 'column', gap: '0.15rem', overflowY: 'auto' }}>
+        <nav style={{ flex: 1, padding: '0.8rem 0.8rem', display: 'flex', flexDirection: 'column', gap: '0.25rem', overflowY: 'auto' }}>
           {getMenuItems().map((item) => {
             const isClickOnly = item.path === '#';
             const componentProps = isClickOnly ? {
@@ -118,12 +118,12 @@ const Layout = () => {
               },
               style: {
                 display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.75rem 1rem',
-                color: '#9ca3af',
+                color: '#64748b',
                 background: 'transparent',
                 border: 'none',
                 width: '100%',
                 textAlign: 'left',
-                borderRadius: '8px', cursor: 'pointer', fontWeight: 500, fontSize: '0.875rem',
+                borderRadius: '10px', cursor: 'pointer', fontWeight: 600, fontSize: '0.875rem',
                 transition: 'all 0.2s ease', borderLeft: '3px solid transparent',
               }
             } : {
@@ -131,9 +131,9 @@ const Layout = () => {
               onClick: () => setSidebarOpen(false),
               style: {
                 display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.75rem 1rem',
-                color: isActive(item.path) ? '#fff' : '#9ca3af',
-                background: isActive(item.path) ? `${roleAccent}20` : 'transparent',
-                borderRadius: '8px', textDecoration: 'none', fontWeight: 500, fontSize: '0.875rem',
+                color: isActive(item.path) ? '#191c1e' : '#64748b',
+                background: isActive(item.path) ? `${roleAccent}12` : 'transparent',
+                borderRadius: '10px', textDecoration: 'none', fontWeight: 600, fontSize: '0.875rem',
                 transition: 'all 0.2s ease', borderLeft: isActive(item.path) ? `3px solid ${roleAccent}` : '3px solid transparent',
               }
             };
@@ -155,9 +155,9 @@ const Layout = () => {
           })}
         </nav>
 
-        <div style={{ padding: '1rem 0.8rem', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+        <div style={{ padding: '1rem 0.8rem', borderTop: '1px solid rgba(15, 23, 42, 0.08)', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
           {user?.role === 'citizen' && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', padding: '0.6rem', borderRadius: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', padding: '0.6rem', borderRadius: '10px', background: 'rgba(15, 23, 42, 0.02)', border: '1px solid rgba(15, 23, 42, 0.05)', overflow: 'hidden' }}>
               {user?.photoURL ? (
                 <img 
                   src={user.photoURL} 
@@ -170,10 +170,10 @@ const Layout = () => {
                 </div>
               )}
               <div style={{ flex: 1, overflow: 'hidden', textAlign: 'left' }}>
-                <div style={{ color: '#fff', fontSize: '0.78rem', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.name}</div>
-                <div style={{ color: '#9ca3af', fontSize: '0.65rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '0.15rem' }}>{user?.email}</div>
+                <div style={{ color: '#191c1e', fontSize: '0.78rem', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.name}</div>
+                <div style={{ color: '#64748b', fontSize: '0.65rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '0.15rem' }}>{user?.email}</div>
                 {user?.emailVerified && (
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.58rem', fontWeight: 800, color: '#10b981', background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.25)', padding: '0.05rem 0.35rem', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.58rem', fontWeight: 800, color: '#10b981', background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.18)', padding: '0.05rem 0.35rem', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.03em' }}>
                     ✅ Verified Citizen
                   </span>
                 )}
@@ -182,9 +182,9 @@ const Layout = () => {
           )}
           <button
             onClick={handleLogout}
-            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.75rem 1rem', background: 'transparent', border: 'none', color: '#9ca3af', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500, borderRadius: '8px', transition: 'all 0.2s' }}
-            onMouseOver={e => e.currentTarget.style.color = '#fff'}
-            onMouseOut={e => e.currentTarget.style.color = '#9ca3af'}
+            style={{ width: '100%', display: 'flex', alignItems: 'center', gap: '0.8rem', padding: '0.75rem 1rem', background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, borderRadius: '10px', transition: 'all 0.2s' }}
+            onMouseOver={e => e.currentTarget.style.color = '#191c1e'}
+            onMouseOut={e => e.currentTarget.style.color = '#64748b'}
           >
             <LogOut size={18} /> Logout
           </button>

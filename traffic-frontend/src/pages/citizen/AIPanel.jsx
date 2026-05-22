@@ -33,13 +33,24 @@ export const AutoIncidentFill = ({ formData, setFormData }) => {
         alignItems: 'center',
         justifyContent: 'center',
         gap: '0.5rem',
-        borderColor: '#8b5cf6',
-        color: '#8b5cf6',
-        padding: '0.6rem',
-        borderRadius: '8px',
-        fontWeight: 700
+        borderColor: '#2170e4',
+        color: '#2170e4',
+        background: 'rgba(33, 112, 228, 0.04)',
+        padding: '0.65rem',
+        borderRadius: '12px',
+        fontWeight: 700,
+        fontFamily: 'Outfit, sans-serif',
+        transition: 'all 0.2s'
       }}
       disabled={filling}
+      onMouseOver={e => {
+        e.currentTarget.style.background = 'rgba(33, 112, 228, 0.08)';
+        e.currentTarget.style.borderColor = '#0058be';
+      }}
+      onMouseOut={e => {
+        e.currentTarget.style.background = 'rgba(33, 112, 228, 0.04)';
+        e.currentTarget.style.borderColor = '#2170e4';
+      }}
     >
       <Wand2 size={14} className={filling ? 'animate-spin' : ''} />
       {filling ? 'AI Auto-filling…' : 'Smart Auto-Fill Report'}
@@ -100,11 +111,11 @@ export const SmartAIIncidentAnalysis = ({ description, onSuggest }) => {
   };
 
   return (
-    <div className="glass-panel" style={{ padding: '1.25rem' }}>
-      <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.85rem', display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-        <Sparkles size={15} color="#8b5cf6" /> Smart AI Incident Analysis
+    <div className="glass-panel" style={{ padding: '1.25rem', fontFamily: 'Outfit, sans-serif' }}>
+      <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.9rem', fontWeight: 800, display: 'flex', gap: '0.4rem', alignItems: 'center', color: '#191c1e' }}>
+        <Sparkles size={16} color="#2170e4" /> Smart AI Incident Analysis
       </h4>
-      <p style={{ fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.75rem' }}>
+      <p style={{ fontSize: '0.78rem', color: '#64748b', marginBottom: '1rem', lineHeight: 1.45 }}>
         Analyze the current incident description to auto-classify category, suggest severity, and extract key features.
       </p>
       <button
@@ -112,32 +123,50 @@ export const SmartAIIncidentAnalysis = ({ description, onSuggest }) => {
         onClick={analyzeText}
         disabled={analyzing}
         className="btn btn-outline"
-        style={{ width: '100%', fontSize: '0.8rem', fontWeight: 700 }}
+        style={{
+          width: '100%',
+          fontSize: '0.8rem',
+          fontWeight: 700,
+          borderColor: 'rgba(15, 23, 42, 0.08)',
+          color: '#191c1e',
+          borderRadius: '12px',
+          padding: '0.65rem',
+          background: '#ffffff',
+          transition: 'all 0.2s'
+        }}
+        onMouseOver={e => {
+          e.currentTarget.style.background = '#f1f5f9';
+          e.currentTarget.style.borderColor = 'rgba(15, 23, 42, 0.15)';
+        }}
+        onMouseOut={e => {
+          e.currentTarget.style.background = '#ffffff';
+          e.currentTarget.style.borderColor = 'rgba(15, 23, 42, 0.08)';
+        }}
       >
         {analyzing ? 'Analyzing Description…' : '🔍 Analyze Description'}
       </button>
 
       {result && (
-        <div style={{ marginTop: '1rem', background: 'rgba(139, 92, 246, 0.05)', border: '1px solid rgba(139, 92, 246, 0.15)', borderRadius: 8, padding: '0.75rem' }}>
+        <div style={{ marginTop: '1rem', background: 'rgba(33, 112, 228, 0.04)', border: '1px solid rgba(33, 112, 228, 0.12)', borderRadius: 12, padding: '0.75rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.78rem' }}>
-            <span style={{ color: '#6b7280' }}>Suggested Category:</span>
-            <span style={{ fontWeight: 700, color: '#8b5cf6' }}>{result.category}</span>
+            <span style={{ color: '#64748b' }}>Suggested Category:</span>
+            <span style={{ fontWeight: 800, color: '#2170e4' }}>{result.category}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.78rem' }}>
-            <span style={{ color: '#6b7280' }}>Suggested Severity:</span>
+            <span style={{ color: '#64748b' }}>Suggested Severity:</span>
             <span style={{
-              fontWeight: 800,
+              fontWeight: 900,
               textTransform: 'uppercase',
-              color: result.severity === 'high' ? '#dc2626' : result.severity === 'medium' ? '#f59e0b' : '#10b981'
+              color: result.severity === 'high' ? '#ba1a1a' : result.severity === 'medium' ? '#f59e0b' : '#10b981'
             }}>{result.severity}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.78rem' }}>
-            <span style={{ color: '#6b7280' }}>Confidence:</span>
-            <span style={{ fontWeight: 700, color: '#10b981' }}>{result.confidence}%</span>
+            <span style={{ color: '#64748b' }}>Confidence:</span>
+            <span style={{ fontWeight: 800, color: '#10b981' }}>{result.confidence}%</span>
           </div>
           <div style={{ display: 'flex', gap: '0.3rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
             {result.highlights.map(h => (
-              <span key={h} style={{ fontSize: '0.65rem', padding: '0.2rem 0.5rem', background: '#e0e7ff', color: '#4338ca', borderRadius: 4, fontWeight: 700 }}>
+              <span key={h} style={{ fontSize: '0.68rem', padding: '0.2rem 0.5rem', background: 'rgba(33, 112, 228, 0.08)', color: '#2170e4', borderRadius: 6, fontWeight: 700 }}>
                 {h}
               </span>
             ))}
@@ -152,13 +181,13 @@ export const SeveritySuggestion = ({ currentSeverity }) => {
   const severities = {
     low: { label: 'Low', desc: 'No active injuries or immediate hazards. Safe zone.', color: '#10b981' },
     medium: { label: 'Moderate', desc: 'Non-life threatening injuries or traffic hazards.', color: '#f59e0b' },
-    high: { label: 'Critical', desc: 'Severe trauma, unconsciousness, fire, or major structural crashes.', color: '#dc2626' }
+    high: { label: 'Critical', desc: 'Severe trauma, unconsciousness, fire, or major structural crashes.', color: '#ba1a1a' }
   };
 
   return (
-    <div className="glass-panel" style={{ padding: '1.25rem' }}>
-      <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.85rem', display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-        <ShieldAlert size={15} color="#ef4444" /> AI Severity Suggestion Advisor
+    <div className="glass-panel" style={{ padding: '1.25rem', fontFamily: 'Outfit, sans-serif' }}>
+      <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.9rem', fontWeight: 800, display: 'flex', gap: '0.4rem', alignItems: 'center', color: '#191c1e' }}>
+        <ShieldAlert size={16} color="#ba1a1a" /> AI Severity Advisor
       </h4>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
         {Object.entries(severities).map(([k, v]) => {
@@ -170,8 +199,8 @@ export const SeveritySuggestion = ({ currentSeverity }) => {
                 display: 'flex',
                 gap: '0.75rem',
                 padding: '0.6rem',
-                borderRadius: 8,
-                background: isSelected ? 'rgba(239, 68, 68, 0.03)' : 'transparent',
+                borderRadius: 12,
+                background: isSelected ? 'rgba(33, 112, 228, 0.03)' : 'transparent',
                 border: isSelected ? `1px solid ${v.color}` : '1px solid transparent',
                 transition: 'all 0.2s'
               }}
@@ -186,10 +215,10 @@ export const SeveritySuggestion = ({ currentSeverity }) => {
               }} />
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  <span style={{ fontWeight: 800, fontSize: '0.8rem', color: isSelected ? v.color : '#1f2937' }}>{v.label} Priority</span>
-                  {isSelected && <span style={{ fontSize: '0.65rem', fontWeight: 800, background: v.color, color: '#fff', padding: '0.1rem 0.4rem', borderRadius: 4 }}>ACTIVE</span>}
+                  <span style={{ fontWeight: 800, fontSize: '0.8rem', color: isSelected ? v.color : '#191c1e' }}>{v.label} Priority</span>
+                  {isSelected && <span style={{ fontSize: '0.65rem', fontWeight: 800, background: v.color, color: '#fff', padding: '0.1rem 0.4rem', borderRadius: 6 }}>ACTIVE</span>}
                 </div>
-                <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.7rem', color: '#6b7280', lineHeight: 1.3 }}>{v.desc}</p>
+                <p style={{ margin: '0.2rem 0 0 0', fontSize: '0.72rem', color: '#64748b', lineHeight: 1.35 }}>{v.desc}</p>
               </div>
             </div>
           );

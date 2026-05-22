@@ -1,23 +1,25 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
 
 :root {
-  --bg-color: #f3f4f6; /* Soft light gray background */
+  --bg-color: #f7f9fb; /* Soft light gray background */
   --surface-color: #ffffff; /* Pure white for cards */
-  --sidebar-bg: #000000; /* Pure black sidebar */
-  --primary-color: #3b82f6; /* Professional blue accent */
-  --primary-hover: #2563eb;
-  --text-main: #111827; /* Dark gray for main text */
-  --text-muted: #6b7280; /* Gray for labels */
-  --border-color: #e5e7eb; /* Very subtle border */
-  --radius-lg: 12px;
-  --radius-md: 8px;
+  --sidebar-bg: rgba(255, 255, 255, 0.7); /* Premium glassmorphic sidebar */
+  --primary-color: #2170e4; /* Elegant royal blue primary */
+  --primary-hover: #0058be;
+  --text-main: #191c1e; /* Dark slate main text */
+  --text-muted: #45464d; /* Muted gray for labels */
+  --border-color: rgba(15, 23, 42, 0.08); /* Minimal light border */
+  --radius-lg: 20px;
+  --radius-md: 12px;
 }
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Outfit', 'Inter', -apple-system, sans-serif;
 }
 
 body {
@@ -27,31 +29,33 @@ body {
   overflow-x: hidden;
 }
 
-/* Professional Cards */
+/* Professional Cards & Glassmorphism */
 .glass-panel {
-  background: var(--surface-color);
-  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: var(--radius-lg);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0px 4px 6px -1px rgba(0, 0, 0, 0.04), 0px 2px 4px -1px rgba(0, 0, 0, 0.02);
   transition: all 0.2s ease;
 }
 
 .glass-panel:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
 }
 
 /* Typography */
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-main);
-  letter-spacing: -0.025em;
+  letter-spacing: -0.03em;
 }
 
 /* Buttons - Clean & Rounded */
 .btn {
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1.2rem;
   border-radius: var(--radius-md);
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -70,12 +74,22 @@ h1, h2, h3, h4, h5, h6 {
 
 .btn-primary:hover {
   background: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(33, 112, 228, 0.2);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
 }
 
 .btn-danger {
-  background: #ef4444;
+  background: #ba1a1a;
   color: #ffffff;
   border: none;
+}
+
+.btn-danger:hover {
+  background: #93000a;
 }
 
 .btn-outline {
@@ -85,7 +99,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-outline:hover {
-  background: #f9fafb;
+  background: #f1f5f9;
 }
 
 /* Forms */
@@ -94,23 +108,26 @@ h1, h2, h3, h4, h5, h6 {
   background: #ffffff;
   border: 1px solid var(--border-color);
   color: var(--text-main);
-  padding: 0.6rem 0.8rem;
+  padding: 0.7rem 0.9rem;
   border-radius: var(--radius-md);
   font-size: 0.875rem;
+  transition: all 0.2s;
 }
 
 .form-control:focus {
   outline: none;
   border-color: var(--primary-color);
-  ring: 2px solid rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 3px rgba(33, 112, 228, 0.15);
 }
 
 .form-label {
   display: block;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.35rem;
   color: var(--text-muted);
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 /* Dashboard Layout */
@@ -122,12 +139,14 @@ h1, h2, h3, h4, h5, h6 {
 .sidebar {
   width: 240px;
   background: var(--sidebar-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   position: fixed;
   height: 100vh;
   z-index: 50;
-  color: #ffffff;
 }
 
 .main-content {
@@ -140,7 +159,9 @@ h1, h2, h3, h4, h5, h6 {
 
 .topbar {
   height: 64px;
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
@@ -158,10 +179,10 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Badges */
 .badge {
-  padding: 0.125rem 0.5rem;
-  border-radius: 4px;
+  padding: 0.25rem 0.6rem;
+  border-radius: 99px;
   font-size: 0.7rem;
-  font-weight: 600;
+  font-weight: 700;
   background: #f3f4f6;
   color: var(--text-muted);
   border: 1px solid var(--border-color);
