@@ -335,14 +335,14 @@ h1, h2, h3, h4, h5, h6 {
   transition: background 0.2s;
 }
 .med-step.active {
-  background: #eff6ff;
-  border-color: #3b82f6;
+  background: #fff7ed;
+  border-color: #ea580c;
 }
 .med-step-num {
   min-width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: #3b82f6;
+  background: #ea580c;
   color: #fff;
   font-weight: 700;
   font-size: 0.8rem;

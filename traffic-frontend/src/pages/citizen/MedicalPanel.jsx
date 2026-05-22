@@ -761,7 +761,7 @@ export const MedicalPanel = () => {
     return (
       <span>
         {parts.map((part, i) =>
-          regex.test(part) ? <strong key={i} style={{ color: '#2170e4', fontWeight: 900 }}>{part}</strong> : <span key={i}>{part}</span>
+          regex.test(part) ? <strong key={i} style={{ color: '#ea580c', fontWeight: 900 }}>{part}</strong> : <span key={i}>{part}</span>
         )}
       </span>
     );
@@ -788,8 +788,8 @@ export const MedicalPanel = () => {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.3rem',
-                background: searchQuery === chip.title ? '#2170e4' : 'rgba(33, 112, 228, 0.05)',
-                color: searchQuery === chip.title ? '#ffffff' : '#2170e4',
+                background: searchQuery === chip.title ? '#ea580c' : 'rgba(234, 88, 12, 0.05)',
+                color: searchQuery === chip.title ? '#ffffff' : '#ea580c',
                 border: 'none',
                 fontWeight: 600,
                 cursor: 'pointer',
@@ -835,13 +835,13 @@ export const MedicalPanel = () => {
                   gap: '0.4rem',
                   padding: '0.45rem 0.9rem',
                   borderRadius: '12px',
-                  border: isSelected ? '1px solid #2170e4' : '1px solid rgba(15, 23, 42, 0.08)',
-                  background: isSelected ? 'linear-gradient(135deg, #2170e4, #0058be)' : '#ffffff',
+                  border: isSelected ? '1px solid #ea580c' : '1px solid rgba(15, 23, 42, 0.08)',
+                  background: isSelected ? 'linear-gradient(135deg, #ea580c, #f97316)' : '#ffffff',
                   color: isSelected ? '#ffffff' : '#64748b',
                   fontSize: '0.75rem',
                   fontWeight: 700,
                   cursor: 'pointer',
-                  boxShadow: isSelected ? '0 4px 10px rgba(33, 112, 228, 0.2)' : 'none',
+                  boxShadow: isSelected ? '0 4px 10px rgba(234, 88, 12, 0.15)' : 'none',
                   transition: 'all 0.2s',
                   flexShrink: 0
                 }}
@@ -940,8 +940,8 @@ export const MedicalPanel = () => {
                     justifyContent: 'space-between',
                     padding: '0.65rem 1rem',
                     cursor: 'pointer',
-                    background: isSelected ? 'rgba(33, 112, 228, 0.04)' : '#ffffff',
-                    borderLeft: isSelected ? '3px solid #2170e4' : '3px solid transparent',
+                    background: isSelected ? 'rgba(234, 88, 12, 0.04)' : '#ffffff',
+                    borderLeft: isSelected ? '3px solid #ea580c' : '3px solid transparent',
                     transition: 'all 0.15s'
                   }}
                 >
@@ -1035,7 +1035,7 @@ export const MedicalPanel = () => {
                         onMouseEnter={(e) => {
                           e.currentTarget.style.transform = 'translateY(-2px)';
                           e.currentTarget.style.boxShadow = '0 6px 15px rgba(0,0,0,0.05)';
-                          e.currentTarget.style.borderColor = '#2170e4';
+                          e.currentTarget.style.borderColor = '#ea580c';
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.transform = 'none';

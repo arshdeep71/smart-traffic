@@ -962,8 +962,8 @@ const CitizenDashboard = () => {
             width: rect.width + 16,
             height: rect.height + 16,
             borderRadius: '12px',
-            boxShadow: '0 0 0 9999px rgba(15, 23, 42, 0.82), 0 0 15px rgba(33, 112, 228, 0.4)',
-            border: '2px solid #2170e4',
+            boxShadow: '0 0 0 9999px rgba(15, 23, 42, 0.85), 0 0 20px rgba(234, 88, 12, 0.5)',
+            border: '2.5px solid #ea580c',
             transition: 'all 0.3s ease-out',
             pointerEvents: 'none',
             zIndex: 99999
@@ -1030,17 +1030,17 @@ const CitizenDashboard = () => {
     return (
       <>
         <div style={style} />
-        <div style={tooltipStyle} className="glass-panel pulse-subtle-glow">
-          <div style={{ background: 'linear-gradient(135deg, #2170e4, #0058be)', padding: '0.8rem 1.25rem', borderTopLeftRadius: 12, borderTopRightRadius: 12, color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Guided Tour</span>
-            <span style={{ fontSize: '0.72rem', fontWeight: 600, background: 'rgba(255,255,255,0.2)', padding: '0.1rem 0.5rem', borderRadius: 4 }}>
+        <div style={tooltipStyle} className="glass-panel pulse-subtle-glow" style={{ ...tooltipStyle, background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', overflow: 'hidden' }}>
+          <div style={{ background: 'linear-gradient(135deg, #0f172a, #1e293b)', padding: '0.8rem 1.25rem', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#ea580c' }}>🧭 Guided System Tour</span>
+            <span style={{ fontSize: '0.68rem', fontWeight: 800, background: 'rgba(234, 88, 12, 0.2)', color: '#ea580c', border: '1px solid rgba(234, 88, 12, 0.3)', padding: '0.15rem 0.5rem', borderRadius: '30px' }}>
               {currentStepIndex + 1} of {TOUR_STEPS.length}
             </span>
           </div>
 
           <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#1f2937' }}>{currentStep.title}</h4>
-            <p style={{ margin: 0, fontSize: '0.78rem', color: '#4b5563', lineHeight: 1.4 }}>{currentStep.desc}</p>
+            <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 800, color: '#0f172a' }}>{currentStep.title}</h4>
+            <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b', lineHeight: 1.45 }}>{currentStep.desc}</p>
             
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.75rem' }}>
               <button 
@@ -1048,7 +1048,9 @@ const CitizenDashboard = () => {
                   setTourActive(false);
                   localStorage.setItem('citizen_tour_completed', 'true');
                 }} 
-                style={{ background: 'transparent', border: 'none', color: '#9ca3af', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', padding: 0 }}
+                style={{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', padding: 0 }}
+                onMouseEnter={(e) => e.currentTarget.style.color = '#64748b'}
+                onMouseLeave={(e) => e.currentTarget.style.color = '#94a3b8'}
               >
                 Skip Tour
               </button>
@@ -1057,8 +1059,9 @@ const CitizenDashboard = () => {
                 {currentStepIndex > 0 && (
                   <button 
                     onClick={() => setCurrentStepIndex(currentStepIndex - 1)}
-                    className="btn btn-outline"
-                    style={{ padding: '0.35rem 0.75rem', fontSize: '0.72rem', borderRadius: 6, fontWeight: 700 }}
+                    style={{ padding: '0.4rem 0.85rem', fontSize: '0.72rem', borderRadius: '30px', border: '1px solid #cbd5e1', background: '#fff', color: '#475569', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = '#f8fafc'; e.currentTarget.style.borderColor = '#94a3b8'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.borderColor = '#cbd5e1'; }}
                   >
                     Back
                   </button>
@@ -1067,8 +1070,9 @@ const CitizenDashboard = () => {
                 {currentStepIndex < TOUR_STEPS.length - 1 ? (
                   <button 
                     onClick={() => setCurrentStepIndex(currentStepIndex + 1)}
-                    className="btn"
-                    style={{ background: '#2170e4', color: '#fff', padding: '0.35rem 0.85rem', fontSize: '0.72rem', borderRadius: 6, border: 'none', fontWeight: 700, cursor: 'pointer' }}
+                    style={{ background: 'linear-gradient(135deg, #ea580c, #f97316)', color: '#fff', padding: '0.45rem 1.1rem', fontSize: '0.72rem', borderRadius: '30px', border: 'none', fontWeight: 800, cursor: 'pointer', boxShadow: '0 4px 12px rgba(234, 88, 12, 0.15)', transition: 'all 0.2s' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = '0 6px 15px rgba(234, 88, 12, 0.25)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(234, 88, 12, 0.15)'; }}
                   >
                     Next
                   </button>
@@ -1082,8 +1086,9 @@ const CitizenDashboard = () => {
                         window.speechSynthesis.speak(utterance);
                       }
                     }}
-                    className="btn"
-                    style={{ background: '#10b981', color: '#fff', padding: '0.35rem 0.85rem', fontSize: '0.72rem', borderRadius: 6, border: 'none', fontWeight: 800, cursor: 'pointer' }}
+                    style={{ background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff', padding: '0.45rem 1.1rem', fontSize: '0.72rem', borderRadius: '30px', border: 'none', fontWeight: 800, cursor: 'pointer', boxShadow: '0 4px 12px rgba(16, 185, 129, 0.15)', transition: 'all 0.2s' }}
+                    onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = '0 6px 15px rgba(16, 185, 129, 0.25)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.15)'; }}
                   >
                     Finish 🎉
                   </button>
@@ -1701,10 +1706,12 @@ const CitizenDashboard = () => {
                   </div>
 
                   {/* Quick Help Guide */}
-                  <div className="glass-panel" style={{ padding: '1rem', background: 'rgba(139, 92, 246, 0.02)', borderColor: 'rgba(139, 92, 246, 0.15)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div className="glass-panel" style={{ padding: '1.25rem 1.5rem', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', borderLeft: '4px solid #ea580c', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.02)', gap: '1rem' }}>
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#6d28d9' }}>Need a system tour?</div>
-                      <div style={{ fontSize: '0.68rem', color: '#7c3aed' }}>Start the 5-step interactive tour to learn how to track ambulances and report incidents.</div>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#ea580c', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        🧭 Need a system tour?
+                      </div>
+                      <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '0.25rem', lineHeight: 1.4 }}>Start the 5-step interactive tour to learn how to track ambulances and report incidents.</div>
                     </div>
                     <button 
                       onClick={() => {
@@ -1713,8 +1720,21 @@ const CitizenDashboard = () => {
                         setCurrentStepIndex(0);
                         setTourActive(true);
                       }}
-                      className="btn"
-                      style={{ background: '#7c3aed', color: '#fff', border: 'none', padding: '0.4rem 0.8rem', borderRadius: 6, fontSize: '0.7rem', fontWeight: 700, cursor: 'pointer' }}
+                      style={{ 
+                        background: 'linear-gradient(135deg, #ea580c, #f97316)', 
+                        color: '#fff', 
+                        border: 'none', 
+                        padding: '0.55rem 1.25rem', 
+                        borderRadius: '30px', 
+                        fontSize: '0.72rem', 
+                        fontWeight: 800, 
+                        cursor: 'pointer',
+                        boxShadow: '0 4px 12px rgba(234, 88, 12, 0.18)',
+                        transition: 'all 0.2s',
+                        whiteSpace: 'nowrap'
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = '0 6px 15px rgba(234, 88, 12, 0.28)'; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(234, 88, 12, 0.18)'; }}
                     >
                       Start Tour
                     </button>
