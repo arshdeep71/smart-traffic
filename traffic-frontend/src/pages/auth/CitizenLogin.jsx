@@ -654,7 +654,7 @@ const CitizenLogin = () => {
               fontSize: '0.68rem', 
               color: '#0f172a', 
               letterSpacing: '-0.5px' 
-            }}>TMI</span>
+            }}>STM</span>
           </div>
           <span style={{ 
             fontWeight: 900, 
@@ -726,7 +726,7 @@ const CitizenLogin = () => {
       <div style={{ 
         flex: 1, 
         display: 'flex', 
-        padding: '5rem 4rem 6rem',
+        padding: '2.5rem 4rem 3rem',
         maxWidth: '1440px',
         margin: '0 auto',
         width: '100%',
@@ -1256,7 +1256,7 @@ const CitizenLogin = () => {
       {/* ─── GATEWAY PORTAL HUB DASHBOARD ─── */}
       <section id="gateway-hub-anchor" style={{ 
         background: '#ffffff', 
-        padding: '5rem 4rem 6rem', 
+        padding: '2.5rem 4rem 3rem', 
         borderTop: '1px solid #f1f5f9',
         boxSizing: 'border-box'
       }}>
@@ -1410,7 +1410,7 @@ const CitizenLogin = () => {
       </section>
 
       {/* ─── FOOTER SECTION ─── */}
-      <footer style={{ background: '#ffffff', padding: '4rem', borderTop: '1px solid #f1f5f9' }}>
+      <footer style={{ background: '#ffffff', padding: '2.5rem 4rem', borderTop: '1px solid #f1f5f9' }}>
         <div style={{ 
           maxWidth: '1440px', 
           margin: '0 auto', 
@@ -1432,9 +1432,9 @@ const CitizenLogin = () => {
               transform: 'rotate(45deg)',
               marginRight: '4px'
             }}>
-              <span style={{ transform: 'rotate(-45deg)', fontWeight: 950, fontSize: '0.45rem', color: '#0f172a' }}>TMI</span>
+              <span style={{ transform: 'rotate(-45deg)', fontWeight: 950, fontSize: '0.45rem', color: '#0f172a' }}>STM</span>
             </div>
-            <span>© {new Date().getFullYear()} Civic Sentinel Platform. Secured by TMI.</span>
+            <span>© {new Date().getFullYear()} Civic Sentinel Platform. Secured by STM.</span>
           </div>
 
           <div style={{ display: 'flex', gap: '2rem' }}>

@@ -76,7 +76,7 @@ const Login = () => {
               fontSize: '0.68rem', 
               color: '#0f172a', 
               letterSpacing: '-0.5px' 
-            }}>TMI</span>
+            }}>STM</span>
           </div>
           <span style={{ 
             fontWeight: 900, 
