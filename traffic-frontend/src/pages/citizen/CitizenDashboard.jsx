@@ -1348,17 +1348,33 @@ const CitizenDashboard = () => {
         </div>
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.2rem' }}>Citizen Safety Portal</h2>
-          <div style={{ color: '#6b7280', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-            <MapPin size={11} style={{ verticalAlign: 'middle' }} /> 
-            {formData.location.lat.toFixed(4)}, {formData.location.lng.toFixed(4)} (±{formData.location.accuracy.toFixed(0)}m)
+          <h2 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 900, color: '#0f172a', letterSpacing: '-0.5px' }}>Citizen Safety Portal</h2>
+          <div style={{ color: '#64748b', fontSize: '0.78rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
+            <MapPin size={12} style={{ color: '#ea580c' }} /> 
+            <span style={{ fontWeight: 600 }}>{formData.location.lat.toFixed(4)}, {formData.location.lng.toFixed(4)}</span>
+            <span style={{ color: '#cbd5e1' }}>|</span>
+            <span>Accuracy: ±{formData.location.accuracy.toFixed(0)}m</span>
             <button 
               type="button"
               onClick={() => requestLocation(true)} 
-              className="btn btn-outline" 
-              style={{ display: 'inline-flex', padding: '0.2rem 0.5rem', fontSize: '0.65rem', borderRadius: 4, cursor: 'pointer', border: '1px solid rgba(33, 112, 228, 0.25)', background: 'transparent', color: '#2170e4', fontWeight: 700 }}
+              style={{ 
+                display: 'inline-flex', 
+                alignItems: 'center',
+                gap: '0.25rem',
+                padding: '0.2rem 0.6rem', 
+                fontSize: '0.68rem', 
+                borderRadius: '6px', 
+                cursor: 'pointer', 
+                border: '1px solid #ea580c', 
+                background: 'transparent', 
+                color: '#ea580c', 
+                fontWeight: 700,
+                transition: 'all 0.15s'
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#ea580c'; e.currentTarget.style.color = '#fff'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#ea580c'; }}
             >
               🔄 Refresh GPS
             </button>
@@ -1366,9 +1382,31 @@ const CitizenDashboard = () => {
         </div>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
           {isOffline && <span style={{ background: '#f59e0b', color: '#000', padding: '0.3rem 0.8rem', borderRadius: 99, fontSize: '0.72rem', fontWeight: 700 }}><Smartphone size={12} /> Offline</span>}
-          <button id="sos-btn" onClick={triggerSOS} disabled={loading} className="btn-danger pulse-alert"
-            style={{ padding: emergencyMode ? '1.2rem 2.5rem' : '0.8rem 2rem', borderRadius: 50, border: 'none', cursor: 'pointer', fontSize: emergencyMode ? '1.4rem' : '1rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.6rem', background: '#dc2626', color: '#fff' }}>
-            <Zap fill="white" size={emergencyMode ? 28 : 20} /> {emergencyMode ? '🚨 SOS' : 'ONE-TAP SOS'}
+          <button 
+            id="sos-btn" 
+            onClick={triggerSOS} 
+            disabled={loading} 
+            className="pulse-alert"
+            style={{ 
+              padding: emergencyMode ? '1.2rem 2.5rem' : '0.75rem 1.75rem', 
+              borderRadius: '50px', 
+              border: 'none', 
+              cursor: 'pointer', 
+              fontSize: emergencyMode ? '1.3rem' : '0.88rem', 
+              fontWeight: 900, 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '0.5rem', 
+              background: 'linear-gradient(135deg, #ef4444, #ea580c)', 
+              color: '#fff',
+              boxShadow: '0 8px 24px rgba(239, 68, 68, 0.25)',
+              transition: 'all 0.2s',
+              letterSpacing: '0.05em'
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.03)'; e.currentTarget.style.boxShadow = '0 12px 30px rgba(239, 68, 68, 0.35)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 8px 24px rgba(239, 68, 68, 0.25)'; }}
+          >
+            <Zap fill="white" size={emergencyMode ? 24 : 16} /> {emergencyMode ? '🚨 SOS ACTIVE' : 'ONE-TAP SOS'}
           </button>
         </div>
       </div>
@@ -1514,25 +1552,28 @@ const CitizenDashboard = () => {
                 <>
                   {/* 🏠 HOME TAB VIEW */}
               {tab === 'home' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                   {/* Welcome Header */}
                   <div style={{
-                    background: 'linear-gradient(135deg, #ef4444, #dc2626)',
-                    borderRadius: '12px',
-                    padding: '1.5rem',
+                    background: 'linear-gradient(135deg, #0f172a, #1e293b)',
+                    borderRadius: '16px',
+                    padding: '1.75rem 2rem',
                     color: '#fff',
-                    boxShadow: '0 4px 15px rgba(239, 68, 68, 0.15)'
+                    boxShadow: '0 10px 30px rgba(15, 23, 42, 0.08)',
+                    borderLeft: '5px solid #ea580c',
+                    position: 'relative',
+                    overflow: 'hidden'
                   }}>
-                    <h3 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 900 }}>Welcome to Emergency Hub</h3>
-                    <p style={{ margin: '0.3rem 0 0 0', fontSize: '0.8rem', color: '#fee2e2', opacity: 0.9 }}>
+                    <h3 style={{ margin: 0, fontSize: '1.4rem', fontWeight: 900, letterSpacing: '-0.5px' }}>Welcome to Emergency Hub</h3>
+                    <p style={{ margin: '0.4rem 0 0 0', fontSize: '0.82rem', color: '#94a3b8', opacity: 0.9, lineHeight: 1.4 }}>
                       Smart City Safe Zone Portal. Dispatching, coordination, and live assistance at your fingertips.
                     </p>
                   </div>
 
                   {/* Active Emergency Summary if exists */}
                   {accidents.filter(a => a.status?.toLowerCase() !== 'completed' && a.status?.toLowerCase() !== 'resolved').length > 0 ? (
-                    <div className="glass-panel" style={{ padding: '1.25rem', borderLeft: '4px solid #ef4444', background: 'rgba(239, 68, 68, 0.02)' }}>
-                      <h4 style={{ margin: '0 0 0.6rem 0', color: '#ef4444', fontSize: '0.88rem', display: 'flex', gap: '0.4rem', alignItems: 'center', fontWeight: 800 }}>
+                    <div className="glass-panel" style={{ padding: '1.25rem', borderLeft: '4px solid #ef4444', background: 'rgba(239, 68, 68, 0.02)', borderRadius: '12px', border: '1px solid rgba(239,68,68,0.15)' }}>
+                      <h4 style={{ margin: '0 0 0.6rem 0', color: '#ef4444', fontSize: '0.8rem', display: 'flex', gap: '0.4rem', alignItems: 'center', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                         <span className="silent-sos-dot" /> ACTIVE EMERGENCY IN PROGRESS
                       </h4>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
@@ -1563,7 +1604,7 @@ const CitizenDashboard = () => {
                       </div>
                     </div>
                   ) : (
-                    <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(16, 185, 129, 0.02)', borderColor: 'rgba(16, 185, 129, 0.15)' }}>
+                    <div className="glass-panel" style={{ padding: '1.25rem', display: 'flex', alignItems: 'center', gap: '1rem', background: 'rgba(16, 185, 129, 0.02)', borderColor: 'rgba(16, 185, 129, 0.15)', borderRadius: '12px' }}>
                       <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#10b981', boxShadow: '0 0 8px #10b981' }} className="animate-pulse" />
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: '0.82rem', fontWeight: 800, color: '#065f46' }}>Safe Zone Active</div>
@@ -1574,43 +1615,88 @@ const CitizenDashboard = () => {
 
                   {/* Shortcuts Grid */}
                   <div>
-                    <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.85rem', color: '#4b5563', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Quick Shortcuts</h4>
-                    <div id="shortcuts-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '0.75rem' }}>
+                    <h4 style={{ margin: '0 0 0.85rem 0', fontSize: '0.78rem', color: '#64748b', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Quick Shortcuts</h4>
+                    <div id="shortcuts-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
                       
-                      <div onClick={() => navigate('/citizen?tab=report')} className="glass-panel hover-card" style={{ padding: '1rem', cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s' }}>
-                        <div style={{ fontSize: '1.6rem', marginBottom: '0.4rem' }}>🚨</div>
-                        <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#1f2937' }}>File Report</div>
-                        <div style={{ fontSize: '0.65rem', color: '#6b7280', marginTop: '0.2rem' }}>Camera evidence & details</div>
+                      <div 
+                        onClick={() => navigate('/citizen?tab=report')} 
+                        className="glass-panel" 
+                        style={{ 
+                          padding: '1.5rem 1rem', 
+                          cursor: 'pointer', 
+                          textAlign: 'center', 
+                          background: '#ffffff', 
+                          border: '1px solid #e2e8f0', 
+                          borderRadius: '12px', 
+                          transition: 'all 0.2s',
+                          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02)'
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = '#ea580c'; e.currentTarget.style.boxShadow = '0 10px 20px -5px rgba(234, 88, 12, 0.08)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02)'; }}
+                      >
+                        <div style={{ fontSize: '2rem', marginBottom: '0.6rem' }}>🚨</div>
+                        <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a' }}>File Report</div>
+                        <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '0.3rem', lineHeight: 1.3 }}>Camera evidence & details</div>
                       </div>
 
-                      <div onClick={triggerSOS} className="glass-panel hover-card" style={{ padding: '1rem', cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s', border: '1px solid rgba(239, 68, 68, 0.15)', background: 'rgba(239, 68, 68, 0.02)' }}>
-                        <div style={{ fontSize: '1.6rem', marginBottom: '0.4rem' }}>🆘</div>
-                        <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#ef4444' }}>Panic SOS</div>
-                        <div style={{ fontSize: '0.65rem', color: '#6b7280', marginTop: '0.2rem' }}>Instant silent trigger</div>
+                      <div 
+                        onClick={triggerSOS} 
+                        className="glass-panel" 
+                        style={{ 
+                          padding: '1.5rem 1rem', 
+                          cursor: 'pointer', 
+                          textAlign: 'center', 
+                          background: 'rgba(239, 68, 68, 0.01)', 
+                          border: '1px solid rgba(239, 68, 68, 0.12)', 
+                          borderRadius: '12px', 
+                          transition: 'all 0.2s',
+                          boxShadow: '0 4px 6px -1px rgba(239, 68, 68, 0.01)'
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = '#ef4444'; e.currentTarget.style.boxShadow = '0 10px 20px -5px rgba(239, 68, 68, 0.1)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.12)'; e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(239, 68, 68, 0.01)'; }}
+                      >
+                        <div style={{ fontSize: '2rem', marginBottom: '0.6rem' }}>🆘</div>
+                        <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#ef4444' }}>Panic SOS</div>
+                        <div style={{ fontSize: '0.68rem', color: '#7f1d1d', marginTop: '0.3rem', lineHeight: 1.3, opacity: 0.8 }}>Instant silent trigger</div>
                       </div>
 
-                      <div onClick={() => navigate('/citizen?tab=medical')} className="glass-panel hover-card" style={{ padding: '1rem', cursor: 'pointer', textAlign: 'center', transition: 'all 0.2s' }}>
-                        <div style={{ fontSize: '1.6rem', marginBottom: '0.4rem' }}>❤️</div>
-                        <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#1f2937' }}>Medical Guide</div>
-                        <div style={{ fontSize: '0.65rem', color: '#6b7280', marginTop: '0.2rem' }}>29 first-aid conditions</div>
+                      <div 
+                        onClick={() => navigate('/citizen?tab=medical')} 
+                        className="glass-panel" 
+                        style={{ 
+                          padding: '1.5rem 1rem', 
+                          cursor: 'pointer', 
+                          textAlign: 'center', 
+                          background: '#ffffff', 
+                          border: '1px solid #e2e8f0', 
+                          borderRadius: '12px', 
+                          transition: 'all 0.2s',
+                          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02)'
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = '#ea580c'; e.currentTarget.style.boxShadow = '0 10px 20px -5px rgba(234, 88, 12, 0.08)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02)'; }}
+                      >
+                        <div style={{ fontSize: '2rem', marginBottom: '0.6rem' }}>❤️</div>
+                        <div style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a' }}>Medical Guide</div>
+                        <div style={{ fontSize: '0.68rem', color: '#64748b', marginTop: '0.3rem', lineHeight: 1.3 }}>29 first-aid conditions</div>
                       </div>
 
                     </div>
                   </div>
 
                   {/* Stats Grid */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }}>
-                    <div className="glass-panel" style={{ padding: '0.75rem', textAlign: 'center' }}>
-                      <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#ef4444' }}>7</div>
-                      <div style={{ fontSize: '0.65rem', color: '#475569', marginTop: '0.1rem' }}>Hospitals Live</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
+                    <div className="glass-panel" style={{ padding: '1rem', textAlign: 'center', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.01)' }}>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#ef4444', letterSpacing: '-0.5px' }}>7</div>
+                      <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', marginTop: '0.2rem' }}>Hospitals Live</div>
                     </div>
-                    <div className="glass-panel" style={{ padding: '0.75rem', textAlign: 'center' }}>
-                      <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#2563eb' }}>12</div>
-                      <div style={{ fontSize: '0.65rem', color: '#475569', marginTop: '0.1rem' }}>Ambulances</div>
+                    <div className="glass-panel" style={{ padding: '1rem', textAlign: 'center', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.01)' }}>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#3b82f6', letterSpacing: '-0.5px' }}>12</div>
+                      <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', marginTop: '0.2rem' }}>Ambulances</div>
                     </div>
-                    <div className="glass-panel" style={{ padding: '0.75rem', textAlign: 'center' }}>
-                      <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#f59e0b' }}>4.8m</div>
-                      <div style={{ fontSize: '0.65rem', color: '#475569', marginTop: '0.1rem' }}>Avg Dispatch</div>
+                    <div className="glass-panel" style={{ padding: '1rem', textAlign: 'center', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.01)' }}>
+                      <div style={{ fontSize: '1.4rem', fontWeight: 900, color: '#ea580c', letterSpacing: '-0.5px' }}>4.8m</div>
+                      <div style={{ fontSize: '0.68rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', marginTop: '0.2rem' }}>Avg Dispatch</div>
                     </div>
                   </div>
 
@@ -1968,15 +2054,17 @@ const CitizenDashboard = () => {
                 </PremiumMap>
               </div>
 
-              <div className="glass-panel" style={{ padding: '1.25rem', background: 'rgba(239,68,68,0.03)', borderColor: 'rgba(239,68,68,0.15)' }}>
-                <h4 style={{ margin: '0 0 0.5rem 0', color: '#ef4444', fontSize: '0.85rem', display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+              <div className="glass-panel" style={{ padding: '1.25rem', background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.01)' }}>
+                <h4 style={{ margin: '0 0 0.75rem 0', color: '#ea580c', fontSize: '0.8rem', display: 'flex', gap: '0.4rem', alignItems: 'center', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                   <Activity size={14} /> Live AI Status
                 </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.75rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.8rem' }}>
                   {[['Silent SOS', 'Armed'], ['GPS Lock', 'Acquired'], ['Trust Score', '100%']].map(([k, v]) => (
-                    <div key={k} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: '#6b7280' }}>{k}</span>
-                      <span style={{ fontWeight: 600, color: '#10b981' }}>{v}</span>
+                    <div key={k} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #f8fafc', paddingBottom: '0.35rem' }}>
+                      <span style={{ color: '#64748b', fontWeight: 500 }}>{k}</span>
+                      <span style={{ fontWeight: 800, color: '#10b981', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981' }} /> {v}
+                      </span>
                     </div>
                   ))}
                 </div>
