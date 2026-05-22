@@ -358,18 +358,18 @@ const HospitalsManagement = () => {
                 </div>
 
                 {/* Admin Credentials */}
-                <div style={{ background: 'rgba(9, 13, 22, 0.95)', border: '1px solid rgba(234, 88, 12, 0.25)', borderRadius: '14px', padding: '1rem', marginBottom: '1.5rem', boxShadow: 'inset 0 4px 15px rgba(0,0,0,0.4)' }}>
-                  <div style={{ fontSize: '0.7rem', color: '#ea580c', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <span style={{ fontSize: '0.9rem' }}>🔑</span> Admin Credentials
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '14px', padding: '1.1rem', marginBottom: '1.5rem', boxShadow: '0 4px 15px rgba(0, 0, 0, 0.05)' }}>
+                  <div style={{ fontSize: '0.75rem', color: '#0f172a', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <span style={{ fontSize: '1rem' }}>🔑</span> Admin Credentials
                   </div>
                   {/* Login ID */}
-                  <div style={{ marginBottom: '0.6rem' }}>
-                    <div style={{ color: '#64748b', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '0.2rem' }}>LOGIN EMAIL</div>
-                    <div style={{ color: '#fff', fontFamily: 'monospace', fontSize: '0.78rem', fontWeight: 700, wordBreak: 'break-all', background: 'rgba(255,255,255,0.03)', padding: '0.3rem 0.5rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>{hospital.admin_login_id}</div>
+                  <div style={{ marginBottom: '0.75rem' }}>
+                    <div style={{ color: '#64748b', fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.5px', marginBottom: '0.25rem' }}>LOGIN EMAIL</div>
+                    <div style={{ color: '#0f172a', fontFamily: 'monospace', fontSize: '0.8rem', fontWeight: 700, wordBreak: 'break-all', background: '#ffffff', padding: '0.45rem 0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>{hospital.admin_login_id}</div>
                   </div>
                   <div>
-                    <div style={{ color: '#64748b', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '0.2rem' }}>PASSWORD</div>
-                    <div style={{ color: '#fbbf24', fontFamily: 'monospace', fontSize: '0.78rem', fontWeight: 700, background: 'rgba(255,255,255,0.03)', padding: '0.3rem 0.5rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>{hospital.admin_password_hint || 'Password@123'}</div>
+                    <div style={{ color: '#64748b', fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.5px', marginBottom: '0.25rem' }}>PASSWORD</div>
+                    <div style={{ color: '#0f172a', fontFamily: 'monospace', fontSize: '0.8rem', fontWeight: 700, background: '#ffffff', padding: '0.45rem 0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>{hospital.admin_password_hint || 'Password@123'}</div>
                   </div>
                 </div>
               </div>
