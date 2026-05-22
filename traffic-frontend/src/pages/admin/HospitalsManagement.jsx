@@ -318,67 +318,71 @@ const HospitalsManagement = () => {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '1.5rem' }}>
           {filtered.map((hospital) => (
-            <div key={hospital._id} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '1.75rem', transition: 'all 0.3s ease', cursor: 'pointer' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(234, 88, 12,0.4)'; e.currentTarget.style.background = 'rgba(234, 88, 12,0.05)'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
+            <div key={hospital._id} style={{ background: 'rgba(9, 13, 22, 0.65)', border: '1px solid rgba(255, 255, 255, 0.08)', borderRadius: '20px', padding: '1.8rem', transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)', cursor: 'pointer', backdropFilter: 'blur(12px)', boxShadow: '0 10px 30px rgba(0,0,0,0.3)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = '#ea580c'; e.currentTarget.style.boxShadow = '0 15px 35px rgba(234, 88, 12, 0.18)'; e.currentTarget.style.transform = 'translateY(-5px)'; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.3)'; e.currentTarget.style.transform = 'translateY(0)'; }}
             >
-              {/* Hospital Header */}
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
-                  <div style={{ fontSize: '2rem', lineHeight: 1 }}>{typeIcon[hospital.hospital_type] || '🏥'}</div>
+              <div>
+                {/* Hospital Header */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem' }}>
+                  <div style={{ display: 'flex', gap: '0.9rem', alignItems: 'flex-start' }}>
+                    <div style={{ fontSize: '2.2rem', lineHeight: 1, filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))' }}>{typeIcon[hospital.hospital_type] || '🏥'}</div>
+                    <div>
+                      <div style={{ color: '#fff', fontWeight: 900, fontSize: '1.15rem', lineHeight: 1.3, marginBottom: '0.25rem', letterSpacing: '-0.3px' }}>{hospital.name}</div>
+                      <div style={{ color: '#ea580c', fontSize: '0.75rem', fontFamily: 'monospace', fontWeight: 700, letterSpacing: '0.5px' }}>{hospital.code}</div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.3rem 0.8rem', borderRadius: '50px', background: `${statusColor(hospital.status)}12`, border: `1px solid ${statusColor(hospital.status)}30`, fontSize: '0.7rem', fontWeight: 800, color: statusColor(hospital.status), letterSpacing: '0.5px' }}>
+                    <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', background: statusColor(hospital.status), animation: hospital.status === 'active' ? 'pulse-alert 2s infinite' : 'none' }}></span> {hospital.status?.toUpperCase()}
+                  </div>
+                </div>
+
+                {/* Location */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#94a3b8', fontSize: '0.85rem', marginBottom: '1.25rem', fontWeight: 500 }}>
+                  <MapPin size={14} color="#64748b" />
+                  {hospital.city}, {hospital.state}
+                </div>
+
+                {/* Stats Row */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.8rem', marginBottom: '1.5rem' }}>
+                  {[
+                    { label: 'STAFF', value: hospital.staff_count ?? 0, color: '#a78bfa', bg: 'rgba(167, 139, 250, 0.06)', border: 'rgba(167, 139, 250, 0.15)' },
+                    { label: 'AMBULANCES', value: hospital.ambulance_count ?? 0, color: '#fbbf24', bg: 'rgba(251, 191, 36, 0.06)', border: 'rgba(251, 191, 36, 0.15)' },
+                    { label: 'AVAILABLE', value: hospital.available_ambulances ?? 0, color: '#34d399', bg: 'rgba(52, 211, 153, 0.06)', border: 'rgba(52, 211, 153, 0.15)' },
+                  ].map(s => (
+                    <div key={s.label} style={{ background: s.bg, border: `1px solid ${s.border}`, borderRadius: '12px', padding: '0.75rem 0.5rem', textAlign: 'center', boxShadow: 'inset 0 4px 10px rgba(0,0,0,0.2)' }}>
+                      <div style={{ fontSize: '1.55rem', fontWeight: 900, color: s.color, lineHeight: 1.1, marginBottom: '0.2rem' }}>{s.value}</div>
+                      <div style={{ fontSize: '0.6rem', color: '#64748b', fontWeight: 800, letterSpacing: '0.08em' }}>{s.label}</div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Admin Credentials */}
+                <div style={{ background: 'rgba(9, 13, 22, 0.95)', border: '1px solid rgba(234, 88, 12, 0.25)', borderRadius: '14px', padding: '1rem', marginBottom: '1.5rem', boxShadow: 'inset 0 4px 15px rgba(0,0,0,0.4)' }}>
+                  <div style={{ fontSize: '0.7rem', color: '#ea580c', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <span style={{ fontSize: '0.9rem' }}>🔑</span> Admin Credentials
+                  </div>
+                  {/* Login ID */}
+                  <div style={{ marginBottom: '0.6rem' }}>
+                    <div style={{ color: '#64748b', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '0.2rem' }}>LOGIN EMAIL</div>
+                    <div style={{ color: '#fff', fontFamily: 'monospace', fontSize: '0.78rem', fontWeight: 700, wordBreak: 'break-all', background: 'rgba(255,255,255,0.03)', padding: '0.3rem 0.5rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>{hospital.admin_login_id}</div>
+                  </div>
                   <div>
-                    <div style={{ color: '#fff', fontWeight: 800, fontSize: '1.05rem', lineHeight: 1.3, marginBottom: '0.2rem' }}>{hospital.name}</div>
-                    <div style={{ color: '#64748b', fontSize: '0.75rem', fontFamily: 'monospace' }}>{hospital.code}</div>
+                    <div style={{ color: '#64748b', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '0.2rem' }}>PASSWORD</div>
+                    <div style={{ color: '#fbbf24', fontFamily: 'monospace', fontSize: '0.78rem', fontWeight: 700, background: 'rgba(255,255,255,0.03)', padding: '0.3rem 0.5rem', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>{hospital.admin_password_hint || 'Password@123'}</div>
                   </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.25rem 0.75rem', borderRadius: '20px', background: `${statusColor(hospital.status)}20`, border: `1px solid ${statusColor(hospital.status)}40`, fontSize: '0.7rem', fontWeight: 700, color: statusColor(hospital.status) }}>
-                  <span>●</span> {hospital.status?.toUpperCase()}
-                </div>
-              </div>
-
-              {/* Location */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#64748b', fontSize: '0.8rem', marginBottom: '1rem' }}>
-                <MapPin size={14} />
-                {hospital.city}, {hospital.state}
-              </div>
-
-              {/* Stats Row */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', marginBottom: '1.25rem' }}>
-                {[
-                  { label: 'STAFF', value: hospital.staff_count ?? 0, color: '#8b5cf6' },
-                  { label: 'AMBULANCES', value: hospital.ambulance_count ?? 0, color: '#f59e0b' },
-                  { label: 'AVAILABLE', value: hospital.available_ambulances ?? 0, color: '#10b981' },
-                ].map(s => (
-                  <div key={s.label} style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '8px', padding: '0.6rem', textAlign: 'center' }}>
-                    <div style={{ fontSize: '1.4rem', fontWeight: 800, color: s.color }}>{s.value}</div>
-                    <div style={{ fontSize: '0.6rem', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>{s.label}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Admin Credentials */}
-              <div style={{ background: 'rgba(234, 88, 12,0.08)', border: '1px solid rgba(234, 88, 12,0.18)', borderRadius: '10px', padding: '0.75rem', marginBottom: '1rem' }}>
-                <div style={{ fontSize: '0.65rem', color: '#60a5fa', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '0.6rem' }}>🔑 Admin Credentials</div>
-                {/* Login ID — stacked so full email is always visible */}
-                <div style={{ marginBottom: '0.4rem' }}>
-                  <div style={{ color: '#64748b', fontSize: '0.65rem', marginBottom: '0.15rem' }}>LOGIN EMAIL</div>
-                  <div style={{ color: '#93c5fd', fontFamily: 'monospace', fontSize: '0.73rem', fontWeight: 700, wordBreak: 'break-all' }}>{hospital.admin_login_id}</div>
-                </div>
-                <div>
-                  <div style={{ color: '#64748b', fontSize: '0.65rem', marginBottom: '0.15rem' }}>PASSWORD</div>
-                  <div style={{ color: '#fcd34d', fontFamily: 'monospace', fontSize: '0.73rem', fontWeight: 700 }}>{hospital.admin_password_hint || 'Password@123'}</div>
                 </div>
               </div>
 
               {/* Actions */}
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button onClick={() => navigate(`/hospitals/${hospital.id || hospital._id}`)} style={{ flex: 1, background: 'linear-gradient(135deg, #ea580c, #ea580c)', color: '#fff', border: 'none', borderRadius: '8px', padding: '0.55rem', cursor: 'pointer', fontWeight: 600, fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
+              <div style={{ display: 'flex', gap: '0.6rem', marginTop: 'auto' }}>
+                <button onClick={() => navigate(`/hospitals/${hospital.id || hospital._id}`)} style={{ flex: 1, background: 'linear-gradient(135deg, #ea580c, #c2410c)', color: '#fff', border: 'none', borderRadius: '10px', padding: '0.7rem', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', boxShadow: '0 4px 12px rgba(234, 88, 12, 0.25)', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.filter = 'brightness(1.1)'} onMouseLeave={e => e.currentTarget.style.filter = 'none'}>
                   <Eye size={15} /> View Details
                 </button>
-                <button onClick={() => handleSuspend(hospital.id || hospital._id, hospital.status)} style={{ background: hospital.status === 'active' ? 'rgba(245,158,11,0.15)' : 'rgba(16,185,129,0.15)', border: `1px solid ${hospital.status === 'active' ? 'rgba(245,158,11,0.3)' : 'rgba(16,185,129,0.3)'}`, color: hospital.status === 'active' ? '#f59e0b' : '#10b981', borderRadius: '8px', padding: '0.55rem 0.75rem', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}>
+                <button onClick={() => handleSuspend(hospital.id || hospital._id, hospital.status)} style={{ background: hospital.status === 'active' ? 'rgba(245,158,11,0.06)' : 'rgba(16,185,129,0.06)', border: `1px solid ${hospital.status === 'active' ? 'rgba(245,158,11,0.25)' : 'rgba(16,185,129,0.25)'}`, color: hospital.status === 'active' ? '#f59e0b' : '#10b981', borderRadius: '10px', padding: '0.7rem 0.9rem', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 700, transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = hospital.status === 'active' ? 'rgba(245,158,11,0.12)' : 'rgba(16,185,129,0.12)'} onMouseLeave={e => e.currentTarget.style.background = hospital.status === 'active' ? 'rgba(245,158,11,0.06)' : 'rgba(16,185,129,0.06)'}>
                   {hospital.status === 'active' ? 'Suspend' : 'Activate'}
                 </button>
-                <button onClick={() => handleDelete(hospital.id || hospital._id)} style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', color: '#ef4444', borderRadius: '8px', padding: '0.55rem 0.75rem', cursor: 'pointer' }}>
+                <button onClick={() => handleDelete(hospital.id || hospital._id)} style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.25)', color: '#ef4444', borderRadius: '10px', padding: '0.7rem 0.9rem', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.15)'} onMouseLeave={e => e.currentTarget.style.background = 'rgba(239,68,68,0.06)'}>
                   <Trash2 size={15} />
                 </button>
               </div>
