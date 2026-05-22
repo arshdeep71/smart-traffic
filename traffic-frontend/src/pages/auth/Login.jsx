@@ -286,70 +286,34 @@ const Login = () => {
 
             </form>
 
-            {/* Forgot Password Link */}
-            <div style={{ marginTop: '2rem', textAlign: 'left' }}>
-              <a 
-                href="#forgot" 
-                style={{ 
-                  color: '#ea580c', 
-                  textDecoration: 'none', 
-                  fontSize: '0.85rem', 
-                  fontWeight: 700 
-                }}
-                onMouseOver={e => e.currentTarget.style.textDecoration = 'underline'}
-                onMouseOut={e => e.currentTarget.style.textDecoration = 'none'}
-              >
-                Forgot Your Password?
-              </a>
-            </div>
-
-            {/* Citizen Portal Link */}
+            {/* Back to Dashboard Arrow Link */}
             <div style={{ 
               marginTop: '2.5rem', 
               borderTop: '1px solid #e2e8f0', 
               paddingTop: '2rem', 
               textAlign: 'left' 
             }}>
-              <p style={{ 
-                color: '#64748b', 
-                fontSize: '0.78rem', 
-                fontWeight: 600, 
-                marginBottom: '1rem',
-                fontFamily: "'Inter', sans-serif"
-              }}>
-                Resident or Citizen reporting an emergency?
-              </p>
               <button
                 type="button"
                 onClick={() => navigate('/citizen-login')}
                 style={{
-                  width: '100%',
                   background: 'transparent',
-                  border: '1px solid #ea580c',
-                  color: '#ea580c',
-                  borderRadius: '4px',
-                  padding: '0.8rem',
-                  fontSize: '0.8rem',
-                  fontWeight: 800,
+                  border: 'none',
+                  color: '#64748b',
+                  fontSize: '0.85rem',
+                  fontWeight: 700,
                   cursor: 'pointer',
-                  display: 'flex',
+                  display: 'inline-flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
                   gap: '0.5rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.04em',
-                  transition: 'all 0.2s'
+                  padding: 0,
+                  transition: 'color 0.2s',
+                  fontFamily: "'Inter', sans-serif"
                 }}
-                onMouseOver={e => {
-                  e.currentTarget.style.background = '#ea580c';
-                  e.currentTarget.style.color = '#ffffff';
-                }}
-                onMouseOut={e => {
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.color = '#ea580c';
-                }}
+                onMouseOver={e => e.currentTarget.style.color = '#ea580c'}
+                onMouseOut={e => e.currentTarget.style.color = '#64748b'}
               >
-                🛡️ Enter Citizen Emergency Portal
+                ← Go to Main Dashboard
               </button>
             </div>
 
