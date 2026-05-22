@@ -692,27 +692,6 @@ const CitizenLogin = () => {
           >
             Client Portal
           </button>
-          
-          <button 
-            onClick={() => navigate('/login')}
-            style={{
-              background: '#0f172a',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '50px',
-              padding: '0.6rem 1.35rem',
-              fontSize: '0.75rem',
-              fontWeight: 800,
-              cursor: 'pointer',
-              textTransform: 'uppercase',
-              letterSpacing: '0.05em',
-              transition: 'background 0.2s'
-            }}
-            onMouseOver={e => e.currentTarget.style.background = '#1e293b'}
-            onMouseOut={e => e.currentTarget.style.background = '#0f172a'}
-          >
-            Portal Login
-          </button>
 
           <button 
             onClick={() => navigate('/login?admin=true')}
@@ -1294,7 +1273,7 @@ const CitizenLogin = () => {
 
           <div style={{ 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', 
             gap: '2.5rem' 
           }}>
             
@@ -1360,66 +1339,7 @@ const CitizenLogin = () => {
               </button>
             </div>
 
-            {/* Gateway 2: Portal Login */}
-            <div className="glass-panel" style={{ 
-              padding: '3rem 2.5rem', 
-              background: '#fafafa', 
-              border: '1px solid #f1f5f9', 
-              borderRadius: '4px',
-              textAlign: 'left',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'space-between',
-              transition: 'all 0.2s'
-            }}>
-              <div>
-                <div style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  width: '50px', 
-                  height: '50px', 
-                  borderRadius: '50%', 
-                  background: 'rgba(15, 23, 42, 0.06)', 
-                  color: '#0f172a', 
-                  marginBottom: '2rem' 
-                }}>
-                  <Activity size={24} />
-                </div>
-                <h3 style={{ fontSize: '1.4rem', fontWeight: 900, color: '#0f172a', textTransform: 'uppercase', marginBottom: '0.8rem', letterSpacing: '0.02em' }}>
-                  Portal Login
-                </h3>
-                <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: 1.6, marginBottom: '2.5rem', fontFamily: "'Inter', sans-serif", minHeight: '75px' }}>
-                  Responder staff interface for designated city service personnel. Dedicated pipelines for traffic police patrolling units, ambulance emergency drivers, and medical staff response operators.
-                </p>
-              </div>
-              <button 
-                onClick={() => navigate('/login')}
-                style={{
-                  background: '#0f172a',
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: '4px',
-                  padding: '0.85rem 1.8rem',
-                  fontSize: '0.8rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  width: 'fit-content',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  transition: 'background 0.2s'
-                }}
-                onMouseOver={e => e.currentTarget.style.background = '#1e293b'}
-                onMouseOut={e => e.currentTarget.style.background = '#0f172a'}
-              >
-                Enter Portal Login →
-              </button>
-            </div>
-
-            {/* Gateway 3: Administrative Login */}
+            {/* Gateway 2: Administrative Login */}
             <div className="glass-panel" style={{ 
               padding: '3rem 2.5rem', 
               background: '#fafafa', 
