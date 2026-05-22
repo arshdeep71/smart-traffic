@@ -370,6 +370,7 @@ const CitizenDashboard = () => {
         setIsSOS(false);
         setEmergencyMode(false);
         setResolutionCountdown(3);
+        localStorage.removeItem('tracked_incident_id');
         if ('speechSynthesis' in window) {
           const utterance = new SpeechSynthesisUtterance("Emergency incident successfully resolved. Closing tracking session.");
           window.speechSynthesis.speak(utterance);
@@ -471,6 +472,7 @@ const CitizenDashboard = () => {
       setActiveIncident(null);
       setAssignedAmbulance(null);
       setResolutionCountdown(null);
+      localStorage.removeItem('tracked_incident_id');
       setTab('home');
       return;
     }
@@ -493,10 +495,15 @@ const CitizenDashboard = () => {
         return ['pending', 'report received', 'sos received', 'police assigned', 'officer en route', 'officer nearby', 'officer reached scene', 'investigation active', 'police team notified', 'patrol unit dispatched', 'unit en route', 'officers approaching'].includes(s);
       });
       if (active) {
-        // Do not auto-set activeIncident on page boot/mount so the tracking map doesn't hijack the screen.
-        // The user can click 'Live Track 🗺️' from their active emergency banner on the home dashboard to track manually.
-        // setActiveIncident(active);
         const s = active.status?.toLowerCase() || '';
+        const isAssigned = ['police assigned', 'officer en route', 'officer nearby', 'officer reached scene', 'patrol unit dispatched', 'unit en route', 'officers approaching'].includes(s);
+        const isTracked = localStorage.getItem('tracked_incident_id') === (active._id || active.id);
+
+        // Only restore/auto-open tracking if responder is assigned OR the citizen is actively tracking it
+        if (isAssigned || isTracked) {
+          setActiveIncident(active);
+        }
+
         const isPolice = s.includes('police') || s.includes('officer') || s.includes('patrol') || s.includes('investigation');
         setAssignedAmbulance({
           driverName: isPolice ? "Officer Patrol Unit" : "Assigned Driver",
@@ -508,6 +515,8 @@ const CitizenDashboard = () => {
             lng: active.police_live_location?.[0] || 75.6980
           }
         });
+      } else {
+        localStorage.removeItem('tracked_incident_id');
       }
     } catch (_) { }
   };
@@ -684,6 +693,7 @@ const CitizenDashboard = () => {
     try {
       const res = await api.post('/accidents', { title: 'URGENT PANIC SOS', description: 'Citizen triggered SOS.', severity: 'high', latitude: formData.location.lat, longitude: formData.location.lng, category: 'Medical Emergency' });
       const accidentData = res.data.data;
+      localStorage.setItem('tracked_incident_id', accidentData._id || accidentData.id);
       setActiveIncident({ ...accidentData, status: 'SOS Received', timeline: [{ time: new Date().toLocaleTimeString(), text: 'SOS Triggered' }, { time: new Date().toLocaleTimeString(), text: 'GPS Captured' }] });
       startRecording();
 
@@ -743,6 +753,7 @@ const CitizenDashboard = () => {
       const accidentData = res.data.data;
       setSubmittedAccident(accidentData);
       setShowSuccessModal(true);
+      localStorage.setItem('tracked_incident_id', accidentData._id || accidentData.id);
       setActiveIncident({ ...accidentData, status: 'Report Received', timeline: [{ time: new Date().toLocaleTimeString(), text: 'Evidence Package Uploaded' }] });
       setMessage('Emergency Report Submitted.');
 
@@ -1240,6 +1251,7 @@ const CitizenDashboard = () => {
               onClick={() => {
                 setActiveIncident(null);
                 setTab('history');
+                localStorage.removeItem('tracked_incident_id');
               }}
               style={{
                 width: '100%',
@@ -1366,7 +1378,7 @@ const CitizenDashboard = () => {
         {/* ZOMATO/UBER STYLE FULLSCREEN HERO LIVE TRACKING */}
         {activeIncident && !isWaiting ? (
           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999 }}>
-            <button onClick={() => { setActiveIncident(null); setTab('history'); }} style={{ position: 'absolute', top: 20, right: 20, zIndex: 10001, background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', padding: '0.6rem 1rem', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', color: '#fff', fontSize: '0.85rem', boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }}>Close Map</button>
+            <button onClick={() => { setActiveIncident(null); setTab('history'); localStorage.removeItem('tracked_incident_id'); }} style={{ position: 'absolute', top: 20, right: 20, zIndex: 10001, background: '#1e293b', border: '1px solid rgba(255,255,255,0.15)', padding: '0.6rem 1rem', borderRadius: '8px', fontWeight: 700, cursor: 'pointer', color: '#fff', fontSize: '0.85rem', boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }}>Close Map</button>
             <LiveTrackingView
               incident={activeIncident}
               ambulance={assignedAmbulance}
@@ -1539,6 +1551,7 @@ const CitizenDashboard = () => {
                                 setActiveIncident(acc);
                                 setAssignedAmbulance(null);
                                 setRouteInfo({ distance: '—', time: '—' });
+                                localStorage.setItem('tracked_incident_id', acc._id || acc.id);
                               }}
                               className="btn"
                               style={{ background: '#ef4444', color: '#fff', fontSize: '0.75rem', padding: '0.4rem 1rem', border: 'none', cursor: 'pointer', borderRadius: '6px', fontWeight: 700 }}
@@ -1642,7 +1655,7 @@ const CitizenDashboard = () => {
                         const isPending = acc.status?.toLowerCase() === 'pending' || acc.status?.toLowerCase() === 'sos received';
 
                         return (
-                          <div key={acc._id || acc.id || i} onClick={() => { setActiveIncident(acc); setAssignedAmbulance(null); setRouteInfo({ distance: '—', time: '—' }); window.scrollTo(0, 0); }} className="glass-panel" style={{ padding: '1.25rem', cursor: 'pointer', borderLeft: isCompleted ? '4px solid #10b981' : isPending ? '4px solid #f59e0b' : '4px solid #3b82f6', transition: 'transform 0.2s, box-shadow 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.01)'; e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.06)'; }} onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none'; }}>
+                          <div key={acc._id || acc.id || i} onClick={() => { setActiveIncident(acc); setAssignedAmbulance(null); setRouteInfo({ distance: '—', time: '—' }); localStorage.setItem('tracked_incident_id', acc._id || acc.id); window.scrollTo(0, 0); }} className="glass-panel" style={{ padding: '1.25rem', cursor: 'pointer', borderLeft: isCompleted ? '4px solid #10b981' : isPending ? '4px solid #f59e0b' : '4px solid #3b82f6', transition: 'transform 0.2s, box-shadow 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.01)'; e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.06)'; }} onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none'; }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.8rem' }}>
                               <div>
                                 <div style={{ fontWeight: 800, fontSize: '1rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
