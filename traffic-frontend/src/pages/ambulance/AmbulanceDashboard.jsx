@@ -504,37 +504,37 @@ export const AmbulanceDashboard = () => {
       </div>
 
       {/* TOP TOGGLES FLOATING */}
-      <div style={{ position: 'absolute', top: 20, left: 20, zIndex: 1000, display: 'flex', gap: '0.5rem', background: '#fff', padding: '0.4rem', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
-         <button onClick={() => setActiveTab('dispatch')} style={{ background: activeTab === 'dispatch' ? '#0f172a' : 'transparent', color: activeTab === 'dispatch' ? '#fff' : '#64748b', border: 'none', padding: '0.6rem 1.2rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 800 }}>Navigation</button>
-         <button onClick={() => setActiveTab('history')} style={{ background: activeTab === 'history' ? '#0f172a' : 'transparent', color: activeTab === 'history' ? '#fff' : '#64748b', border: 'none', padding: '0.6rem 1.2rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 800 }}>History</button>
+      <div style={{ position: 'absolute', top: 20, left: 20, zIndex: 1000, display: 'flex', gap: '0.5rem', background: 'rgba(9, 13, 22, 0.95)', border: '1px solid rgba(234, 88, 12, 0.25)', padding: '0.4rem', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)' }}>
+         <button onClick={() => setActiveTab('dispatch')} style={{ background: activeTab === 'dispatch' ? '#ea580c' : 'transparent', color: activeTab === 'dispatch' ? '#fff' : '#94a3b8', border: 'none', padding: '0.6rem 1.2rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 800, transition: 'all 0.2s' }}>Navigation</button>
+         <button onClick={() => setActiveTab('history')} style={{ background: activeTab === 'history' ? '#ea580c' : 'transparent', color: activeTab === 'history' ? '#fff' : '#94a3b8', border: 'none', padding: '0.6rem 1.2rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 800, transition: 'all 0.2s' }}>History</button>
       </div>
 
       {/* 🔄 HARD REFRESH GPS ACTION */}
-      <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 1000, display: 'flex', background: '#fff', padding: '0.4rem', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.1)' }}>
-         <button onClick={triggerHardRefresh} style={{ background: 'transparent', border: 'none', color: '#ef4444', padding: '0.6rem 1.2rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 800, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+      <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 1000, display: 'flex', background: 'rgba(9, 13, 22, 0.95)', border: '1px solid rgba(234, 88, 12, 0.25)', padding: '0.4rem', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)' }}>
+         <button onClick={triggerHardRefresh} style={{ background: 'transparent', border: 'none', color: '#ea580c', padding: '0.6rem 1.2rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 800, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.4rem', transition: 'all 0.2s' }}>
            🔄 Force Refresh GPS
          </button>
       </div>
 
       {activeTab === 'history' && (
-        <div style={{ position: 'absolute', top: 80, left: 20, bottom: 20, width: '400px', zIndex: 1000, background: '#fff', borderRadius: '20px', padding: '1.5rem', boxShadow: '0 10px 40px rgba(0,0,0,0.15)', overflowY: 'auto' }}>
+        <div style={{ position: 'absolute', top: 80, left: 20, bottom: 20, width: '400px', zIndex: 1000, background: 'rgba(9, 13, 22, 0.95)', border: '1px solid rgba(234, 88, 12, 0.25)', borderRadius: '20px', padding: '1.5rem', boxShadow: '0 10px 40px rgba(0,0,0,0.5)', overflowY: 'auto', backdropFilter: 'blur(12px)' }}>
            {selectedTrip ? (
               <div style={{ display: 'flex', flexDirection: 'column', height: '100%', textAlign: 'left' }}>
-                 <button onClick={() => setSelectedTrip(null)} style={{ background: '#f1f5f9', border: 'none', borderRadius: '8px', padding: '0.5rem 1rem', cursor: 'pointer', fontWeight: 700, color: '#64748b', marginBottom: '1.2rem', alignSelf: 'flex-start', fontSize: '0.85rem' }}>
+                 <button onClick={() => setSelectedTrip(null)} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '0.5rem 1rem', cursor: 'pointer', fontWeight: 700, color: '#94a3b8', marginBottom: '1.2rem', alignSelf: 'flex-start', fontSize: '0.85rem', transition: 'all 0.2s' }}>
                     ← Back to List
                  </button>
 
                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem' }}>
-                    <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#0f172a', fontWeight: 900 }}>Trip Record</h3>
-                    <span style={{ padding: '0.3rem 0.8rem', borderRadius: '50px', fontSize: '0.65rem', fontWeight: 800, background: '#d1fae5', color: '#059669', textTransform: 'uppercase' }}>
+                    <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#fff', fontWeight: 900 }}>Trip Record</h3>
+                    <span style={{ padding: '0.3rem 0.8rem', borderRadius: '50px', fontSize: '0.65rem', fontWeight: 800, background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.25)', textTransform: 'uppercase' }}>
                        {selectedTrip.status?.toUpperCase() || 'COMPLETED'}
                     </span>
                  </div>
 
-                 <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '1rem', marginBottom: '1.2rem' }}>
-                    <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Incident Call</div>
-                    <div style={{ fontSize: '1.15rem', color: '#0f172a', fontWeight: 800, marginTop: '0.2rem' }}>{selectedTrip.title || selectedTrip.category || "Panic SOS"}</div>
-                    <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.4rem', lineHeight: '1.4' }}>{selectedTrip.description || "Emergency dispatcher assistance call."}</div>
+                 <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', padding: '1rem', marginBottom: '1.2rem' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#ea580c', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Incident Call</div>
+                    <div style={{ fontSize: '1.15rem', color: '#fff', fontWeight: 800, marginTop: '0.2rem' }}>{selectedTrip.title || selectedTrip.category || "Panic SOS"}</div>
+                    <div style={{ fontSize: '0.8rem', color: '#94a3b8', marginTop: '0.4rem', lineHeight: '1.4' }}>{selectedTrip.description || "Emergency dispatcher assistance call."}</div>
                  </div>
 
                  {/* 🕒 TIME TIMELINE */}
@@ -563,27 +563,27 @@ export const AmbulanceDashboard = () => {
                  </div>
 
                  {/* 📍 GEOGRAPHIC INFO */}
-                 <h4 style={{ margin: '0 0 0.8rem 0', color: '#64748b', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Route Log</h4>
-                 <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', fontSize: '0.8rem' }}>
+                 <h4 style={{ margin: '0 0 0.8rem 0', color: '#94a3b8', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Route Log</h4>
+                 <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.8rem', fontSize: '0.8rem' }}>
                     <div>
-                       <div style={{ fontWeight: 800, color: '#64748b', fontSize: '0.7rem', textTransform: 'uppercase' }}>PICKED UP FROM</div>
-                       <div style={{ fontWeight: 800, color: '#0f172a', marginTop: '0.1rem' }}>
+                       <div style={{ fontWeight: 800, color: '#ea580c', fontSize: '0.7rem', textTransform: 'uppercase' }}>PICKED UP FROM</div>
+                       <div style={{ fontWeight: 800, color: '#fff', marginTop: '0.1rem' }}>
                           {selectedTrip.pickup_address || "Incident Scene"}
                        </div>
                        {selectedTrip.pickup_coords && (
-                          <div style={{ fontSize: '0.7rem', color: '#64748b', fontFamily: 'monospace', marginTop: '0.2rem' }}>
+                          <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontFamily: 'monospace', marginTop: '0.2rem' }}>
                              GPS: {selectedTrip.pickup_coords[0]?.toFixed(5)}, {selectedTrip.pickup_coords[1]?.toFixed(5)}
                           </div>
                        )}
                     </div>
-                    <hr style={{ border: 'none', borderTop: '1px solid #e2e8f0', margin: '0.1rem 0' }} />
+                    <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.06)', margin: '0.1rem 0' }} />
                     <div>
-                       <div style={{ fontWeight: 800, color: '#64748b', fontSize: '0.7rem', textTransform: 'uppercase' }}>DELIVERED TO</div>
-                       <div style={{ fontWeight: 800, color: '#0f172a', marginTop: '0.1rem' }}>
+                       <div style={{ fontWeight: 800, color: '#ea580c', fontSize: '0.7rem', textTransform: 'uppercase' }}>DELIVERED TO</div>
+                       <div style={{ fontWeight: 800, color: '#fff', marginTop: '0.1rem' }}>
                           {selectedTrip.handover_address || selectedTrip.hospital_name || "Narad Hospital Emergency Wing"}
                        </div>
                        {selectedTrip.handover_coords && (
-                          <div style={{ fontSize: '0.7rem', color: '#64748b', fontFamily: 'monospace', marginTop: '0.2rem' }}>
+                          <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontFamily: 'monospace', marginTop: '0.2rem' }}>
                              GPS: {selectedTrip.handover_coords[0]?.toFixed(5)}, {selectedTrip.handover_coords[1]?.toFixed(5)}
                           </div>
                        )}
@@ -592,17 +592,17 @@ export const AmbulanceDashboard = () => {
               </div>
            ) : (
               <>
-                 <h2 style={{ color: '#0f172a', margin: '0 0 1rem 0' }}>Driver Trip History</h2>
+                 <h2 style={{ color: '#fff', margin: '0 0 1rem 0', fontSize: '1.25rem', fontWeight: 900 }}>Driver Trip History</h2>
                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                  {pastTrips.map((trip, i) => {
                     const isCompleted = trip.status?.toLowerCase() === 'completed' || trip.status?.toLowerCase() === 'resolved';
                     return (
-                       <div key={trip._id || trip.id || i} onClick={() => setSelectedTrip(trip)} style={{ background: '#f8fafc', borderRadius: '12px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: isCompleted ? '4px solid #10b981' : '4px solid #f59e0b', cursor: 'pointer', transition: 'transform 0.15s, box-shadow 0.15s' }} onMouseEnter={e=>{e.currentTarget.style.transform='scale(1.02)'; e.currentTarget.style.boxShadow='0 4px 10px rgba(0,0,0,0.05)'}} onMouseLeave={e=>{e.currentTarget.style.transform='scale(1)'; e.currentTarget.style.boxShadow='none'}}>
+                       <div key={trip._id || trip.id || i} onClick={() => setSelectedTrip(trip)} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderLeft: isCompleted ? '4px solid #10b981' : '4px solid #f59e0b', cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={e=>{e.currentTarget.style.background='rgba(234, 88, 12, 0.08)'; e.currentTarget.style.borderColor='rgba(234, 88, 12, 0.25)'}} onMouseLeave={e=>{e.currentTarget.style.background='rgba(255,255,255,0.02)'; e.currentTarget.style.borderColor='rgba(255,255,255,0.05)'}}>
                           <div>
-                             <div style={{ color: '#64748b', fontSize: '0.75rem', marginBottom: '0.2rem' }}>{new Date(trip.created_at || Date.now()).toLocaleString()}</div>
-                             <div style={{ color: '#0f172a', fontSize: '1.1rem', fontWeight: 800 }}>{trip.title || trip.category || 'Emergency'}</div>
+                             <div style={{ color: '#6b7280', fontSize: '0.75rem', marginBottom: '0.2rem' }}>{new Date(trip.created_at || Date.now()).toLocaleString()}</div>
+                             <div style={{ color: '#fff', fontSize: '1.05rem', fontWeight: 800 }}>{trip.title || trip.category || 'Emergency'}</div>
                           </div>
-                          <span style={{ padding: '0.3rem 0.8rem', borderRadius: '50px', fontSize: '0.7rem', fontWeight: 800, background: isCompleted ? '#d1fae5' : '#fef3c7', color: isCompleted ? '#059669' : '#d97706', textTransform: 'uppercase' }}>
+                          <span style={{ padding: '0.3rem 0.8rem', borderRadius: '50px', fontSize: '0.7rem', fontWeight: 800, background: isCompleted ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)', color: isCompleted ? '#10b981' : '#f59e0b', border: isCompleted ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(245, 158, 11, 0.2)', textTransform: 'uppercase' }}>
                              {isCompleted ? 'COMPLETED' : trip.status}
                           </span>
                        </div>
@@ -619,51 +619,51 @@ export const AmbulanceDashboard = () => {
         {/* FLOATING DISPATCH / ACTION SHEET */}
         <div style={{ position: 'absolute', bottom: 30, left: '50%', transform: 'translateX(-50%)', zIndex: 1000, width: '90%', maxWidth: '500px' }}>
           {!emergency ? (
-            <div style={{ background: '#fff', borderRadius: '20px', padding: '2rem', textAlign: 'center', boxShadow: '0 10px 40px rgba(0,0,0,0.15)' }}>
-               <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: '#d1fae5', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' }}>
-                 <Radio size={30} color="#059669" />
+            <div style={{ background: 'rgba(9, 13, 22, 0.95)', border: '1px solid rgba(234, 88, 12, 0.25)', borderRadius: '20px', padding: '2rem', textAlign: 'center', boxShadow: '0 10px 40px rgba(0,0,0,0.5)', backdropFilter: 'blur(12px)' }}>
+               <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(234, 88, 12, 0.08)', border: '1px solid rgba(234, 88, 12, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem', color: '#ea580c' }} className="pulse-alert">
+                 <Radio size={30} />
                </div>
-               <h3 style={{ color: '#0f172a', margin: '0 0 0.5rem 0', fontSize: '1.4rem' }}>Available for Dispatch</h3>
-               <p style={{ color: '#64748b', margin: 0, fontWeight: 500 }}>Waiting for emergency requests in your area</p>
+               <h3 style={{ color: '#fff', margin: '0 0 0.5rem 0', fontSize: '1.35rem', fontWeight: 900 }}>Available for Dispatch</h3>
+               <p style={{ color: '#94a3b8', margin: 0, fontWeight: 500, fontSize: '0.85rem' }}>Waiting for high-priority emergency alerts in your sector</p>
             </div>
           ) : (
-            <div style={{ background: '#fff', borderRadius: '24px', padding: '1.5rem', boxShadow: '0 20px 50px rgba(0,0,0,0.2)' }}>
+            <div style={{ background: 'rgba(9, 13, 22, 0.95)', border: '1px solid rgba(234, 88, 12, 0.25)', borderRadius: '24px', padding: '1.5rem', boxShadow: '0 20px 50px rgba(0,0,0,0.6)', backdropFilter: 'blur(12px)' }}>
                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
                   <div>
-                    <div style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>Active Emergency</div>
-                    <h3 style={{ margin: '0.2rem 0 0', fontSize: '1.5rem', color: '#0f172a' }}>{emergency.category || 'Emergency Call'}</h3>
+                     <div style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '1px' }}>Active Emergency</div>
+                     <h3 style={{ margin: '0.2rem 0 0', fontSize: '1.45rem', color: '#fff', fontWeight: 900 }}>{emergency.category || 'Emergency Call'}</h3>
                   </div>
                   {routeInfo && (
                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#f59e0b' }}>{routeInfo.time}<span style={{fontSize: '1rem', color:'#64748b', fontWeight:700}}>min</span></div>
-                        <div style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: 700 }}>{routeInfo.distance} km</div>
+                        <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#ea580c' }}>{routeInfo.time}<span style={{fontSize: '1rem', color:'#94a3b8', fontWeight:700}}>min</span></div>
+                        <div style={{ fontSize: '0.9rem', color: '#94a3b8', fontWeight: 700 }}>{routeInfo.distance} km</div>
                      </div>
                   )}
                </div>
 
                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
                  {(stage === 'en_route' || stage === 'near_incident') && (
-                   <button onClick={() => updateStage('arrived_scene')} style={{ width: '100%', background: '#0f172a', color: '#fff', border: 'none', borderRadius: '14px', padding: '1.2rem', fontSize: '1.1rem', fontWeight: 800, cursor: 'pointer', transition: 'transform 0.1s' }} onMouseDown={e=>e.currentTarget.style.transform='scale(0.98)'} onMouseUp={e=>e.currentTarget.style.transform='scale(1)'}>
+                   <button onClick={() => updateStage('arrived_scene')} style={{ width: '100%', background: 'linear-gradient(135deg, #090d16, #030712)', color: '#fff', border: '1px solid rgba(234, 88, 12, 0.3)', borderRadius: '14px', padding: '1.2rem', fontSize: '1.1rem', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }} onMouseEnter={e=>e.currentTarget.style.border='1px solid #ea580c'} onMouseLeave={e=>e.currentTarget.style.border='1px solid rgba(234, 88, 12, 0.3)'}>
                      ARRIVED AT SCENE
                    </button>
                  )}
                  {stage === 'arrived_scene' && (
-                   <button onClick={() => updateStage('patient_picked')} style={{ width: '100%', background: '#ea580c', color: '#fff', border: 'none', borderRadius: '14px', padding: '1.2rem', fontSize: '1.1rem', fontWeight: 800, cursor: 'pointer' }}>
+                   <button onClick={() => updateStage('patient_picked')} style={{ width: '100%', background: 'linear-gradient(135deg, #ea580c, #c2410c)', color: '#fff', border: 'none', borderRadius: '14px', padding: '1.2rem', fontSize: '1.1rem', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 15px rgba(234, 88, 12, 0.4)' }}>
                      PATIENT SECURED
                    </button>
                  )}
                  {stage === 'patient_picked' && (
-                   <button onClick={() => updateStage('transporting_to_hospital')} style={{ width: '100%', background: '#f59e0b', color: '#fff', border: 'none', borderRadius: '14px', padding: '1.2rem', fontSize: '1.1rem', fontWeight: 800, cursor: 'pointer' }}>
+                   <button onClick={() => updateStage('transporting_to_hospital')} style={{ width: '100%', background: 'linear-gradient(135deg, #ea580c, #c2410c)', color: '#fff', border: 'none', borderRadius: '14px', padding: '1.2rem', fontSize: '1.1rem', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 15px rgba(234, 88, 12, 0.4)' }}>
                      NAVIGATE TO HOSPITAL
                    </button>
                  )}
                  {stage === 'transporting_to_hospital' && (
-                   <button onClick={() => updateStage('reached_hospital')} style={{ width: '100%', background: '#0f172a', color: '#fff', border: 'none', borderRadius: '14px', padding: '1.2rem', fontSize: '1.1rem', fontWeight: 800, cursor: 'pointer' }}>
+                   <button onClick={() => updateStage('reached_hospital')} style={{ width: '100%', background: 'linear-gradient(135deg, #090d16, #030712)', color: '#fff', border: '1px solid rgba(234, 88, 12, 0.3)', borderRadius: '14px', padding: '1.2rem', fontSize: '1.1rem', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }} onMouseEnter={e=>e.currentTarget.style.border='1px solid #ea580c'} onMouseLeave={e=>e.currentTarget.style.border='1px solid rgba(234, 88, 12, 0.3)'}>
                      REACHED HOSPITAL
                    </button>
                  )}
                  {stage === 'reached_hospital' && (
-                   <button onClick={() => updateStage('completed')} style={{ width: '100%', background: '#10b981', color: '#fff', border: 'none', borderRadius: '14px', padding: '1.2rem', fontSize: '1.1rem', fontWeight: 800, cursor: 'pointer' }}>
+                   <button onClick={() => updateStage('completed')} style={{ width: '100%', background: 'linear-gradient(135deg, #10b981, #059669)', color: '#fff', border: 'none', borderRadius: '14px', padding: '1.2rem', fontSize: '1.1rem', fontWeight: 800, cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 15px rgba(16, 185, 129, 0.4)' }}>
                      COMPLETE TRIP
                    </button>
                  )}

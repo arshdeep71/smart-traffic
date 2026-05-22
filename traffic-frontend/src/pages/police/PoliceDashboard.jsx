@@ -1053,29 +1053,79 @@ export const PoliceDashboard = () => {
 
       {/* COMMAND CENTER HEADER & TELEMETRY */}
       <div className="diagnostic-header">
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: '#ea580c', fontWeight: 800, fontSize: '0.72rem', letterSpacing: '0.1em' }} className="pulse-alert">
-            <Radio size={14} /> SECURITY GNSS PATROL COMMS ACTIVE
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', minWidth: '280px' }}>
+          <div style={{ 
+            display: 'inline-flex', 
+            alignItems: 'center', 
+            gap: '0.4rem', 
+            background: 'rgba(234, 88, 12, 0.08)', 
+            border: '1px solid rgba(234, 88, 12, 0.25)', 
+            borderRadius: '50px', 
+            padding: '0.25rem 0.75rem', 
+            color: '#ea580c', 
+            fontWeight: 800, 
+            fontSize: '0.65rem', 
+            letterSpacing: '0.05em', 
+            width: 'fit-content' 
+          }}>
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#ea580c' }} className="animate-ping" />
+            <Radio size={12} /> SECURITY GNSS PATROL COMMS ACTIVE
           </div>
-          <h2 style={{ margin: '0.2rem 0 0 0', color: '#fff', fontSize: '1.35rem', fontWeight: 900, letterSpacing: '-0.5px' }}>
-            👮 SmartTraffic Incident Operations Center
+          <h2 style={{ margin: 0, color: '#fff', fontSize: '1.45rem', fontWeight: 900, letterSpacing: '-0.5px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            SmartTraffic Incident Operations Center
           </h2>
         </div>
 
-        <div style={{ display: 'flex', gap: '1.5rem' }} className="telemetry-diagnostics">
-          {[
-            ['📟 PATROL NET', 'SECURE TRANSCODE', '#ea580c'],
-            ['🛰️ GNSS LOCK', '31.25224 N, 75.70313 E', '#10b981'],
-            ['📡 FREQUENCY', '148.950 MHz', '#8b5cf6'],
-            ['🛡️ SECURITY', 'AES-256-GCM', '#f59e0b']
-          ].map(([k, v, color]) => (
-            <div key={k} style={{ borderLeft: '2px solid rgba(255,255,255,0.06)', paddingLeft: '1rem' }}>
-              <div style={{ fontSize: '0.58rem', fontWeight: 800, color: '#6b7280', letterSpacing: '0.05em' }}>{k}</div>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: color, marginTop: '0.1rem' }}>{v}</div>
-            </div>
-          ))}
-          <button onClick={fetchAccidents} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '6px', width: '32px', height: '32px', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <RefreshCw size={14} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', flex: 1, justifyContent: 'flex-end', width: '100%' }}>
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', 
+            gap: '0.75rem', 
+            flex: 1, 
+            maxWidth: '680px',
+            width: '100%'
+          }} className="telemetry-diagnostics">
+            {[
+              ['📟 PATROL NET', 'SECURE TRANSCODE', '#ea580c'],
+              ['🛰️ GNSS LOCK', '31.25224 N, 75.70313 E', '#10b981'],
+              ['📡 FREQUENCY', '148.950 MHz', '#a855f7'],
+              ['🛡️ SECURITY', 'AES-256-GCM', '#f59e0b']
+            ].map(([k, v, color]) => (
+              <div 
+                key={k} 
+                className="telemetry-tile"
+                style={{ 
+                  background: 'rgba(255,255,255,0.01)', 
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  borderLeft: `3px solid ${color}`,
+                  borderRadius: '8px', 
+                  padding: '0.5rem 0.75rem',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                }}
+              >
+                <div style={{ fontSize: '0.55rem', fontWeight: 800, color: '#6b7280', letterSpacing: '0.05em', textTransform: 'uppercase' }}>{k}</div>
+                <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#fff', marginTop: '0.15rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v}</div>
+              </div>
+            ))}
+          </div>
+          <button 
+            onClick={fetchAccidents} 
+            className="refresh-btn"
+            style={{ 
+              background: 'linear-gradient(135deg, #090d16, #030712)', 
+              border: '1px solid rgba(234, 88, 12, 0.25)', 
+              borderRadius: '8px', 
+              width: '38px', 
+              height: '38px', 
+              color: '#fff', 
+              cursor: 'pointer', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}
+          >
+            <RefreshCw size={15} />
           </button>
         </div>
       </div>
@@ -1707,13 +1757,24 @@ export const PoliceDashboard = () => {
         }
         .diagnostic-header {
           display: flex; 
+          flex-flow: row wrap;
           justify-content: space-between; 
           align-items: center; 
           margin-bottom: 1.5rem; 
-          background: #090d16; 
-          border: 1px solid rgba(234, 88, 12,0.15); 
-          border-radius: 12px; 
-          padding: 1.25rem;
+          background: linear-gradient(135deg, #090d16, #030712); 
+          border: 1px solid rgba(234, 88, 12, 0.2); 
+          border-radius: 16px; 
+          padding: 1.5rem;
+          gap: 1.5rem;
+          box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
+        }
+        .telemetry-tile {
+          transition: all 0.2s ease-out;
+        }
+        .telemetry-tile:hover {
+          background: rgba(255, 255, 255, 0.03) !important;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
         .card-hover-police {
           transition: all 0.2s ease-out;
