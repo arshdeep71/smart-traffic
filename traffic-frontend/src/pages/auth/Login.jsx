@@ -325,8 +325,8 @@ const Login = () => {
                 style={{
                   width: '100%',
                   background: 'transparent',
-                  border: '1px solid #10b981',
-                  color: '#10b981',
+                  border: '1px solid #ea580c',
+                  color: '#ea580c',
                   borderRadius: '4px',
                   padding: '0.8rem',
                   fontSize: '0.8rem',
@@ -341,12 +341,12 @@ const Login = () => {
                   transition: 'all 0.2s'
                 }}
                 onMouseOver={e => {
-                  e.currentTarget.style.background = '#10b981';
+                  e.currentTarget.style.background = '#ea580c';
                   e.currentTarget.style.color = '#ffffff';
                 }}
                 onMouseOut={e => {
                   e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.color = '#10b981';
+                  e.currentTarget.style.color = '#ea580c';
                 }}
               >
                 🛡️ Enter Citizen Emergency Portal
